@@ -312,12 +312,15 @@ def _single_eval_worker(args_tuple):
         if 'BULL_BUY_MULT' in params:
             config.REGIME_WEIGHTS = _build_regime_from_params(params)
 
+        # ⚠️ 关键修复：重载导入时捕获配置的模块，使 setattr 的新参数生效
+        strategy_mod, backtest_mod = _reload_config_capture_modules()
+
         # 从 pickle 缓存加载 DataFrame（首次加载后永久缓存）
         df, _ = _load_data_cache()
 
-        strategy = V6Strategy()
+        strategy = strategy_mod.V6Strategy()
         signals = strategy.run(df)
-        bt = V6Backtest(df, start_date=start_date)
+        bt = backtest_mod.V6Backtest(df, start_date=start_date)
         bt_results = bt.run(signals)
 
         if not bt_results:
@@ -588,15 +591,49 @@ _REGIME_MAPPING = {
 
 
 def _build_regime_from_params(params):
-    """从扁平参数构建 REGIME_WEIGHTS（模块级别，可 pickle）"""
-    import copy
-    from config import REGIME_WEIGHTS as _orig_regime
+    """从扁平参数构建 REGIME_WEIGHTS（模块级别，可 pickle）
 
+    注意：不能从 config.REGIME_WEIGHTS deepcopy —— 优化过程中 config 模块可能
+    已被前一轮 setattr 污染，必须使用固定默认结构再覆盖搜索参数。
+    """
+    import copy
+    _orig_regime = {
+        'Bull': {'buy_mult': 1.80, 'sell_div': 0.12},
+        'Bear': {'buy_mult': 0.90, 'sell_div': 1.05},
+        'Range': {'buy_mult': 0.55, 'sell_div': 0.85},
+        'Unknown': {'buy_mult': 0.75, 'sell_div': 0.95},
+    }
     weights = copy.deepcopy(_orig_regime)
     for param_key, (regime_key, weight_key) in _REGIME_MAPPING.items():
         if param_key in params and regime_key in weights:
             weights[regime_key][weight_key] = params[param_key]
     return weights
+
+
+# ═══ 需要重载的模块：均通过 `from config import *` 在导入时捕获配置 ═══
+# 优化器 worker 先 setattr(config, ...) 再执行回测，若这些模块不重载，
+# 策略仍使用导入时的旧配置（这是 heavy 优化结果无法复现的根因）。
+_RELOAD_CONFIG_CAPTURE_MODULES = [
+    'indicators', 'regime_detector', 'behavior_detector', 'emotion_builder',
+    'event_engine', 'evidence_engine', 'reward_risk', 'scoring_engine',
+    'position_manager', 'replay_engine', 'crowd_psychology', 'strategy', 'backtest',
+]
+
+
+def _reload_config_capture_modules():
+    """setattr(config, ...) 之后调用：强制重载所有导入时捕获配置的模块。
+
+    返回 (strategy_module, backtest_module)，调用方必须使用返回的新模块
+    （旧模块对象已被替换，原 import 句柄失效）。
+    """
+    import importlib
+    import sys as _sys
+    for mod_name in _RELOAD_CONFIG_CAPTURE_MODULES:
+        if mod_name in _sys.modules:
+            del _sys.modules[mod_name]
+    import strategy as _strategy_mod
+    import backtest as _backtest_mod
+    return _strategy_mod, _backtest_mod
 
 
 class _OptunaEvaluator:
@@ -1690,9 +1727,12 @@ def _eval_single_plain_on_df(params, df, start_date):
         if 'BULL_BUY_MULT' in params:
             config.REGIME_WEIGHTS = _build_regime_from_params(params)
 
-        strategy = V6Strategy()
+        # ⚠️ 关键修复：重载导入时捕获配置的模块，使 setattr 的新参数生效
+        strategy_mod, backtest_mod = _reload_config_capture_modules()
+
+        strategy = strategy_mod.V6Strategy()
         signals = strategy.run(df)
-        bt = V6Backtest(df, start_date=start_date)
+        bt = backtest_mod.V6Backtest(df, start_date=start_date)
         bt_results = bt.run(signals)
         if not bt_results:
             return None
@@ -1722,9 +1762,12 @@ def _eval_single_heavy_on_df(params, df, start_date):
         if ev_weights:
             config.EVIDENCE_WEIGHTS = ev_weights
 
-        strategy = V6Strategy()
+        # ⚠️ 关键修复：重载导入时捕获配置的模块，使 setattr 的新参数生效
+        strategy_mod, backtest_mod = _reload_config_capture_modules()
+
+        strategy = strategy_mod.V6Strategy()
         signals = strategy.run(df)
-        bt = V6Backtest(df, start_date=start_date)
+        bt = backtest_mod.V6Backtest(df, start_date=start_date)
         bt_results = bt.run(signals)
         if not bt_results:
             return None
@@ -2436,9 +2479,13 @@ def _heavy_eval_worker(args_tuple):
         # 从 pickle 缓存加载数据
         df, _ = _load_data_cache()
 
-        strategy = V6Strategy()
+        # ⚠️ 关键修复：strategy 及依赖模块在导入时用 `from config import *` 捕获了
+        # 旧配置，必须重载后才会使用 setattr 的新参数（否则优化结果失真）
+        strategy_mod, backtest_mod = _reload_config_capture_modules()
+
+        strategy = strategy_mod.V6Strategy()
         signals = strategy.run(df)
-        bt = V6Backtest(df, start_date=start_date)
+        bt = backtest_mod.V6Backtest(df, start_date=start_date)
         bt_results = bt.run(signals)
 
         if not bt_results:
