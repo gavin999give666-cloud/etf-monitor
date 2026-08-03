@@ -1925,8 +1925,8 @@ class HeavyOptimizer:
             except:
                 pass
 
-    def run(self, n_trials=2000, ga_generations=100, ga_population=60,
-            n_jobs=-1, wf_top_k=20, resume=True, verbose=True):
+    def run(self, n_trials=10000, ga_generations=100, ga_population=60,
+            n_jobs=16, wf_top_k=20, resume=True, verbose=True):
         """
         启动全量优化管道（支持断点续算）
 
@@ -2595,8 +2595,8 @@ if __name__ == '__main__':
     parser.add_argument('--method', type=str, default='optuna',
                         choices=['optuna', 'genetic', 'coarse2fine', 'adaptive', 'all', 'heavy'],
                         help='优化方法: optuna/genetic/coarse2fine/adaptive/all/heavy')
-    parser.add_argument('--trials', type=int, default=500,
-                        help='Optuna 试验次数 (默认500; heavy模式默认2000)')
+    parser.add_argument('--trials', type=int, default=10000,
+                        help='Optuna 试验次数 (默认10000; heavy模式默认10000)')
     parser.add_argument('--generations', type=int, default=50,
                         help='遗传算法代数 (默认50; heavy模式默认100)')
     parser.add_argument('--population', type=int, default=40,
@@ -2607,8 +2607,8 @@ if __name__ == '__main__':
                         help='自适应搜索随机采样数 (默认300)')
     parser.add_argument('--n-local', type=int, default=200,
                         help='自适应搜索局部搜索数 (默认200)')
-    parser.add_argument('--jobs', type=int, default=-1,
-                        help='并行进程数 (-1=全部)')
+    parser.add_argument('--jobs', type=int, default=16,
+                        help='并行进程数 (默认16)')
     parser.add_argument('--apply', action='store_true',
                         help='自动将最优参数写入 config.py')
     parser.add_argument('--dry-run', action='store_true',

@@ -8,6 +8,7 @@
 - 复核后仅将**真正生效的执行参数**写入 `config.py`：`TRADE_TARGET_DELTA=0.091`、`TRADE_ACTUAL_DELTA=0.019`、`MIN_HOLD_DAYS=34`、`MAX_POSITION=0.98`、`INITIAL_POSITION=0.89`、`SCORE_HOLD_ZONE=17`、买入/卖出仓位曲线重写（T1-T4）
 - 执行参数复核回测：收益 40.76%、夏普 0.976、回撤 -27.51%、胜率 66.7%、6 笔交易（与原 config 的 25.63% 相比收益显著提升，但回撤同步加深，属激进化配置）
 - 修复 `param_optimizer.py` worker 参数注入 bug：`_heavy_eval_worker` / `_eval_single_*_on_df` 在 `setattr(config, ...)` 后新增 `_reload_config_capture_modules()` 强制重载 strategy/backtest 及所有导入时 `from config import *` 的依赖模块，使策略级参数（评分权重、REGIME 乘数、确认阈值等）真正生效；`_build_regime_from_params` 改用固定默认结构，避免 worker 常驻时跨 trial 的 config 污染。修复后 top1 参数回测 24.80%（与直接写入 config.py 的 25.07% 一致，策略级参数生效），彻底消除"记录收益 41.51% 但实际无法复现"的失真问题
+- `--heavy` 优化默认训练量调整为 10000（`n_trials`，含 `main.py --heavy` 与 CLI `--trials` 默认值），默认并行线程数调整为 16（`n_jobs`/`--jobs`）
 
 ## V6.1-科创（2026-07）
 
