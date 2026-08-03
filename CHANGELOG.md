@@ -2,6 +2,12 @@
 
 版本按时间倒序排列。早期版本（V1.0 到 V6.0）代码已归档，条目依据现存代码中的注释和 docstring 整理，细节以当时代码为准。
 
+## V6.1-科创（2026-08）
+
+- 二次全量优化（2026-08-02 22:20，12167 次评估）：Optuna 阶段最优 objective 46.77（记录收益 41.51%），因 `_heavy_eval_worker` 中 strategy 在 `setattr(config, ...)` 之前已 `from config import *` 捕获旧值，**策略级参数（评分权重、REGIME 乘数、确认阈值等）在优化过程中从未真正生效**，仅 backtest/scoring_engine 运行时读取的执行参数生效
+- 复核后仅将**真正生效的执行参数**写入 `config.py`：`TRADE_TARGET_DELTA=0.091`、`TRADE_ACTUAL_DELTA=0.019`、`MIN_HOLD_DAYS=34`、`MAX_POSITION=0.98`、`INITIAL_POSITION=0.89`、`SCORE_HOLD_ZONE=17`、买入/卖出仓位曲线重写（T1-T4）
+- 执行参数复核回测：收益 40.76%、夏普 0.976、回撤 -27.51%、胜率 66.7%、6 笔交易（与原 config 的 25.63% 相比收益显著提升，但回撤同步加深，属激进化配置）
+
 ## V6.1-科创（2026-07）
 
 科创综指 ETF（589800）主线的独立分支，代码从 V6.1 复制后按科创板特征调整。
