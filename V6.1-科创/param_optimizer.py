@@ -732,7 +732,7 @@ class BayesianOptimizer(BaseOptimizer):
         # JournalStorage: 支持多进程 + 断点续算，有文件 I/O 开销
         _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                       '.optuna_journal.log')
-        _use_in_memory = (n_jobs == 1) and (not resume or not os.path.exists(_journal_path))
+        _use_in_memory = (n_jobs == 1) and (not self.resume or not os.path.exists(_journal_path))
 
         if _use_in_memory:
             storage = optuna.storages.InMemoryStorage()
@@ -763,9 +763,9 @@ class BayesianOptimizer(BaseOptimizer):
                                 if t.state == optuna.trial.TrialState.COMPLETE)
         remaining = max(0, n_trials - existing_complete)
 
-        if resume and existing_complete > 0:
+        if self.resume and existing_complete > 0:
             print(f"\n  断点续算: {existing_complete}/{n_trials} trials 已完成, 剩余 {remaining}")
-        elif existing_complete > 0 and not resume:
+        elif existing_complete > 0 and not self.resume:
             # 强制全新
             if not _use_in_memory and os.path.exists(_journal_path):
                 os.remove(_journal_path)
@@ -816,16 +816,6 @@ class BayesianOptimizer(BaseOptimizer):
 
         self._restore_config()
 
-        # Optuna journal 文件清理（全部完成后删除，仅 JournalStorage 时需要）
-        if not _use_in_memory and (len(self.results) >= n_trials or not resume):
-            _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                          '.optuna_journal.log')
-            try:
-                if os.path.exists(_journal_path):
-                    os.remove(_journal_path)
-            except:
-                pass
-
         if verbose:
             print(f"\n--- 贝叶斯优化完成 ---")
             print(f"有效试验: {len(self.results)}/{n_trials}")
@@ -842,6 +832,16 @@ class BayesianOptimizer(BaseOptimizer):
                     for name, imp in sorted(importance.items(), key=lambda x: -x[1])[:10]:
                         bar = '█' * int(imp * 40)
                         print(f"  {name:<40} {imp:.3f} {bar}")
+            except:
+                pass
+
+        # Optuna journal 文件清理（数据已全部读取后删除，仅 JournalStorage 时需要）
+        if not _use_in_memory and (len(self.results) >= n_trials or not self.resume):
+            _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                          '.optuna_journal.log')
+            try:
+                if os.path.exists(_journal_path):
+                    os.remove(_journal_path)
             except:
                 pass
 
@@ -2631,6 +2631,16 @@ if __name__ == '__main__':
 
     if args.apply:
         sys.argv.append('--apply')
+
+    # 交互询问：本次计算完成后是否自动关机（已带 --shutdown 则不询问）
+    if not args.shutdown:
+        try:
+            resp = input("\n本次计算完成后是否自动关机？[y/N]: ").strip().lower()
+            if resp in ('y', 'yes'):
+                args.shutdown = True
+                print("  已启用：计算完成后自动关机（30秒倒计时，可按 Ctrl+C 取消）")
+        except EOFError:
+            pass  # 非交互环境（如脚本/批处理）跳过询问
 
     try:
         # Heavy 模式走独立管道
