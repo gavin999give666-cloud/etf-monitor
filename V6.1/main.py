@@ -14,6 +14,9 @@ V6.1 主程序入口 —— CLI 版本（稳定化版本）
   python main.py --grid-search      # 运行参数网格搜索（断点续算）
   python main.py --grid-fresh       # 强制全新网格搜索（忽略断点）
   python main.py --grid-status      # 查看断点续算状态
+  python main.py --heavy            # 全量高算力优化（50+参数，断点续算）
+  python main.py --heavy-fresh      # 全量优化（忽略断点，全新开始）
+  python main.py --heavy-view       # 查看上次全量优化结果
 """
 import sys
 import os
@@ -131,6 +134,21 @@ def main():
             print(detail)
         return
 
+    if '--heavy' in sys.argv:
+        from param_optimizer import run_heavy_optimization
+        run_heavy_optimization(resume=True)
+        return
+
+    if '--heavy-fresh' in sys.argv:
+        from param_optimizer import run_heavy_optimization
+        run_heavy_optimization(resume=False)
+        return
+
+    if '--heavy-view' in sys.argv:
+        from param_optimizer import view_saved_results
+        view_saved_results()
+        return
+
     # 交互模式
     print("\n  请选择操作:")
     print("  1. V6.1 回测评估（Evidence Engine 稳定化版本）")
@@ -141,6 +159,9 @@ def main():
     print("  6. 参数网格搜索（断点续算）")
     print("  7. 参数网格搜索（忽略断点，全新开始）")
     print("  8. 查看断点续算状态")
+    print("  9. 全量高算力优化（50+参数，断点续算）")
+    print(" 10. 全量优化（忽略断点，全新开始）")
+    print(" 11. 查看上次全量优化结果")
     print("  0. 退出")
 
     choice = input("\n  请输入选项: ").strip()
@@ -203,6 +224,15 @@ def main():
         df = load_data_from_db()
         if df is not None:
             GridSearch(df).checkpoint_status()
+    elif choice == '9':
+        from param_optimizer import run_heavy_optimization
+        run_heavy_optimization(resume=True)
+    elif choice == '10':
+        from param_optimizer import run_heavy_optimization
+        run_heavy_optimization(resume=False)
+    elif choice == '11':
+        from param_optimizer import view_saved_results
+        view_saved_results()
     elif choice == '0':
         print("再见")
     else:

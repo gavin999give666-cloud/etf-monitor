@@ -409,12 +409,12 @@ class V6Strategy:
 
         # --- 情绪修正 ---
         if psych_state == 'Panic':
-            buy_score *= 1.10   # 恐慌中勇敢买入小幅加分
+            buy_score *= PSYCH_PANIC_BUY_BOOST    # 恐慌中勇敢买入小幅加分
         elif psych_state == 'Euphoria':
-            sell_score *= 1.20  # 狂热中卖出更强
-            buy_score *= 0.50   # 狂热中买入大幅折扣
+            sell_score *= PSYCH_EUPHORIA_SELL_BOOST  # 狂热中卖出更强
+            buy_score *= PSYCH_EUPHORIA_BUY_CUT      # 狂热中买入大幅折扣
         elif psych_state == 'Exhaustion':
-            sell_score *= 1.25  # 衰竭中卖出强烈加分
+            sell_score *= PSYCH_EXHAUSTION_SELL_BOOST  # 衰竭中卖出强烈加分
 
         # V6.2: 牛市止盈后重新入场 Boost
         if bull_reentry_boost > 1.0:
