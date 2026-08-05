@@ -424,3 +424,8 @@ FUTURE_FACTORS = {
     'ml_model': True,             # V6已启用
     'llm_sentiment': False,       # V6.5预留
 }
+
+# ==================== 盘中估算配置 ====================
+INTRADAY_RUN_TIME = '14:40'              # 盘中运行时间
+INTRADAY_VOLUME_RATIO_DEFAULT = 0.90     # 退化用固定成交量比例（当5分钟线数据不足时）
+VOLUME_PROFILE_LOOKBACK_DAYS = 5         # 5分钟线回看天数（用于自动标定成交量比例）

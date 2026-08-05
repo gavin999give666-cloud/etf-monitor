@@ -1,6 +1,7 @@
 """
-V6.1 数据更新模块（多数据源版）
-Sina API(主) -> baostock(备) -> akshare(末备)
+V6.2 数据更新模块（合并版：data_updater + data_updater_baostock）
+多数据源: Sina API(主) -> baostock(备) -> akshare(末备)
+继承 V5.0 特性: 多版本数据库回退 + 持续重试机制
 最稳定免费的 A 股/ETF 日线数据获取方案
 """
 import pandas as pd
@@ -16,7 +17,7 @@ import config
 
 
 def get_db_path():
-    """获取数据库文件路径（V5.0优先 → V4.0 → V2.0 → V1.0 回退）"""
+    """获取数据库文件路径（本目录优先 → 其他版本目录回退）"""
     if getattr(sys, 'frozen', False):
         exe_dir = os.path.dirname(sys.executable)
         local_db = os.path.join(exe_dir, 'stock_data.db')
@@ -27,7 +28,7 @@ def get_db_path():
     if os.path.exists(local_db):
         return local_db
     parent_dir = os.path.dirname(script_dir)
-    for ver in ['V4.0', 'V2.0', 'V1.0']:
+    for ver in ['V6.2', 'V6.1', 'V5.0', 'V4.0', 'V2.0', 'V1.0']:
         db = os.path.join(parent_dir, ver, 'stock_data.db')
         if os.path.exists(db):
             return db
@@ -73,15 +74,16 @@ def migrate_db(db_path=None):
 
 # ============================
 # 数据源 1: Sina 财经 API（主）
+# 最稳定，数据全，免费无限制
 # ============================
-def fetch_from_sina(stock_code='563360', start_date=None, end_date=None, scale=240, datalen=2000):
-    """从新浪财经获取 K 线数据（scale=240为日线，scale=5为5分钟线）"""
+def fetch_from_sina(stock_code='589800', start_date=None, end_date=None):
+    """从新浪财经获取日线 K 线数据"""
     url = "https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData"
     params = {
         "symbol": f"sh{stock_code}",
-        "scale": str(scale),
+        "scale": "240",     # 240分钟 = 日线
         "ma": "no",
-        "datalen": str(datalen),
+        "datalen": "2000",  # 最多2000条，足够覆盖ETF全生命周期
     }
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
@@ -102,19 +104,24 @@ def fetch_from_sina(stock_code='563360', start_date=None, end_date=None, scale=2
             df = pd.DataFrame(data)
             df.columns = ['date', 'open', 'high', 'low', 'close', 'volume']
 
+            # 类型转换
             for col in ['open', 'high', 'low', 'close', 'volume']:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
 
             df = df.dropna(subset=['close'])
             df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+
+            # 按日期排序
             df = df.sort_values('date').reset_index(drop=True)
 
+            # 过滤日期范围（日期已是 YYYY-MM-DD 格式，可直接字符串比较）
             if start_date:
                 s = start_date.replace('-', '')[:8]
                 df = df[df['date'] >= f"{s[:4]}-{s[4:6]}-{s[6:]}"]
             if end_date:
                 e = end_date.replace('-', '')[:8]
                 df = df[df['date'] <= f"{e[:4]}-{e[4:6]}-{e[6:]}"]
+
             if df.empty:
                 print("Sina API: 日期范围内无数据")
                 return None
@@ -123,7 +130,7 @@ def fetch_from_sina(stock_code='563360', start_date=None, end_date=None, scale=2
             return df
 
         except json.JSONDecodeError:
-            print("Sina API 返回非 JSON 格式，重试...")
+            print(f"Sina API 返回非 JSON 格式，重试...")
             time.sleep(2)
         except Exception as e:
             print(f"Sina API 出错: {type(e).__name__}: {str(e)[:80]}，重试...")
@@ -135,10 +142,11 @@ def fetch_from_sina(stock_code='563360', start_date=None, end_date=None, scale=2
 # ============================
 # 数据源 2: baostock（备）
 # ============================
-def fetch_from_baostock(stock_code='563360', start_date=None, end_date=None):
+def fetch_from_baostock(stock_code='589800', start_date=None, end_date=None):
     """从 baostock 获取日线数据"""
     import baostock as bs
 
+    # 转为 baostock 代码格式
     code = str(stock_code).strip()
     if code.startswith('6') or code.startswith('58'):
         bs_code = f'sh.{code}'
@@ -197,7 +205,7 @@ def fetch_from_baostock(stock_code='563360', start_date=None, end_date=None):
 # ============================
 # 数据源 3: akshare（末备）
 # ============================
-def fetch_from_akshare(stock_code='563360', start_date=None, end_date=None):
+def fetch_from_akshare(stock_code='589800', start_date=None, end_date=None):
     """从 akshare（东方财富）获取日线数据"""
     try:
         import akshare as ak
@@ -236,28 +244,52 @@ def fetch_from_akshare(stock_code='563360', start_date=None, end_date=None):
 
 
 # ============================
-# 统一获取入口
+# 统一获取入口（多数据源自动切换 + 持续重试）
 # ============================
-def fetch_stock_data(stock_code='563360', start_date=None, end_date=None):
-    """多数据源自动切换获取日线数据"""
-    df = fetch_from_sina(stock_code, start_date, end_date)
-    if df is not None and not df.empty:
-        return df
+def fetch_stock_data(stock_code='589800', start_date=None, end_date=None):
+    """多数据源自动切换获取日线数据
+    优先级: Sina -> baostock -> akshare
+    所有数据源失败后持续重试直到成功（Ctrl+C 可中断）
+    """
+    attempt = 0
+    while True:
+        try:
+            # 1. Sina（主）
+            df = fetch_from_sina(stock_code, start_date, end_date)
+            if df is not None and not df.empty:
+                return df
 
-    print("Sina 不可用，尝试 baostock...")
-    df = fetch_from_baostock(stock_code, start_date, end_date)
-    if df is not None and not df.empty:
-        return df
+            # 2. baostock（备）
+            print("Sina 不可用，尝试 baostock...")
+            df = fetch_from_baostock(stock_code, start_date, end_date)
+            if df is not None and not df.empty:
+                return df
 
-    print("baostock 不可用，尝试 akshare...")
-    df = fetch_from_akshare(stock_code, start_date, end_date)
-    if df is not None and not df.empty:
-        return df
+            # 3. akshare（末备）
+            print("baostock 不可用，尝试 akshare...")
+            df = fetch_from_akshare(stock_code, start_date, end_date)
+            if df is not None and not df.empty:
+                return df
 
-    print("所有数据源均失败")
-    return None
+            # 所有数据源均失败，等待后重试整个流程
+            attempt += 1
+            wait_time = min(3 * (attempt + 1), 60)
+            print(f"所有数据源均失败，第{attempt}轮重试，等待{wait_time}秒...")
+            time.sleep(wait_time)
+
+        except KeyboardInterrupt:
+            print("\n用户中断，退出数据获取")
+            raise
+        except Exception as e:
+            attempt += 1
+            wait_time = min(3 * (attempt + 1), 60)
+            print(f"获取数据时出错（第{attempt}轮）: {type(e).__name__}: {str(e)[:100]}，等待{wait_time}秒重试...")
+            time.sleep(wait_time)
 
 
+# ============================
+# 盘中估算相关函数
+# ============================
 def backfill_estimated_data(stock_code=None):
     """用真实日线数据回填估算记录（is_estimated=1），即 T+1 数据回填
 
@@ -279,7 +311,7 @@ def backfill_estimated_data(stock_code=None):
 
         today_str = datetime.now().strftime('%Y-%m-%d')
         print(f"发现 {len(rows)} 条估算记录，开始 T+1 回填...")
-        df_real = fetch_from_sina(stock_code, scale=240, datalen=2000)
+        df_real = fetch_from_sina(stock_code)
 
         backfilled = 0
         for date, est_open, est_high, est_low, est_close, est_vol in rows:
@@ -430,7 +462,10 @@ def update_intraday(stock_code=None):
         return False
 
 
-def update_stock_data(stock_code='563360'):
+# ============================
+# 业务函数（与旧版接口兼容）
+# ============================
+def update_stock_data(stock_code='589800'):
     """增量更新数据"""
     db_path = get_db_path()
     try:
@@ -469,14 +504,10 @@ def update_stock_data(stock_code='563360'):
             return True
 
         conn = sqlite3.connect(db_path)
-        # 使用 INSERT OR REPLACE 避免主键冲突（重复运行不报错）
-        records = df_new[['date', 'open', 'high', 'low', 'close', 'volume']].values.tolist()
-        conn.executemany(
-            "INSERT OR REPLACE INTO stock_data "
-            "(date, open, high, low, close, volume, is_estimated) VALUES (?, ?, ?, ?, ?, ?, 0)",
-            records
-        )
-        conn.commit()
+        # 显式写入 is_estimated=0（真实数据）
+        df_new = df_new[['date', 'open', 'high', 'low', 'close', 'volume']].copy()
+        df_new['is_estimated'] = 0
+        df_new.to_sql('stock_data', conn, if_exists='append', index=False)
         total_records = pd.read_sql_query("SELECT COUNT(*) as count FROM stock_data", conn)
         print(f"数据库中共有 {total_records['count'].iloc[0]} 条记录")
         conn.close()
@@ -490,7 +521,7 @@ def update_stock_data(stock_code='563360'):
         return False
 
 
-def full_refresh_data(stock_code='563360'):
+def full_refresh_data(stock_code='589800'):
     """完全刷新数据"""
     db_path = get_db_path()
     try:
@@ -540,7 +571,7 @@ def load_data_from_db(db_path=None):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("V6.1 数据更新工具（Sina + baostock + akshare）")
+    print("V6.2 数据更新工具（Sina + baostock + akshare）")
     print("=" * 60)
     print("\n请选择操作:")
     print("1. 增量更新数据（推荐）")

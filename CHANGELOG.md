@@ -2,6 +2,16 @@
 
 版本按时间倒序排列。早期版本（V1.0 到 V6.0）代码已归档，条目依据现存代码中的注释和 docstring 整理，细节以当时代码为准。
 
+## V6.2 / V6.2-科创（2026-08-05）
+
+A500 主线与科创综指主线同步发布 V6.2。这一版修复了一个会永久污染历史数据的重大问题，并补齐了盘中估算与 T+1 回填能力。
+
+- 修复重大数据污染问题：盘中运行时 Sina API 会返回当日不完整K线，此前被直接写入数据库且永久污染历史数据。三层修复（`data_updater.py`）：新增当日数据过滤（盘中不完整K线不入库）、写入改为 `INSERT OR REPLACE`（同日记录可被真实收盘数据覆盖）、增量更新的 `MAX(date)` 判断只统计真实数据（跳过估算/不完整记录）
+- 新增 14:40 盘中成交量估算（`volume_estimator.py`）：基于盘中已产生的成交量估算当日总量，主用 Sina 5分钟线自动标定比例法，拿不到 5分钟线时退化为固定比例 0.90；新增 CLI 命令 `--intraday`（盘中估算当日数据并出信号，附估算值免责提示）；数据库新增 `is_estimated` 标记列区分估算记录与真实数据
+- 新增 T+1 自动回填（`backfill_estimated_data()`）：`--update` 时自动用真实收盘数据回填此前的估算记录，也可手动 `--backfill` 触发
+- 新增运行时间感知（`get_runtime_context()`）：启动横幅显示当前交易日/时段（盘前/盘中/收盘竞价/盘后/非交易日），各模式配套智能提示与防护——非盘中时段拒绝 `--intraday` 并给出原因，盘中运行 `--signal`/`--eval` 警告数据不完整并引导使用 `--intraday`，盘中 `--update` 提示只补历史
+- 修复 Windows GBK 控制台输出 ⚠ 等特殊字符时的 UnicodeEncodeError 崩溃（stdout/stderr 统一 `errors='replace'` 降级）
+
 ## V6.1-科创（2026-08）
 
 - 二次全量优化（2026-08-02 22:20，12167 次评估）：Optuna 阶段最优 objective 46.77（记录收益 41.51%），因 `_heavy_eval_worker` 中 strategy 在 `setattr(config, ...)` 之前已 `from config import *` 捕获旧值，**策略级参数（评分权重、REGIME 乘数、确认阈值等）在优化过程中从未真正生效**，仅 backtest/scoring_engine 运行时读取的执行参数生效

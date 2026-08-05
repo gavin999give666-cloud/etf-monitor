@@ -1,14 +1,14 @@
 """
-V6.1 主程序入口 —— CLI 版本（稳定化版本）
+V6.2 主程序入口 —— CLI 版本（稳定化版本）
 ==========================================
 
 用法：
   python main.py                    # 交互式菜单
-  python main.py --eval             # 运行回测评估（V6.1）
+  python main.py --eval             # 运行回测评估（V6.2）
   python main.py --signal           # 输出今日信号（含Evidence分解）
   python main.py --update           # 更新数据
   python main.py --replay           # 打印最近回放记录
-  python main.py --behavior-memory  # 行为记忆库统计（V6.1增强版）
+  python main.py --behavior-memory  # 行为记忆库统计（V6.2增强版）
   python main.py --evidence-debug   # Evidence Engine调试输出
   python main.py --replay-summary   # Replay Learning Top10/Worst10
   python main.py --grid-search      # 运行参数网格搜索（断点续算）
@@ -23,7 +23,7 @@ V6.1 主程序入口 —— CLI 版本（稳定化版本）
 import sys
 import os
 
-# 确保 V6.1 目录在 path 中
+# 确保 V6.2 目录在 path 中
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Windows 控制台编码保护：GBK 等编码无法输出 ⚠ 等字符时不崩溃（降级替换）
@@ -97,7 +97,7 @@ def warn_intraday_data(ctx):
 
 def main():
     print("=" * 60)
-    print("  A500 ETF V6.1 Evidence Engine 稳定化版本")
+    print("  A500 ETF V6.2 Evidence Engine 稳定化版本")
     print("=" * 60)
 
     # 运行上下文检测（运行时间感知）
@@ -125,7 +125,7 @@ def main():
         df = load_data_from_db(db_path)
         if df is not None:
             signal, detail = get_today_signal_v6(df)
-            print(f"\nV6.1 今日信号: {signal}")
+            print(f"\nV6.2 今日信号: {signal}")
             print(detail)
         else:
             print("无法加载数据")
@@ -197,7 +197,7 @@ def main():
         df = load_data_from_db()
         if df is not None:
             signal, detail = get_today_signal_v6(df)
-            print(f"\nV6.1 今日信号: {signal}")
+            print(f"\nV6.2 今日信号: {signal}")
             print(detail)
         return
 
@@ -229,7 +229,7 @@ def main():
             if df is not None:
                 from strategy import get_today_signal_v6
                 signal, detail = get_today_signal_v6(df)
-                print(f"\nV6.1 今日信号: {signal}")
+                print(f"\nV6.2 今日信号: {signal}")
                 print(detail)
                 print("\n⚠ 注意：成交量为盘中估算值，仅供参考")
             else:
@@ -244,8 +244,8 @@ def main():
     # 交互模式
     print(f"\n  当前运行环境: {ctx['description']}")
     print("\n  请选择操作:")
-    print("  1. V6.1 回测评估（Evidence Engine 稳定化版本）")
-    print("  2. V6.1 今日信号（含Evidence分解）")
+    print("  1. V6.2 回测评估（Evidence Engine 稳定化版本）")
+    print("  2. V6.2 今日信号（含Evidence分解）")
     print("  3. 更新数据")
     print("  4. 行为记忆库统计（Replay Learning）")
     print("  5. Replay Summary (Top10/Worst10)")
@@ -274,7 +274,7 @@ def main():
         df = load_data_from_db(db_path)
         if df is not None:
             signal, detail = get_today_signal_v6(df)
-            print(f"\nV6.1 今日信号: {signal}")
+            print(f"\nV6.2 今日信号: {signal}")
             print(detail)
         else:
             print("无法加载数据，请先更新数据")
@@ -343,7 +343,7 @@ def main():
             if df is not None:
                 from strategy import get_today_signal_v6
                 signal, detail = get_today_signal_v6(df)
-                print(f"\nV6.1 今日信号: {signal}")
+                print(f"\nV6.2 今日信号: {signal}")
                 print(detail)
                 print("\n⚠ 注意：成交量为盘中估算值，仅供参考")
             else:
