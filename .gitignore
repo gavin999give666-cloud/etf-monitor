@@ -1,0 +1,30 @@
+# 数据库与数据文件
+*.db
+*.pkl
+*.bak_*
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# IDE / 编辑器
+.qoder-cn/
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+
+# 网格搜索生成数据
+grid_search_*/
+.grid_search_checkpoint.json
+
+# 回测/交易生成记录
+backtest_records.json
+trades_v6.json
+heavy_results.json
+.data_cache.pkl

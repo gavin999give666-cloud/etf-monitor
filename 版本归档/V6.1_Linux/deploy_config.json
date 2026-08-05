@@ -1,0 +1,10 @@
+{
+    "bark_url": "",
+    "bark_key": "",
+    "stock_code": "563360",
+    "db_path": "src/stock_data.db",
+    "max_data_retries": 3,
+    "max_signal_rounds": 3,
+    "retry_wait_seconds": 30,
+    "timeout_seconds": 120
+}
