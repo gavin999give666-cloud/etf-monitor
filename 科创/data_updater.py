@@ -1,5 +1,5 @@
 """
-V6.2 数据更新模块（合并版：data_updater + data_updater_baostock）
+V6.2.1 数据更新模块（合并版：data_updater + data_updater_baostock）
 多数据源: Sina API(主) -> baostock(备) -> akshare(末备)
 继承 V5.0 特性: 多版本数据库回退 + 持续重试机制
 最稳定免费的 A 股/ETF 日线数据获取方案
@@ -28,7 +28,7 @@ def get_db_path():
     if os.path.exists(local_db):
         return local_db
     parent_dir = os.path.dirname(script_dir)
-    for ver in ['V6.2', 'V6.1', 'V5.0', 'V4.0', 'V2.0', 'V1.0']:
+    for ver in ['V6.2.1', 'V6.1', 'V5.0', 'V4.0', 'V2.0', 'V1.0']:
         db = os.path.join(parent_dir, ver, 'stock_data.db')
         if os.path.exists(db):
             return db
@@ -571,7 +571,7 @@ def load_data_from_db(db_path=None):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("V6.2 数据更新工具（Sina + baostock + akshare）")
+    print("V6.2.1 数据更新工具（Sina + baostock + akshare）")
     print("=" * 60)
     print("\n请选择操作:")
     print("1. 增量更新数据（推荐）")

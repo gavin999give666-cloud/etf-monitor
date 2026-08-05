@@ -1,5 +1,5 @@
 """
-V6.2 数据更新模块（多数据源版）
+V6.2.1 数据更新模块（多数据源版）
 Sina API(主) -> baostock(备) -> akshare(末备)
 最稳定免费的 A 股/ETF 日线数据获取方案
 """
@@ -540,7 +540,7 @@ def load_data_from_db(db_path=None):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("V6.2 数据更新工具（Sina + baostock + akshare）")
+    print("V6.2.1 数据更新工具（Sina + baostock + akshare）")
     print("=" * 60)
     print("\n请选择操作:")
     print("1. 增量更新数据（推荐）")

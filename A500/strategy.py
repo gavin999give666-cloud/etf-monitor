@@ -1,5 +1,5 @@
 """
-V6.2 策略流水线（Strategy Pipeline）—— 稳定化版本
+V6.2.1 策略流水线（Strategy Pipeline）—— 稳定化版本
 ===================================================
 
 完整的 V6.1 架构：
@@ -112,7 +112,7 @@ class V6Strategy:
         # V6: 价格+情绪双确认记录
         self.emotion_confirmation_log = []
 
-        # V6.2: 牛市止盈后重新入场追踪
+        # V6.2.1: 牛市止盈后重新入场追踪
         self._reentry_until_idx = -1  # 直入窗口结束的索引位置
         self._last_sell_signal_idx = -1
         self._reentry_log = []
@@ -209,7 +209,7 @@ class V6Strategy:
             )
 
             # ---- Layer 6: V6 Evidence Engine ----
-            # V6.2: 牛市止盈后重新入场检查
+            # V6.2.1: 牛市止盈后重新入场检查
             in_reentry_window = BULL_REENTRY_ENABLED and (i <= self._reentry_until_idx)
             if in_reentry_window:
                 reentry_days_left = self._reentry_until_idx - i
@@ -223,7 +223,7 @@ class V6Strategy:
                 bull_reentry_boost=BULL_REENTRY_BUY_BOOST if in_reentry_window else 1.0
             )
 
-            # V6.2: 在牛市中买入评分突然大幅下降 → 视为止盈信号，开启直入窗口
+            # V6.2.1: 在牛市中买入评分突然大幅下降 → 视为止盈信号，开启直入窗口
             # 使用 buy_score 而非 sell_score，因为 Bull 中 sell 被压得很低
             if BULL_REENTRY_ENABLED and regime == 'Bull':
                 prev_buy = self.signals[-1]['buy_score'] if self.signals else 0
@@ -273,7 +273,7 @@ class V6Strategy:
                 'score_breakdown': score_breakdown,
                 'evidence_debug': evidence_debug,
                 'replay': replay,
-                # V6.2: 牛市直入状态
+                # V6.2.1: 牛市直入状态
                 'bull_reentry': in_reentry_window,
                 'reentry_days_left': reentry_days_left,
             }
@@ -286,7 +286,7 @@ class V6Strategy:
                            current_date, df_slice=None, idx=None,
                            bull_reentry_boost=1.0):
         """
-        V6.0 评分计算 + V6.1 历史高位保护 + V6.2 牛市直入
+        V6.0 评分计算 + V6.1 历史高位保护 + V6.2.1 牛市直入
 
         Returns:
             buy_score, sell_score, score_breakdown, evidence_debug
@@ -416,7 +416,7 @@ class V6Strategy:
         elif psych_state == 'Exhaustion':
             sell_score *= PSYCH_EXHAUSTION_SELL_BOOST  # 衰竭中卖出强烈加分
 
-        # V6.2: 牛市止盈后重新入场 Boost
+        # V6.2.1: 牛市止盈后重新入场 Boost
         if bull_reentry_boost > 1.0:
             buy_score *= bull_reentry_boost
             sell_score *= (1.0 / bull_reentry_boost)  # 卖出信号相应减弱
@@ -527,7 +527,7 @@ class V6Strategy:
         return self.emotion_confirmation_log
 
     def get_reentry_log(self):
-        """V6.2: 获取牛市直入日志"""
+        """V6.2.1: 获取牛市直入日志"""
         return self._reentry_log
 
     def record_trade_result(self, regime, behavior_name, success, date, psychology=None):

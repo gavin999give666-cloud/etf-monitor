@@ -119,7 +119,7 @@ def evaluate_strategy(use_ml=True, emotion_method='weighted', show_plot=None):
     # V6.1: Evidence Explainability 摘要
     print_evidence_explainability(bt)
 
-    # V6.2: 牛市直入统计
+    # V6.2.1: 牛市直入统计
     print_bull_reentry(bt, strategy)
 
     # Step 9: Replay Engine 验证
@@ -558,9 +558,9 @@ def print_time_decay_statistics(bt, strategy):
 
 
 def print_bull_reentry(bt, strategy):
-    """V6.2: 打印牛市止盈后重新入场统计"""
+    """V6.2.1: 打印牛市止盈后重新入场统计"""
     print("\n" + "=" * 80)
-    print("V6.2 牛市止盈后重新入场 (Bull Re-entry) 统计")
+    print("V6.2.1 牛市止盈后重新入场 (Bull Re-entry) 统计")
     print("=" * 80)
 
     reentry_log = strategy.get_reentry_log()

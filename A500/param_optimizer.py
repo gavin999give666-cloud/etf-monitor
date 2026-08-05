@@ -1,5 +1,5 @@
 """
-V6.2 智能参数优化器（Smart Parameter Optimizer）
+V6.2.1 智能参数优化器（Smart Parameter Optimizer）
 ==================================================
 
 超越传统网格搜索的三层优化方法：
@@ -1193,7 +1193,7 @@ def find_best_params(method='optuna', **kwargs):
         (optimizer_instance, best_params_dict)
     """
     print("=" * 60)
-    print("V6.2 智能参数优化器")
+    print("V6.2.1 智能参数优化器")
     print("=" * 60)
 
     df = load_data_from_db()
@@ -1826,7 +1826,7 @@ class HeavyOptimizer:
         """保存断点到磁盘（含 phase_results 持久化，支持跨进程恢复）"""
         import json as _json
         ckpt = {
-            'version': 'V6.2',
+            'version': 'V6.2.1',
             'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'completed_phases': sorted(list(self._completed_phases)),
             'phase_results_count': {k: len(v) for k, v in self.phase_results.items()},
@@ -1956,7 +1956,7 @@ class HeavyOptimizer:
 
         resumed_phases = ', '.join(sorted(self._completed_phases)) if self._completed_phases else '全新'
         print("=" * 70)
-        print("  V6.2 全量高算力优化管道（HEAVY COMPUTE）")
+        print("  V6.2.1 全量高算力优化管道（HEAVY COMPUTE）")
         print("=" * 70)
         print(f"  搜索空间: {len(space)} 个参数")
         print(f"  管道: Optuna({n_trials}) → GA({ga_generations}代×{ga_population}) → FineGrid → WFV({wf_top_k})")
@@ -2294,7 +2294,7 @@ class HeavyOptimizer:
 
         output = {
             'meta': {
-                'version': 'V6.2 Heavy',
+                'version': 'V6.2.1 Heavy',
                 'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'total_elapsed_min': round(total_elapsed / 60, 1),
                 'total_evaluations': len(self.all_results),
@@ -2591,7 +2591,7 @@ def view_saved_results():
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='V6.2 智能参数优化器')
+    parser = argparse.ArgumentParser(description='V6.2.1 智能参数优化器')
     parser.add_argument('--method', type=str, default='optuna',
                         choices=['optuna', 'genetic', 'coarse2fine', 'adaptive', 'all', 'heavy'],
                         help='优化方法: optuna/genetic/coarse2fine/adaptive/all/heavy')
