@@ -1,0 +1,9 @@
+# V6.1 Python 依赖（Linux 部署版）
+pandas>=1.5.0
+numpy>=1.23.0
+akshare>=1.10.0
+matplotlib>=3.5.0
+tqdm>=4.64.0
+baostock>=1.0.0
+scikit-learn>=1.0.0
+scipy>=1.9.0
