@@ -20,6 +20,12 @@ dist/
 .heavy_checkpoint.json
 backtest_records.json
 
+# 运行残留（调试/错误/输出文件，不上传）
+Error.txt
+_answer.txt
+_gui_err.txt
+_gui_out.txt
+
 # 系统文件
 .DS_Store
 Thumbs.db
