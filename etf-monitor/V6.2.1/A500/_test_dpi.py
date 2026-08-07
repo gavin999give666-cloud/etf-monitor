@@ -50,7 +50,8 @@ def main():
         res['tksc'], res['expect'], res['S'] = tksc, expect, app._S
         print('[gui] post-map S=%.3f tk_scaling=%.4f expect=%.4f geometry=%s'
               % (app._S, tksc, expect, app.root.geometry()))
-        assert abs(tksc - expect) < 1e-6, 'tk scaling mismatch: %s vs %s' % (tksc, expect)
+        # GetDpiForWindow 有量化误差，容差需 ≥1e-3（不能按理论值用 1e-6）
+        assert abs(tksc - expect) < 1e-3, 'tk scaling mismatch: %s vs %s' % (tksc, expect)
         assert app._mapped_once is True
         app.root.destroy()
 

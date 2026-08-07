@@ -25,8 +25,21 @@ V6.2.1 智能参数优化器（Smart Parameter Optimizer）
 """
 
 import copy
+import gc
 import multiprocessing
 import os
+
+# ═══ 在 import numpy 之前限制 BLAS 线程数 ═══
+# 每个进程（主进程 + 每个 spawn 的 worker）的 numpy/OpenBLAS 默认按
+# 全部逻辑核初始化线程池。多进程场景下：主进程 + N 个 worker × 核数
+# = 数百条 BLAS 线程，每条线程都 commit 内存，直接推高"已提交内存"
+# 到提交上限（表现为：committed 占满、pagefile 使用率却很低、内存分配
+# 报"页面文件太小"）。策略回测为串行小计算，限制线程数无性能损失。
+os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
+os.environ.setdefault('OMP_NUM_THREADS', '1')
+os.environ.setdefault('MKL_NUM_THREADS', '1')
+os.environ.setdefault('NUMEXPR_NUM_THREADS', '1')
+
 import pickle
 import random
 import sys
@@ -112,7 +125,8 @@ except ImportError:
 # 与设定的资源限制（1~100%，100%=最大性能模式）实时增减；同时弹出
 # 独立控制面板窗口（EXE 内嵌，不走外部浏览器）。
 try:
-    from adaptive_pool import AdaptiveWorkerPool, CpuGovernor, DashboardState
+    from adaptive_pool import (AdaptiveWorkerPool, CpuGovernor, DashboardState,
+                               live_pools)
     HAS_ADAPTIVE = True
     ADAPTIVE_IMPORT_ERR = ''
 except Exception as _adaptive_imp_err:
@@ -122,6 +136,298 @@ except Exception as _adaptive_imp_err:
 ADAPTIVE_ENABLED = False
 GOVERNOR = None
 DASHBOARD_STATE = None
+
+# ===== 信号文件控制（暂停/停止/紧急停止） =====
+PAUSE_FILE = os.path.join(os.getcwd(), '.optimizer_pause.flag')
+STOP_FILE  = os.path.join(os.getcwd(), '.optimizer_stop.flag')
+EMERGENCY_FILE = os.path.join(os.getcwd(), '.optimizer_emergency.flag')
+
+# 当前正在运行的全量优化器实例（紧急停止时用于立即保存断点）
+_ACTIVE_HEAVY = None
+
+def _check_control():
+    """检查暂停/停止/紧急停止信号。返回 'stop' 或 None。暂停时阻塞等待。"""
+    if os.path.exists(STOP_FILE) or os.path.exists(EMERGENCY_FILE):
+        return 'stop'
+    while os.path.exists(PAUSE_FILE):
+        if os.path.exists(STOP_FILE) or os.path.exists(EMERGENCY_FILE):
+            return 'stop'
+        time.sleep(0.3)
+    return None
+
+def request_pause():
+    """请求暂停（GUI调用）"""
+    with open(PAUSE_FILE, 'w') as f:
+        f.write(str(time.time()))
+    if DASHBOARD_STATE:
+        DASHBOARD_STATE.add_event('⏸ 已请求暂停，等待当前计算完成...')
+
+def request_resume():
+    """请求继续（GUI调用）"""
+    if os.path.exists(PAUSE_FILE):
+        os.remove(PAUSE_FILE)
+    if DASHBOARD_STATE:
+        DASHBOARD_STATE.add_event('▶ 已请求继续运行')
+
+def request_stop():
+    """请求优雅停止（GUI调用）"""
+    with open(STOP_FILE, 'w') as f:
+        f.write(str(time.time()))
+    if DASHBOARD_STATE:
+        DASHBOARD_STATE.add_event('⏹ 已请求优雅停止，等待当前计算完成...')
+
+def request_emergency_stop():
+    """紧急停止（GUI 紧急停止按钮）：立即保存当前断点并强行终止所有进程。
+
+    由后台线程调用（断点保存可能耗时，避免卡住 Tk 主线程）：
+    1. 立即保存全量优化断点（若 heavy 正在运行）；
+    2. 对所有活动进程池 abort() —— 直接 terminate 全部 worker，
+       放弃未完成任务（不等待任何任务/进程收尾）。
+    """
+    with open(EMERGENCY_FILE, 'w') as f:
+        f.write(str(time.time()))
+    saved = False
+    if _ACTIVE_HEAVY is not None:
+        try:
+            _ACTIVE_HEAVY._save_checkpoint()
+            saved = True
+        except Exception as e:
+            if DASHBOARD_STATE:
+                DASHBOARD_STATE.add_event(f'[紧急停止] 断点保存失败: {e}')
+    killed = 0
+    for _pool in live_pools():
+        try:
+            killed += _pool.abort()
+        except Exception:
+            pass
+    if DASHBOARD_STATE:
+        DASHBOARD_STATE.add_event(
+            f'🛑 紧急停止：断点已保存，已强制终止 {killed} 个进程' if saved
+            else f'🛑 紧急停止：已强制终止 {killed} 个进程')
+
+def request_emergency_trim():
+    """紧急执行（GUI 紧急执行按钮）：立即杀死超出目标进程数的进程。
+
+    目标进程数 = 各活动池调度器最近一次真实决策意图（_desired_target，
+    即 GUI"目标进程数"显示值同源）；超出部分直接 terminate，
+    其正在运行的任务数据被放弃（不等待结果）。
+    """
+    pools = live_pools()
+    if not pools:
+        if DASHBOARD_STATE:
+            DASHBOARD_STATE.add_event('⚡ 紧急执行：无活动进程池，跳过')
+        return 0
+    targets = []
+    for _pool in pools:
+        try:
+            _t = getattr(_pool, '_desired_target', None)
+        except Exception:
+            _t = None
+        if _t and int(_t) >= 1:
+            targets.append(int(_t))
+    if not targets:
+        if DASHBOARD_STATE:
+            DASHBOARD_STATE.add_event('⚡ 紧急执行：目标进程数不可用，跳过')
+        return 0
+    target = max(targets)   # 多池取最大意图（保守：不误杀目标内的进程）
+    killed = 0
+    for _pool in pools:
+        try:
+            killed += _pool.kill_excess(target)
+        except Exception:
+            pass
+    if DASHBOARD_STATE:
+        DASHBOARD_STATE.add_event(
+            f'⚡ 紧急执行：已立即终止 {killed} 个进程（目标 {target}）')
+    return killed
+
+def clear_control_flags():
+    """清理所有信号文件（启动/结束时调用）"""
+    for f in [PAUSE_FILE, STOP_FILE, EMERGENCY_FILE]:
+        if os.path.exists(f):
+            try:
+                os.remove(f)
+            except OSError:
+                pass
+
+def _report_progress(msg):
+    """上报进度到 GUI 日志"""
+    if DASHBOARD_STATE:
+        DASHBOARD_STATE.add_event(msg)
+        DASHBOARD_STATE.add_log(msg)
+
+
+def _update_progress(phase=None, label=None, current=None, total=None,
+                     pct=None, detail=None):
+    """上报结构化计算进度到 GUI 独立进度面板（与终端打印完全解耦）。
+
+    进度不再走 print/日志，而是写入 DashboardState.progress 字段，
+    由 GUI 右侧"计算进度"面板渲染（阶段 + 进度条 + 明细）。
+    """
+    if DASHBOARD_STATE is not None:
+        try:
+            DASHBOARD_STATE.set_progress(phase=phase, label=label,
+                                         current=current, total=total,
+                                         pct=pct, detail=detail)
+        except Exception:
+            pass
+
+
+def _wait_future(fut, timeout=0.5):
+    """轮询等待 future 完成，同时响应暂停/停止/紧急停止信号。
+
+    修复"点击暂停后再点停止停不下来"：原来各循环直接 `fut.result()`
+    阻塞（可能数分钟），暂停/停止信号要等当前任务完成后才能生效；
+    改为 timeout 轮询 + `_check_control()`，信号到达后最多 timeout 秒内
+    返回并令调用方 break。
+
+    返回 (result, stopped)：stopped=True 表示收到停止信号且任务未完成
+    （调用方应放弃剩余任务）。兼容 PoolFuture（超时返回 None 不抛异常）
+    与 concurrent.futures.Future（超时抛 TimeoutError）。
+    """
+    while not fut.done():
+        if _check_control() == 'stop':
+            return None, True
+        try:
+            fut.result(timeout=timeout)
+        except TimeoutError:
+            continue            # concurrent.futures：超时 → 继续轮询
+        except Exception:
+            break               # 任务失败 → 结束等待
+    try:
+        return fut.result(), False
+    except Exception:
+        return None, False
+
+
+class _TeeWriter:
+    """终端输出分流器：把 print / tqdm 进度条等写入内容同时转发到
+    GUI 终端打印区（DASHBOARD_STATE.add_log），原终端照常显示。
+
+    - 按 \n 与 \r 切行：进度条（用 \r 刷新）的每一次状态都保留为独立
+      日志行（"全部保留"语义），而非覆盖同一条。
+    - 线程安全：后台优化线程与 Tk 主线程可并发写。
+    - 真实流写入失败（如 UnicodeEncodeError 管道编码限制）不阻断日志，
+      该行仍会进入 GUI 终端区。
+    """
+
+    def __init__(self, real, sink):
+        self._real = real          # 原始 stdout/stderr（可为 None）
+        self._sink = sink          # callable(str) 每行转发目标
+        self._buf = ''
+        self._lock = threading.Lock()
+
+    def write(self, s):
+        if not s:
+            return
+        if isinstance(s, bytes):
+            try:
+                enc = getattr(self._real, 'encoding', None) or 'utf-8'
+                s = s.decode(enc, 'replace')
+            except Exception:
+                s = s.decode('utf-8', 'replace')
+        with self._lock:
+            if self._real is not None:
+                try:
+                    self._real.write(s)
+                except (UnicodeEncodeError, ValueError, OSError):
+                    pass
+            self._buf += s
+            while True:
+                i_n = self._buf.find('\n')
+                i_r = self._buf.find('\r')
+                if i_n < 0 and i_r < 0:
+                    break
+                i = i_n if i_n >= 0 and (i_r < 0 or i_n < i_r) else i_r
+                line = self._buf[:i]
+                self._buf = self._buf[i + 1:]
+                if line:
+                    self._emit(line)
+            # 无换行的超长流：强制切行，防缓冲无限膨胀
+            if len(self._buf) > 4096:
+                self._emit(self._buf)
+                self._buf = ''
+
+    def _emit(self, line):
+        line = line.rstrip()
+        if line:
+            try:
+                self._sink(line)
+            except Exception:
+                pass
+
+    def flush(self):
+        # 把未换行的残段也转发（进度条末尾无 \n 时状态不丢失）
+        with self._lock:
+            if self._buf:
+                self._emit(self._buf)
+                self._buf = ''
+        if self._real is not None:
+            try:
+                self._real.flush()
+            except Exception:
+                pass
+
+    def isatty(self):
+        return False
+
+    def fileno(self):
+        if self._real is not None:
+            return self._real.fileno()
+        raise OSError('fileno not available')
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+
+_ORIG_STDOUT = None
+_ORIG_STDERR = None
+
+
+def install_stdout_tee():
+    """把 sys.stdout / sys.stderr 替换为分流器（终端照常显示 + 逐行转发
+    到 GUI 终端打印区）。重复调用无副作用。"""
+    global _ORIG_STDOUT, _ORIG_STDERR
+    if _ORIG_STDOUT is not None and _ORIG_STDERR is not None:
+        return
+    st = DASHBOARD_STATE
+    if st is None:
+        return
+
+    def _sink(line):
+        st.add_log(line)
+
+    if _ORIG_STDOUT is None and sys.stdout is not None:
+        _ORIG_STDOUT = sys.stdout
+        try:
+            sys.stdout = _TeeWriter(_ORIG_STDOUT, _sink)
+        except Exception:
+            _ORIG_STDOUT = None
+    if _ORIG_STDERR is None and sys.stderr is not None:
+        _ORIG_STDERR = sys.stderr
+        try:
+            sys.stderr = _TeeWriter(_ORIG_STDERR, _sink)
+        except Exception:
+            _ORIG_STDERR = None
+
+
+def restore_stdout():
+    """恢复原始 sys.stdout / sys.stderr（GUI 关闭时调用）。"""
+    global _ORIG_STDOUT, _ORIG_STDERR
+    if _ORIG_STDOUT is not None:
+        try:
+            _ORIG_STDOUT.flush()
+        except Exception:
+            pass
+        sys.stdout = _ORIG_STDOUT
+        _ORIG_STDOUT = None
+    if _ORIG_STDERR is not None:
+        try:
+            _ORIG_STDERR.flush()
+        except Exception:
+            pass
+        sys.stderr = _ORIG_STDERR
+        _ORIG_STDERR = None
 
 
 def enable_adaptive_control(cpu_limit=100.0):
@@ -164,8 +470,14 @@ def run_with_gui(cpu_limit=100.0, shutdown_cb=None):
     print(f"  资源控制面板已启动（程序自身 CPU 占用上限 {cpu_limit:.0f}%"
           f"{'，最大性能模式' if GOVERNOR.is_max_mode else ''}）")
     print(f"  在面板中选择运算模式并点击【开始优化】；关闭面板窗口将结束程序。")
-    app = OptimizerGUI(GOVERNOR, DASHBOARD_STATE, shutdown_cb=shutdown_cb)
-    app.run()
+    # 终端分流：计算期间的 print / tqdm 进度条等输出，逐行转发到
+    # GUI 右侧"终端打印区"（原终端照常显示，关闭面板后恢复）。
+    install_stdout_tee()
+    try:
+        app = OptimizerGUI(GOVERNOR, DASHBOARD_STATE, shutdown_cb=shutdown_cb)
+        app.run()
+    finally:
+        restore_stdout()
     return True
 
 # ============================================================
@@ -474,8 +786,46 @@ class BaseOptimizer(ABC):
         """构建单个评估任务（使用 pickle 缓存，无需传递 DataFrame）"""
         return (copy.deepcopy(params), self.start_date)
 
-    def _run_evaluations(self, tasks, n_jobs=-1, verbose=True):
-        """并行运行评估任务"""
+    def _eval_with_pool(self, pool, tasks, results, verbose=True, progress_cb=None):
+        """在给定的自适应池中评估任务（支持跨调用复用同一池）。
+
+        池复用避免"每批任务重建进程池"导致的反复 spawn 峰值内存
+        与 worker 重复加载数据（_load_data_cache 只在 worker 首次使用时
+        加载一次，复用池后各代评估零重复加载）。
+        progress_cb: 可选回调 fn(done, total)，每完成一个任务调用一次。
+        """
+        futures = [pool.submit(t) for t in tasks]
+        _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+        pbar = (tqdm(total=len(futures), desc="Evaluating (自适应)",
+                     unit="trial") if _use_tqdm else None)
+        done = 0
+        for f in futures:
+            # ── 暂停/停止信号检查（轮询式，信号到达后立即响应）──
+            r, _stopped = _wait_future(f)
+            if _stopped:
+                # 立即终止池进程：避免 with 退出时 shutdown(wait=True)
+                # 长时间等待已提交任务完成（"停不下来"的直接原因）
+                try:
+                    pool.abort()
+                except Exception:
+                    pass
+                break
+            if r is not None:
+                results.append(r)
+            done += 1
+            if pbar is not None:
+                pbar.update(1)
+            if progress_cb is not None:
+                progress_cb(done, len(futures))
+        if pbar is not None:
+            pbar.close()
+
+    def _run_evaluations(self, tasks, n_jobs=-1, verbose=True, pool=None,
+                         progress_cb=None):
+        """并行运行评估任务
+
+        progress_cb: 可选回调 fn(done, total)，每完成一个任务调用一次。
+        """
         if n_jobs < 0:
             n_jobs = os.cpu_count() or 4
         n_jobs = min(n_jobs, len(tasks))
@@ -484,47 +834,59 @@ class BaseOptimizer(ABC):
 
         if n_jobs == 1 or len(tasks) <= 1:
             iterator = enumerate(tasks, 1)
-            if HAS_TQDM and verbose:
+            _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+            if _use_tqdm:
                 iterator = tqdm(iterator, total=len(tasks), desc="Evaluating", unit="trial")
             for idx, task in iterator:
+                # ── 暂停/停止信号检查 ──
+                if _check_control() == 'stop':
+                    break
                 result = _single_eval_worker(task)
                 if result is not None:
                     results.append(result)
+                if progress_cb is not None:
+                    progress_cb(idx, len(tasks))
         elif ADAPTIVE_ENABLED and HAS_ADAPTIVE:
             # ── 自适应进程池（可视化控制面板模式）──
             # worker 数量由 CpuGovernor 实时增减，确保程序自身 CPU 占用
-            # 不超过面板设定的资源限制。
-            with AdaptiveWorkerPool(_single_eval_worker, governor=GOVERNOR,
-                                    state=DASHBOARD_STATE, pool_name='Eval') as _pool:
-                futures = [_pool.submit(t) for t in tasks]
-                if HAS_TQDM and verbose:
-                    pbar = tqdm(total=len(futures), desc="Evaluating (自适应)", unit="trial")
-                else:
-                    pbar = None
-                for f in futures:
-                    r = f.result()
-                    if r is not None:
-                        results.append(r)
-                    if pbar is not None:
-                        pbar.update(1)
-                if pbar is not None:
-                    pbar.close()
+            # 不超过面板设定的资源限制。pool 传入时复用（GA 多代共享），
+            # 否则新建。
+            if pool is not None:
+                self._eval_with_pool(pool, tasks, results, verbose, progress_cb)
+            else:
+                with AdaptiveWorkerPool(_single_eval_worker, governor=GOVERNOR,
+                                        state=DASHBOARD_STATE, pool_name='Eval') as _pool:
+                    self._eval_with_pool(_pool, tasks, results, verbose, progress_cb)
         else:
             ctx = multiprocessing.get_context('spawn')
             with ProcessPoolExecutor(max_workers=n_jobs, mp_context=ctx) as executor:
                 futures = {executor.submit(_single_eval_worker, t): t for t in tasks}
-                if HAS_TQDM and verbose:
-                    pbar = tqdm(total=len(futures), desc="Evaluating", unit="trial")
-                for future in as_completed(futures):
+                _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+                pbar = (tqdm(total=len(futures), desc="Evaluating",
+                             unit="trial") if _use_tqdm else None)
+                done = 0
+                remaining = set(futures)
+                while remaining:
+                    # ── 暂停/停止信号检查（as_completed 带超时轮询）──
+                    if _check_control() == 'stop':
+                        break
                     try:
-                        result = future.result()
-                        if result is not None:
-                            results.append(result)
-                    except:
-                        pass
-                    if HAS_TQDM and verbose:
-                        pbar.update(1)
-                if HAS_TQDM and verbose:
+                        for future in as_completed(list(remaining), timeout=0.5):
+                            remaining.discard(future)
+                            try:
+                                result = future.result()
+                                if result is not None:
+                                    results.append(result)
+                            except:
+                                pass
+                            done += 1
+                            if pbar is not None:
+                                pbar.update(1)
+                            if progress_cb is not None:
+                                progress_cb(done, len(futures))
+                    except TimeoutError:
+                        continue
+                if pbar is not None:
                     pbar.close()
 
         return results
@@ -1019,7 +1381,8 @@ class GeneticOptimizer(BaseOptimizer):
 
     def run(self, space=None, population_size=40, generations=50,
             elite_count=4, mutation_rate=0.15, crossover_rate=0.80,
-            n_jobs=-1, verbose=True, **kwargs):
+            n_jobs=-1, verbose=True, val_eval_fn=None,
+            val_stagnant_limit=5, val_tolerance=1.0, **kwargs):
         """
         运行遗传算法优化
 
@@ -1031,6 +1394,10 @@ class GeneticOptimizer(BaseOptimizer):
             crossover_rate: 交叉概率
             n_jobs: 并行进程数
             verbose: 是否打印进度
+            val_eval_fn: 可选验证段评估函数 fn(params) -> float objective
+                         （用于保留验证段早停；None = 不启用）
+            val_stagnant_limit: 验证段无改善的连续代数上限（达到则提前停止）
+            val_tolerance: 判定"改善"的最小验证分提升量
         """
         if space is None:
             space = dict(OPTIMIZER_SEARCH_SPACE)
@@ -1059,11 +1426,27 @@ class GeneticOptimizer(BaseOptimizer):
 
         best_overall = None
         best_overall_obj = float('-inf')
+        best_val_obj = float('-inf')
+        val_stagnant = 0
+
+        # ── 自适应模式：单个跨代复用的进程池 ──
+        # 若每代重建进程池，Windows spawn 会反复触发"导入重库 + 加载数据"的
+        # 内存峰值（每个 worker 数百 MB），在页面文件较小时直接 MemoryError
+        # 崩溃（Error.txt 中 OpenBLAS/numpy 分配失败的根因）。复用池后：
+        #   - spawn 只在池创建时发生一次；
+        #   - worker 的 _load_data_cache 只在首次任务时加载一次，后续代复用。
+        _pool = None
+        _pool_owner = None
+        if ADAPTIVE_ENABLED and HAS_ADAPTIVE:
+            _pool_owner = AdaptiveWorkerPool(_single_eval_worker, governor=GOVERNOR,
+                                             state=DASHBOARD_STATE, pool_name='GA')
+            _pool = _pool_owner.__enter__()
 
         for gen in range(generations):
             # 评估当前种群
             tasks = [self._build_task(ind) for ind in population]
-            results_list = self._run_evaluations(tasks, n_jobs=n_jobs, verbose=False)
+            results_list = self._run_evaluations(tasks, n_jobs=n_jobs, verbose=False,
+                                                 pool=_pool)
 
             # 构建适应度
             fitness = []
@@ -1084,11 +1467,38 @@ class GeneticOptimizer(BaseOptimizer):
                 best_overall_obj = gen_best_obj
 
             if verbose:
-                print(f"  Gen {gen+1:>3}/{generations} | "
-                      f"Best={gen_best_obj:.2f} | "
-                      f"Return={results_list[gen_best_idx].strategy_return*100:.2f}% | "
-                      f"Sharpe={results_list[gen_best_idx].sharpe_ratio:.3f} | "
-                      f"DD={results_list[gen_best_idx].max_drawdown*100:.1f}%")
+                _gb = results_list[gen_best_idx] if gen_best_idx < len(results_list) else None
+                if _gb is not None:
+                    _metrics = (f'Best={gen_best_obj:.2f} | '
+                                f'Return={_gb.strategy_return*100:.2f}% | '
+                                f'Sharpe={_gb.sharpe_ratio:.3f} | '
+                                f'DD={_gb.max_drawdown*100:.1f}%')
+                else:
+                    _metrics = f'Best={gen_best_obj:.2f}'
+                if ADAPTIVE_ENABLED and DASHBOARD_STATE is not None:
+                    # GUI 模式：进度走独立进度面板，不再逐代打印到终端
+                    _update_progress(phase='Phase 2/4', label='遗传算法精炼',
+                                     current=gen + 1, total=generations,
+                                     detail=_metrics)
+                else:
+                    print(f"  Gen {gen+1:>3}/{generations} | {_metrics}")
+
+            # ── 保留验证段早停：连续 val_stagnant_limit 代无改善则提前停止 ──
+            if val_eval_fn is not None:
+                v_score = val_eval_fn(gen_best)
+                if v_score is not None:
+                    if v_score > best_val_obj + val_tolerance:
+                        best_val_obj = v_score
+                        val_stagnant = 0
+                    else:
+                        val_stagnant += 1
+                    if verbose:
+                        print(f"       [验证段] Val={v_score:.2f} "
+                              f"(best={best_val_obj:.2f}, 停滞{val_stagnant}/{val_stagnant_limit})")
+                    if val_stagnant >= val_stagnant_limit:
+                        print(f"  ⏹ 验证段连续 {val_stagnant_limit} 代无改善，"
+                              f"遗传算法提前停止")
+                        break
 
             if gen == generations - 1:
                 break
@@ -1109,7 +1519,18 @@ class GeneticOptimizer(BaseOptimizer):
 
             population = new_population
 
+            # ── 停止信号检查（每代结束后）──
+            if _check_control() == 'stop':
+                break
+
         self._restore_config()
+
+        # 关闭跨代复用的进程池（正常结束或早停/停止信号 break 后统一收尾）
+        if _pool_owner is not None:
+            try:
+                _pool_owner.__exit__(None, None, None)
+            except Exception:
+                pass
 
         if verbose and best_overall:
             print(f"\n全局最优参数 (Generation):")
@@ -1676,14 +2097,16 @@ def returns_aggressive_objective(
     excess_contrib = excess_return * 80
     score += excess_contrib
 
-    # ── 风险底线约束（回撤 > 25% 才强惩罚）──
+    # ── 风险底线约束（回撤 > 10% 开始惩罚，>25% 强惩罚）──
     if max_drawdown < 0:
         dd_pct = abs(max_drawdown)
         if dd_pct > 0.25:
-            score += (0.20 - dd_pct) * 80  # >25% 惩罚
+            score += (0.20 - dd_pct) * 80  # >25% 强惩罚
         elif dd_pct > 0.15:
-            score -= (dd_pct - 0.15) * 30  # 15-25% 小惩罚
-        # <15% 不惩罚
+            score -= (dd_pct - 0.15) * 40  # 15-25% 中惩罚
+        elif dd_pct > 0.10:
+            score -= (dd_pct - 0.10) * 30  # 10-15% 小惩罚
+        # <10% 不惩罚
 
     # ── 夏普比率加分 ──
     if sharpe_ratio > 0:
@@ -1826,47 +2249,79 @@ def _wf_worker(args):
     return run_walk_forward_validation(df, params, n_splits=3, objective_fn=objective_fn)
 
 
-def _run_wf_parallel(tasks, n_jobs=-1, verbose=True):
-    """并行执行多个 Walk-Forward 验证"""
+def _run_wf_parallel(tasks, n_jobs=-1, verbose=True, progress_cb=None):
+    """并行执行多个 Walk-Forward 验证
+
+    progress_cb: 可选回调 fn(done, total)，每完成一个候选调用一次。
+    """
     results = []
     if n_jobs == 1 or len(tasks) <= 1:
-        for t in tasks:
+        for idx, t in enumerate(tasks, 1):
+            # ── 暂停/停止信号检查 ──
+            if _check_control() == 'stop':
+                break
             r = _wf_worker(t)
             if r is not None:
                 results.append(r)
+            if progress_cb is not None:
+                progress_cb(idx, len(tasks))
     elif ADAPTIVE_ENABLED and HAS_ADAPTIVE:
         # ── 自适应进程池（可视化控制面板模式）──
         with AdaptiveWorkerPool(_wf_worker, governor=GOVERNOR, state=DASHBOARD_STATE,
                                 pool_name='WFV') as _pool:
             futures = [_pool.submit(t) for t in tasks]
-            if HAS_TQDM and verbose:
-                pbar = tqdm(total=len(futures), desc="WFV (自适应)", unit="candidate")
-            else:
-                pbar = None
+            _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+            pbar = (tqdm(total=len(futures), desc="WFV (自适应)",
+                         unit="candidate") if _use_tqdm else None)
+            done = 0
             for future in futures:
-                r = future.result()
+                # ── 暂停/停止信号检查（轮询式）──
+                r, _stopped = _wait_future(future)
+                if _stopped:
+                    try:
+                        _pool.abort()
+                    except Exception:
+                        pass
+                    break
                 if r is not None:
                     results.append(r)
+                done += 1
                 if pbar is not None:
                     pbar.update(1)
+                if progress_cb is not None:
+                    progress_cb(done, len(futures))
             if pbar is not None:
                 pbar.close()
     else:
         ctx = multiprocessing.get_context('spawn')
         with ProcessPoolExecutor(max_workers=min(n_jobs, len(tasks)), mp_context=ctx) as executor:
             futures = {executor.submit(_wf_worker, t): t for t in tasks}
-            if HAS_TQDM and verbose:
-                pbar = tqdm(total=len(futures), desc="WFV", unit="candidate")
-            for future in as_completed(futures):
+            _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+            pbar = (tqdm(total=len(futures), desc="WFV",
+                         unit="candidate") if _use_tqdm else None)
+            done = 0
+            remaining = set(futures)
+            while remaining:
+                # ── 暂停/停止信号检查（as_completed 带超时轮询）──
+                if _check_control() == 'stop':
+                    break
                 try:
-                    r = future.result()
-                    if r is not None:
-                        results.append(r)
-                except:
-                    pass
-                if HAS_TQDM and verbose:
-                    pbar.update(1)
-            if HAS_TQDM and verbose:
+                    for future in as_completed(list(remaining), timeout=0.5):
+                        remaining.discard(future)
+                        try:
+                            r = future.result()
+                            if r is not None:
+                                results.append(r)
+                        except:
+                            pass
+                        done += 1
+                        if pbar is not None:
+                            pbar.update(1)
+                        if progress_cb is not None:
+                            progress_cb(done, len(futures))
+                except TimeoutError:
+                    continue
+            if pbar is not None:
                 pbar.close()
     return results
 
@@ -1992,6 +2447,9 @@ class HeavyOptimizer:
         )
         self._completed_phases = set()
         self._checkpoint = {}  # 断点元数据
+        # ── 保留验证段（三阶段搜索早停监控，独立于 Phase 4 Walk-Forward）──
+        self._val_df = None
+        self._val_baseline = None
 
     def _save_checkpoint(self):
         """保存断点到磁盘（含 phase_results 持久化，支持跨进程恢复）"""
@@ -2096,7 +2554,85 @@ class HeavyOptimizer:
             except:
                 pass
 
+    def _make_val_split(self, val_ratio=0.15):
+        """划分保留验证段（数据最后 val_ratio，至少 30 行，与训练段无重叠）"""
+        total = len(self.df)
+        if total < 100:
+            return None, "数据过少，跳过早停监控"
+        n_val = max(30, int(total * val_ratio))
+        n_train = total - n_val
+        if n_train < 60:
+            return None, "训练段过短，跳过早停监控"
+        val_df = self.df.iloc[n_train:].copy()
+        note = (f"{len(val_df)} 行 "
+                f"{val_df.index[0].date()} ~ {val_df.index[-1].date()} "
+                f"(训练 {n_train} 行)")
+        return val_df, note
+
+    def _val_eval_fn(self, params):
+        """验证段评估回调：在保留验证段上运行回测，返回 objective（None=失败）。
+
+        评估前后保存/恢复 config，避免污染主进程后续阶段的配置状态。
+        """
+        if self._val_df is None:
+            return None
+        saved = {}
+        for attr in dir(config):
+            if not attr.startswith('_') and attr.isupper():
+                try:
+                    saved[attr] = copy.deepcopy(getattr(config, attr))
+                except Exception:
+                    pass
+        try:
+            r = _eval_params_on_df(params, self._val_df,
+                                   str(self._val_df.index[0].date()))
+            return r.objective if r is not None else None
+        finally:
+            for attr, val in saved.items():
+                try:
+                    setattr(config, attr, val)
+                except Exception:
+                    pass
+
+    def _update_val_baseline(self, top_k=10):
+        """用当前所有结果中训练目标 Top-K 在验证段上的最优值刷新早停基线。
+
+        Returns:
+            float: 验证段最优 objective；无有效结果返回 None
+        """
+        if self._val_df is None or not self.all_results:
+            return None
+        top_k = max(1, min(top_k, len(self.all_results)))
+        top_sorted = sorted(self.all_results, key=lambda x: x.objective,
+                            reverse=True)[:top_k]
+        best_val = None
+        for r in top_sorted:
+            v = self._val_eval_fn(r.params)
+            if v is not None:
+                best_val = v if best_val is None else max(best_val, v)
+        self._val_baseline = best_val
+        return best_val
+
     def run(self, n_trials=10000, ga_generations=100, ga_population=60,
+            n_jobs=14, ga_n_jobs=10, wf_top_k=20, resume=True, verbose=True,
+            output_path=None):
+        """全量优化管道入口：注册当前实例供紧急停止保存断点，再转 _run_pipeline。
+
+        紧急停止（request_emergency_stop）需要在优化线程被终止前立即保存
+        当前断点 —— 通过模块级 _ACTIVE_HEAVY 定位正在运行的实例。
+        """
+        global _ACTIVE_HEAVY
+        _ACTIVE_HEAVY = self
+        try:
+            return self._run_pipeline(
+                n_trials=n_trials, ga_generations=ga_generations,
+                ga_population=ga_population, n_jobs=n_jobs,
+                ga_n_jobs=ga_n_jobs, wf_top_k=wf_top_k,
+                resume=resume, verbose=verbose, output_path=output_path)
+        finally:
+            _ACTIVE_HEAVY = None
+
+    def _run_pipeline(self, n_trials=10000, ga_generations=100, ga_population=60,
             n_jobs=14, ga_n_jobs=10, wf_top_k=20, resume=True, verbose=True,
             output_path=None):
         """
@@ -2145,7 +2681,13 @@ class HeavyOptimizer:
         print("=" * 70)
 
         t_total_start = time.time()
+        _update_progress(phase='准备', label='加载数据与构建缓存', pct=0.0)
         self._save_and_prep()
+
+        # ── 划分保留验证段（最后 val_ratio 数据，用于三阶段搜索早停监控）──
+        self._val_df, _val_note = self._make_val_split(val_ratio=0.15)
+        if self._val_df is not None and verbose:
+            print(f"  保留验证段（早停监控）: {_val_note}")
 
         # ──────── Phase 1: Optuna 贝叶斯优化 ────────
         if 'optuna' in self._completed_phases:
@@ -2158,6 +2700,7 @@ class HeavyOptimizer:
             print(f"\n{'─'*70}")
             print(f"  Phase 1/4: Optuna 贝叶斯优化 ({n_trials} trials)")
             print(f"{'─'*70}")
+            _report_progress('Phase 1/4: Optuna 贝叶斯搜索开始...')
             t0 = time.time()
 
             _prepare_data_cache(self.df)
@@ -2217,6 +2760,8 @@ class HeavyOptimizer:
             # 改用 ProcessPoolExecutor（进程池），每个 worker 进程独立运行 trials，
             # 通过 JournalStorage 共享结果，实现真正的多核并行。
             if remaining > 0:
+                _update_progress(phase='Phase 1/4', label='Optuna 贝叶斯搜索',
+                                 current=0, total=remaining)
                 if n_jobs > 1 and not (ADAPTIVE_ENABLED and HAS_ADAPTIVE):
                     # ── 固定进程池并行（原逻辑）：每个 worker 进程分配一批 trials ──
                     _trials_per_worker = remaining // n_jobs
@@ -2236,16 +2781,33 @@ class HeavyOptimizer:
                     ctx = multiprocessing.get_context('spawn')
                     with ProcessPoolExecutor(max_workers=n_jobs, mp_context=ctx) as _pool:
                         _futures = [_pool.submit(_phase1_worker, a) for a in _worker_args]
-                        if HAS_TQDM and verbose:
-                            _pbar = tqdm(total=remaining, desc="Phase 1 (processes)", unit="trial")
-                        for _f in as_completed(_futures):
+                        # GUI 模式不再打印进度（走独立进度面板）；CLI 保留 tqdm
+                        _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+                        _pbar = (tqdm(total=remaining, desc="Phase 1 (processes)",
+                                      unit="trial") if _use_tqdm else None)
+                        _done_acc = 0
+                        _futures_set = set(_futures)
+                        while _futures_set:
+                            # ── 暂停/停止信号检查（as_completed 带超时轮询）──
+                            if _check_control() == 'stop':
+                                break
                             try:
-                                _done = _f.result()
-                                if HAS_TQDM and verbose:
-                                    _pbar.update(_done)
-                            except Exception as _e:
-                                print(f"  [worker 异常] {_e}")
-                        if HAS_TQDM and verbose:
+                                for _f in as_completed(list(_futures_set), timeout=0.5):
+                                    _futures_set.discard(_f)
+                                    try:
+                                        _done = _f.result() or 0
+                                        _done_acc += _done
+                                        if _pbar is not None:
+                                            _pbar.update(_done)
+                                        _update_progress(
+                                            phase='Phase 1/4', label='Optuna 贝叶斯搜索',
+                                            current=min(_done_acc, remaining),
+                                            total=remaining)
+                                    except Exception as _e:
+                                        print(f"  [worker 异常] {_e}")
+                            except TimeoutError:
+                                continue
+                        if _pbar is not None:
                             _pbar.close()
 
                     # 从 journal 读取所有结果（主进程 study 需要加载 journal）
@@ -2283,16 +2845,32 @@ class HeavyOptimizer:
                                             state=DASHBOARD_STATE,
                                             pool_name='Phase1') as _pool:
                         _futures = [_pool.submit(a) for a in _chunk_args]
-                        if HAS_TQDM and verbose:
-                            _pbar = tqdm(total=remaining, desc="Phase 1 (自适应)", unit="trial")
+                        # GUI 模式不再打印进度（走独立进度面板）；CLI 保留 tqdm
+                        _use_tqdm = HAS_TQDM and verbose and not ADAPTIVE_ENABLED
+                        _pbar = (tqdm(total=remaining, desc="Phase 1 (自适应)",
+                                      unit="trial") if _use_tqdm else None)
+                        _done_acc = 0
                         for _f in _futures:
+                            # ── 暂停/停止信号检查（轮询式；原实现无检查点，
+                            #    暂停/停止在此阶段完全无效，是"停不下来"根因）──
+                            _res, _stopped = _wait_future(_f)
+                            if _stopped:
+                                try:
+                                    _pool.abort()
+                                except Exception:
+                                    pass
+                                break
                             try:
-                                _done = _f.result() or 0
-                                if HAS_TQDM and verbose:
+                                _done = _res or 0
+                                _done_acc += _done
+                                if _pbar is not None:
                                     _pbar.update(_done)
+                                _update_progress(phase='Phase 1/4', label='Optuna 贝叶斯搜索',
+                                                 current=min(_done_acc, remaining),
+                                                 total=remaining)
                             except Exception as _e:
                                 print(f"  [worker 异常] {_e}")
-                        if HAS_TQDM and verbose:
+                        if _pbar is not None:
                             _pbar.close()
 
                     # 从 journal 读取所有结果
@@ -2318,8 +2896,13 @@ class HeavyOptimizer:
                             n_startup_trials=20, n_warmup_steps=10,
                         ),
                     )
-                    study.optimize(evaluator, n_trials=remaining, n_jobs=1,
-                                   show_progress_bar=HAS_TQDM and verbose)
+                    # ── 单进程分支循环化：逐 trial 检查暂停/停止信号 ──
+                    # 保持同一 study 对象复用，TPE 采样器状态不变
+                    for _i in range(remaining):
+                        if _check_control() == 'stop':
+                            break
+                        study.optimize(evaluator, n_trials=1, n_jobs=1,
+                                       show_progress_bar=HAS_TQDM and verbose)
             else:
                 # remaining == 0：所有 trials 已完成（断点续算场景），从 journal 加载结果
                 if not _use_in_memory and os.path.exists(_journal_path):
@@ -2356,12 +2939,51 @@ class HeavyOptimizer:
                       f"Best Obj={best.objective:.2f}, "
                       f"Return={best.strategy_return*100:.2f}%, "
                       f"耗时 {elapsed/60:.0f}min")
+            _report_progress(f'Phase 1/4 完成: {len(phase1_results)} 有效结果')
+            _update_progress(phase='Phase 1/4', label='已完成', current=1, total=1,
+                             pct=100.0, detail=f'{len(phase1_results)} 有效结果')
 
             # Phase 1 完成，保存断点
             self._completed_phases.add('optuna')
             print(f"  正在保存 checkpoint...")
             self._save_checkpoint()
             print(f"  checkpoint 保存完成，即将进入 Phase 2...")
+
+            # ── 早停监控：更新验证段基线 ──
+            if self._val_df is not None:
+                _v1 = self._update_val_baseline(top_k=10)
+                self._val_baseline_p1 = self._val_baseline  # 记录 Phase 1 基线
+                if verbose and _v1 is not None:
+                    print(f"  [早停] Phase 1 验证段 Top-10 最优目标: {_v1:.2f}")
+                elif verbose:
+                    print(f"  [早停] 验证段评估失败，将不触发早停")
+
+            # ── 阶段间停止检查 ──
+            if _check_control() == 'stop':
+                print("  ⏹ 已收到优雅停止请求，保存进度后退出...")
+                _report_progress('⏹ 已优雅停止（Phase 1 完成后）')
+                self._save_checkpoint()
+                return
+
+        # ── 释放 Phase 1 主进程内存（study/journal 已持久化），
+        #    降低 GA 阶段 spawn 新 worker 时的内存峰值 ──
+        try:
+            del study
+        except (NameError, UnboundLocalError):
+            pass
+        try:
+            del _result_storage
+        except (NameError, UnboundLocalError):
+            pass
+        try:
+            del _tmp_storage
+        except (NameError, UnboundLocalError):
+            pass
+        try:
+            del _tmp_study
+        except (NameError, UnboundLocalError):
+            pass
+        gc.collect()
 
         # ──────── Phase 2: 遗传算法精炼 ────────
         if 'genetic' in self._completed_phases:
@@ -2372,6 +2994,9 @@ class HeavyOptimizer:
             print(f"\n{'─'*70}")
             print(f"  Phase 2/4: 遗传算法精炼 ({ga_generations}代 × {ga_population})")
             print(f"{'─'*70}")
+            _report_progress('Phase 2/4: 遗传算法精炼开始...')
+            _update_progress(phase='Phase 2/4', label='遗传算法精炼',
+                             current=0, total=ga_generations)
             t0 = time.time()
 
             # 用 Phase 1 的 Top-K 初始化种群
@@ -2386,6 +3011,9 @@ class HeavyOptimizer:
                 generations=ga_generations,
                 n_jobs=ga_n_jobs,
                 verbose=verbose,
+                val_eval_fn=self._val_eval_fn if self._val_df is not None else None,
+                val_stagnant_limit=5,
+                val_tolerance=1.0,
             )
             phase2_results = list(ga.results)
             self.phase_results['genetic'] = phase2_results
@@ -2398,10 +3026,33 @@ class HeavyOptimizer:
                       f"Best Obj={best.objective:.2f}, "
                       f"Return={best.strategy_return*100:.2f}%, "
                       f"耗时 {elapsed/60:.0f}min")
+            _report_progress('Phase 2/4 完成')
+            _update_progress(phase='Phase 2/4', label='已完成', current=1, total=1,
+                             pct=100.0, detail='遗传算法精炼完成')
+
+            # ── 早停监控：Phase 2 后刷新验证段基线 ──
+            if self._val_df is not None:
+                _v2 = self._update_val_baseline(top_k=10)
+                if verbose and _v2 is not None:
+                    print(f"  [早停] Phase 2 验证段 Top-10 最优目标: {_v2:.2f}")
+                # ── 跨阶段早停：若验证段较 Phase 1 无实质改善，跳过 Phase 3 ──
+                _p1 = getattr(self, '_val_baseline_p1', None)
+                if (_v2 is not None and _p1 is not None
+                        and _v2 < _p1 + 1.0):
+                    print(f"  ⏹ 验证段较 Phase 1 无改善（{_p1:.2f} → {_v2:.2f}），"
+                          f"跳过 Phase 3 局部网格")
+                    self._completed_phases.add('local_grid')
 
             # Phase 2 完成
             self._completed_phases.add('genetic')
             self._save_checkpoint()
+
+            # ── 阶段间停止检查 ──
+            if _check_control() == 'stop':
+                print("  ⏹ 已收到优雅停止请求，保存进度后退出...")
+                _report_progress('⏹ 已优雅停止（Phase 2 完成后）')
+                self._save_checkpoint()
+                return
 
         # ──────── Phase 3: 局部精细网格 ────────
         if 'local_grid' in self._completed_phases:
@@ -2412,6 +3063,7 @@ class HeavyOptimizer:
             print(f"\n{'─'*70}")
             print(f"  Phase 3/4: 局部精细网格（Top 5 周围）")
             print(f"{'─'*70}")
+            _report_progress('Phase 3/4: 局部精细网格开始...')
             t0 = time.time()
 
             all_sorted = sorted(self.all_results, key=lambda x: x.objective, reverse=True)
@@ -2440,7 +3092,16 @@ class HeavyOptimizer:
 
             grid_opt = CoarseToFineGridOptimizer(self.df, self.start_date)
             tasks = [grid_opt._build_task(p) for p in grid_tasks]
-            p3_results = grid_opt._run_evaluations(tasks, n_jobs=n_jobs, verbose=verbose)
+            _update_progress(phase='Phase 3/4', label='局部精细网格',
+                             current=0, total=len(grid_tasks))
+
+            def _p3_cb(done, total):
+                _update_progress(phase='Phase 3/4', label='局部精细网格',
+                                 current=done, total=total)
+
+            p3_results = grid_opt._run_evaluations(tasks, n_jobs=n_jobs,
+                                                   verbose=verbose,
+                                                   progress_cb=_p3_cb)
             self.phase_results['local_grid'] = p3_results
             self.all_results.extend(p3_results)
 
@@ -2450,10 +3111,26 @@ class HeavyOptimizer:
                 print(f"  Phase 3 完成: {len(p3_results)} 有效, "
                       f"Best Obj={best.objective:.2f}, Return={best.strategy_return*100:.2f}%, "
                       f"耗时 {elapsed:.0f}s")
+            _report_progress('Phase 3/4 完成')
+            _update_progress(phase='Phase 3/4', label='已完成', current=1, total=1,
+                             pct=100.0, detail='局部精细网格完成')
 
             # Phase 3 完成
             self._completed_phases.add('local_grid')
             self._save_checkpoint()
+
+            # ── 早停监控：Phase 3 后刷新验证段基线 ──
+            if self._val_df is not None:
+                _v3 = self._update_val_baseline(top_k=10)
+                if verbose and _v3 is not None:
+                    print(f"  [早停] Phase 3 验证段 Top-10 最优目标: {_v3:.2f}")
+
+            # ── 阶段间停止检查 ──
+            if _check_control() == 'stop':
+                print("  ⏹ 已收到优雅停止请求，保存进度后退出...")
+                _report_progress('⏹ 已优雅停止（Phase 3 完成后）')
+                self._save_checkpoint()
+                return
 
         # ──────── Phase 4: Walk-Forward 验证（并行）────────
         if 'walkforward' in self._completed_phases:
@@ -2464,14 +3141,22 @@ class HeavyOptimizer:
             print(f"\n{'─'*70}")
             print(f"  Phase 4/4: Walk-Forward 交叉验证（Top {wf_top_k} 候选，{n_jobs} 并行）")
             print(f"{'─'*70}")
+            _report_progress('Phase 4/4: Walk-Forward 验证开始...')
             t0 = time.time()
 
             final_sorted = sorted(self.all_results, key=lambda x: x.objective, reverse=True)
             candidates = final_sorted[:wf_top_k]
+            _update_progress(phase='Phase 4/4', label='Walk-Forward 交叉验证',
+                             current=0, total=len(candidates))
+
+            def _p4_cb(done, total):
+                _update_progress(phase='Phase 4/4', label='Walk-Forward 交叉验证',
+                                 current=done, total=total)
 
             # 并行 Walk-Forward
             wf_tasks = [(self.df, c.params, returns_aggressive_objective) for c in candidates]
-            wf_results_raw = _run_wf_parallel(wf_tasks, n_jobs=n_jobs, verbose=verbose)
+            wf_results_raw = _run_wf_parallel(wf_tasks, n_jobs=n_jobs, verbose=verbose,
+                                              progress_cb=_p4_cb)
 
             for wf in wf_results_raw:
                 if wf is not None:
@@ -2481,9 +3166,13 @@ class HeavyOptimizer:
                 self.wf_results.sort(key=lambda x: x.combined_score, reverse=True)
 
             elapsed = time.time() - t0
+            n_passed = sum(1 for w in self.wf_results if w.val_objective > 0)
             if verbose:
-                print(f"  Phase 4 完成: {len(self.wf_results)}/{len(candidates)} 通过, "
-                      f"耗时 {elapsed:.0f}s")
+                print(f"  Phase 4 完成: {len(self.wf_results)}/{len(candidates)} 有效"
+                      f"（{n_passed} 通过样本外验证）, 耗时 {elapsed:.0f}s")
+            _report_progress('Phase 4/4 完成')
+            _update_progress(phase='Phase 4/4', label='已完成', current=1, total=1,
+                             pct=100.0, detail='Walk-Forward 验证完成')
 
             # Phase 4 完成（全部结束，清理断点）
             self._completed_phases.add('walkforward')
@@ -2510,6 +3199,8 @@ class HeavyOptimizer:
         print(f"  HEAVY COMPUTE 管道完成")
         print(f"  总耗时: {total_elapsed/60:.0f}min | 总评估: {len(self.all_results)} 次")
         print(f"{'='*70}")
+        _update_progress(phase='', label='全部完成', current=1, total=1,
+                         pct=100.0, detail='HEAVY COMPUTE 管道完成')
 
         if self.wf_results:
             self._print_final_report()
@@ -2545,10 +3236,29 @@ class HeavyOptimizer:
                     'n_results': len(results),
                 }
 
-        # Top-20 全参数
-        top20 = sorted(self.all_results, key=lambda x: x.objective, reverse=True)[:20]
+        # Top-20 全参数 —— 以 Walk-Forward 验证结果作为最终筛选依据
+        # 排序优先级：
+        #   1) WF 验证通过（val_objective > 0）→ 按 combined_score 降序
+        #   2) 有 WF 但验证未通过            → 按 val_objective 降序（供诊断）
+        #   3) 无 WF 验证                    → 按训练 objective 降序
+        wf_index = {}
+        for _wf in self.wf_results:
+            _k = tuple(sorted(_wf.params.items()))
+            if _k not in wf_index:  # 保留首个（combined_score 已降序）
+                wf_index[_k] = _wf
+
+        def _top20_key(r):
+            _wf = wf_index.get(tuple(sorted(r.params.items())))
+            if _wf is None:
+                return (2, 0.0, -r.objective)
+            if _wf.val_objective > 0:
+                return (0, -_wf.combined_score, -r.objective)
+            return (1, -_wf.val_objective, -r.objective)
+
+        top20 = sorted(self.all_results, key=_top20_key)[:20]
         top20_export = []
         for r in top20:
+            _wf = wf_index.get(tuple(sorted(r.params.items())))
             entry = {
                 'objective': round(r.objective, 2),
                 'return_pct': round(r.strategy_return * 100, 2),
@@ -2561,15 +3271,23 @@ class HeavyOptimizer:
                 'total_trades': r.total_trades,
                 'params': r.params,
             }
+            if _wf is not None:
+                entry['wf_combined_score'] = round(_wf.combined_score, 2)
+                entry['wf_val_objective'] = round(_wf.val_objective, 2)
+                entry['wf_robustness'] = round(_wf.robustness, 3)
+                entry['wf_passed'] = bool(_wf.val_objective > 0)
+            else:
+                entry['wf_passed'] = None  # 未验证
             top20_export.append(entry)
 
-        # Walk-Forward 结果
+        # Walk-Forward 结果（附带通过标记）
         wf_export = []
         for wf in self.wf_results:
             wf_export.append({
                 'combined_score': round(wf.combined_score, 2),
                 'val_objective': round(wf.val_objective, 2),
                 'robustness': round(wf.robustness, 3),
+                'passed': bool(wf.val_objective > 0),
                 'val_returns_pct': [round(r.strategy_return * 100, 2)
                                     for r in wf.val_results],
                 'params': wf.params,
@@ -2599,9 +3317,18 @@ class HeavyOptimizer:
     def _print_final_report(self):
         best_wf = self.wf_results[0]
 
+        # WF 通过统计
+        n_passed = sum(1 for w in self.wf_results if w.val_objective > 0)
+        n_total = len(self.wf_results)
+
         print(f"\n{'='*70}")
         print(f"  最终推荐参数（Walk-Forward 验证最优）")
         print(f"{'='*70}")
+        if n_total > 0 and n_passed == 0:
+            print(f"  ⚠️ 警告: {n_total} 个候选全部未通过样本外验证"
+                  f"（val_objective ≤ 0），参数疑似过拟合，不建议直接采用")
+        else:
+            print(f"  ✅ {n_passed}/{n_total} 个候选通过样本外验证")
         print(f"  验证集目标分: {best_wf.val_objective:.2f}")
         print(f"  稳健性评分:   {best_wf.robustness:.3f}")
         print(f"  综合得分:     {best_wf.combined_score:.2f}")
@@ -2833,13 +3560,12 @@ def _phase1_worker(args):
     # ── 评估器 ──
     evaluator = _HeavyOptunaEvaluator(start_date, space)
 
-    # ── 运行 trials ──
-    study.optimize(
-        evaluator,
-        n_trials=n_trials_for_worker,
-        n_jobs=1,          # 单线程，避免 worker 内部再开线程
-        show_progress_bar=False,
-    )
+    # ── 运行 trials（逐 trial 循环，支持暂停/停止信号检查）──
+    # 保持同一 study 对象复用，TPE 采样器状态不变
+    for _i in range(n_trials_for_worker):
+        if _check_control() == 'stop':
+            break
+        study.optimize(evaluator, n_trials=1, n_jobs=1, show_progress_bar=False)
 
     return len([t for t in study.trials
                 if t.state == optuna.trial.TrialState.COMPLETE])
@@ -2927,15 +3653,30 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
                             42 + _seed_idx, 'light_optuna_search'))
             _seed_idx += 1
             _rem -= _n
+        _update_progress(phase='轻量运算', label='Optuna 快速搜索',
+                         current=0, total=n_trials)
+        _done_acc = 0
 
         if ADAPTIVE_ENABLED and HAS_ADAPTIVE:
             # ── 自适应进程调度（受面板 CPU 限制控制）──
             with AdaptiveWorkerPool(_phase1_worker, governor=GOVERNOR,
                                     state=DASHBOARD_STATE,
                                     pool_name='Light') as _pool:
-                for _f in [_pool.submit(c) for c in _chunks]:
+                _futures = [_pool.submit(c) for c in _chunks]
+                for _f in _futures:
+                    # ── 暂停/停止信号检查（轮询式）──
+                    _res, _stopped = _wait_future(_f)
+                    if _stopped:
+                        try:
+                            _pool.abort()
+                        except Exception:
+                            pass
+                        break
                     try:
-                        _f.result()
+                        _done_acc += _res or 0
+                        _update_progress(phase='轻量运算', label='Optuna 快速搜索',
+                                         current=min(_done_acc, n_trials),
+                                         total=n_trials)
                     except Exception as _e:
                         print(f"  [worker 异常] {_e}")
         elif n_jobs > 1:
@@ -2943,11 +3684,33 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
             ctx = multiprocessing.get_context('spawn')
             with ProcessPoolExecutor(max_workers=min(n_jobs, len(_chunks)),
                                      mp_context=ctx) as _pool:
-                list(_pool.map(_phase1_worker, _chunks))
+                _futures = [_pool.submit(_phase1_worker, c) for c in _chunks]
+                _futures_set = set(_futures)
+                while _futures_set:
+                    # ── 暂停/停止信号检查（as_completed 带超时轮询）──
+                    if _check_control() == 'stop':
+                        break
+                    try:
+                        for _f in as_completed(list(_futures_set), timeout=0.5):
+                            _futures_set.discard(_f)
+                            try:
+                                _done_acc += _f.result() or 0
+                            except Exception as _e:
+                                print(f"  [worker 异常] {_e}")
+                            _update_progress(phase='轻量运算', label='Optuna 快速搜索',
+                                             current=min(_done_acc, n_trials),
+                                             total=n_trials)
+                    except TimeoutError:
+                        continue
         else:
             # 单进程直跑
             for c in _chunks:
-                _phase1_worker(c)
+                # ── 停止信号检查 ──
+                if _check_control() == 'stop':
+                    break
+                _done_acc += _phase1_worker(c) or 0
+                _update_progress(phase='轻量运算', label='Optuna 快速搜索',
+                                 current=min(_done_acc, n_trials), total=n_trials)
 
         # 从 journal 收集结果
         storage = JournalStorage(JournalFileBackend(_journal_path))
@@ -2980,6 +3743,9 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
                   f"Return={best.strategy_return*100:.2f}%, 耗时 {elapsed:.0f}s")
         else:
             print(f"  轻量运算完成: 0 有效结果（请检查数据与配置），耗时 {elapsed:.0f}s")
+        _report_progress('轻量运算完成')
+        _update_progress(phase='轻量运算', label='已完成', current=1, total=1,
+                         pct=100.0, detail=f'{len(results)} 有效结果')
     else:
         print("  [跳过] Optuna 未安装，无法执行轻量运算（pip install optuna）")
 
@@ -3211,20 +3977,15 @@ def main(argv=None):
     if args.apply:
         sys.argv.append('--apply')
 
-    # 交互询问：本次计算完成后是否自动关机（已带 --shutdown 则不询问）
-    if not args.shutdown:
-        try:
-            resp = input("\n本次计算完成后是否自动关机？[y/N]: ").strip().lower()
-            if resp in ('y', 'yes'):
-                args.shutdown = True
-                print("  已启用：计算完成后自动关机（30秒倒计时，可按 Ctrl+C 取消）")
-        except EOFError:
-            pass  # 非交互环境（如脚本/批处理）跳过询问
+    # 自动关机交互已迁移到 GUI（配置面板"完成后自动关机"勾选）；
+    # CLI 模式仅通过 --shutdown 参数显式启用，不再在终端弹 input 询问。
+    if args.shutdown and not args.gui:
+        print("  已启用：计算完成后自动关机（30秒倒计时，可按 Ctrl+C 取消）")
 
     # ── GUI 模式：控制面板主线程 + 优化后台线程（用户点击"开始优化"后启动）──
+    # 自动关机由面板内"完成后自动关机"勾选框控制（不再由 cmd 询问）
     if args.gui:
-        if run_with_gui(cpu_limit=args.cpu_limit,
-                        shutdown_cb=_shutdown_sequence if args.shutdown else None):
+        if run_with_gui(cpu_limit=args.cpu_limit):
             return 0
         print("[警告] 已回退到命令行模式继续运行")
 
