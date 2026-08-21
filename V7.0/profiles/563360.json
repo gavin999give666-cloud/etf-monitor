@@ -1,0 +1,142 @@
+{
+  "code": "563360",
+  "name": "中证 A500 ETF",
+  "market": "sh",
+  "optimized": true,
+  "SCORE_BEHAVIOR_WEIGHT": 0.3,
+  "SCORE_CONFIDENCE_WEIGHT": 0.15,
+  "SCORE_REWARD_WEIGHT": 0.4,
+  "SCORE_RISK_WEIGHT": 0.15,
+  "REGIME_WEIGHTS": {
+    "Bull": {
+      "buy_mult": 1.8,
+      "sell_div": 0.12
+    },
+    "Bear": {
+      "buy_mult": 0.9,
+      "sell_div": 1.05
+    },
+    "Range": {
+      "buy_mult": 0.55,
+      "sell_div": 0.85
+    },
+    "Unknown": {
+      "buy_mult": 0.75,
+      "sell_div": 0.95
+    }
+  },
+  "BUY_SCORE_THRESHOLDS": [
+    [
+      68,
+      0.95
+    ],
+    [
+      62,
+      0.9
+    ],
+    [
+      56,
+      0.85
+    ],
+    [
+      50,
+      0.75
+    ]
+  ],
+  "SELL_SCORE_THRESHOLDS": [
+    [
+      68,
+      0.5
+    ],
+    [
+      62,
+      0.35
+    ],
+    [
+      56,
+      0.2
+    ],
+    [
+      50,
+      0.1
+    ]
+  ],
+  "MAX_POSITION": 0.95,
+  "INITIAL_POSITION": 0.95,
+  "MIN_HOLD_DAYS": 10,
+  "TRADE_TARGET_DELTA": 0.02,
+  "TRADE_ACTUAL_DELTA": 0.02,
+  "SCORE_HOLD_ZONE": 15,
+  "MIN_TRADE_VALUE": 50,
+  "SLIPPAGE": 0.001,
+  "COMMISSION": 0.0003,
+  "OBSERVATION_WINDOW_MAX": 3,
+  "CONFIRMATION_THRESHOLD": 65,
+  "CONFIDENCE_INCREMENT": 5,
+  "EXPIRY_THRESHOLD": 15,
+  "DOUBLE_BOTTOM_REBOUND_MIN": 0.01,
+  "DOUBLE_BOTTOM_SCORE": 45,
+  "FALSE_BREAK_BREAK_DIST": 0.008,
+  "FALSE_BREAK_SCORE": 35,
+  "MOMO_EXH_RETURN_THRESHOLD": 0.025,
+  "MOMO_EXH_ACCEL_DECLINE": 0.6,
+  "MOMO_EXH_SCORE": 50,
+  "PULLBACK_MA_DIST": 0.015,
+  "PULLBACK_SCORE": 30,
+  "PANIC_SELL_DROP_THRESHOLD": -0.04,
+  "PANIC_SELL_SCORE": 45,
+  "TREND_FAIL_MA_SLOPE_NEG": -0.0005,
+  "TREND_FAIL_SCORE": 50,
+  "BREAKOUT_CONFIRM_DAYS": 2,
+  "BREAKOUT_SCORE": 35,
+  "RSI_OVERBOUGHT_THRESHOLD": 68,
+  "RSI_OVERBOUGHT_SCORE": 25,
+  "PSYCH_PANIC_BUY_BOOST": 1.1,
+  "PSYCH_EUPHORIA_SELL_BOOST": 1.2,
+  "PSYCH_EUPHORIA_BUY_CUT": 0.5,
+  "PSYCH_EXHAUSTION_SELL_BOOST": 1.25,
+  "AUX_MA20_TURNING_UP": 12,
+  "AUX_ADX_BULL_SUPPORT": 12,
+  "AUX_VOLUME_SUPPORT": 12,
+  "AUX_RSI_OVERSOLD_REBOUND": 15,
+  "AUX_DIVERGENCE_BULL": 18,
+  "AUX_RSI_BEAR_DIVERGENCE": 22,
+  "AUX_VOLUME_DECLINE": 18,
+  "AUX_MA5_MA10_DEAD_CROSS": 12,
+  "AUX_ZSCORE_EXTREME": 18,
+  "BULL_REENTRY_ENABLED": true,
+  "BULL_REENTRY_WINDOW": 5,
+  "BULL_REENTRY_BUY_BOOST": 1.5,
+  "BULL_REENTRY_SCORE_DROP": 12,
+  "BULL_REENTRY_SCORE_LOW": 55,
+  "EVIDENCE_WEIGHTS": {
+    "rule": 0.3,
+    "replay": 0.25,
+    "ml": 0.35,
+    "emotion": 0.1
+  },
+  "EVIDENCE_ENABLE_REPLAY": true,
+  "EVIDENCE_ENABLE_ML": true,
+  "EVIDENCE_ENABLE_EMOTION_BONUS": true,
+  "REPLAY_WINDOW_DAYS": 90,
+  "REPLAY_MIN_SAMPLES": 3,
+  "REPLAY_MAX_AGE_DAYS": 30,
+  "REPLAY_TAU_DAYS": 90,
+  "REPLAY_LAPLACE_ALPHA": 1.0,
+  "REPLAY_HIGH_SUCCESS": 0.65,
+  "REPLAY_LOW_SUCCESS": 0.35,
+  "REPLAY_CONSECUTIVE_FAIL": 4,
+  "TIME_DECAY_GRACE_PERIOD": 5,
+  "TIME_DECAY_TAU": 90,
+  "TIME_DECAY_MIN_MULTIPLIER": 0.7,
+  "TIME_DECAY_MIN_CONFIDENCE": 15,
+  "ML_MODEL_TYPE": "rf",
+  "ML_N_ESTIMATORS": 100,
+  "ML_MAX_DEPTH": 5,
+  "ML_MIN_TRAINING_SAMPLES": 30,
+  "ML_CV_FOLDS": 5,
+  "ML_RETRAIN_FREQUENCY": 10,
+  "CALIBRATION_METHOD": "platt",
+  "CALIBRATION_MIN_SAMPLES": 30,
+  "CALIBRATION_AUTO_DISABLE": true
+}
