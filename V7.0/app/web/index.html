@@ -19,11 +19,17 @@
         <!-- 标的选择器 -->
         <div class="profile-selector">
           <div class="profile-label">当前标的</div>
-          <select class="profile-select" v-model="currentCode" @change="onProfileChange">
+          <select class="profile-select" v-model="currentCode" @change="onProfileChange" :disabled="profilesLoading || profiles.length === 0">
+            <option v-if="profilesLoading" value="" disabled>加载中...</option>
+            <option v-else-if="profilesError" value="" disabled>加载失败</option>
+            <option v-else-if="profiles.length === 0" value="" disabled>暂无标的</option>
             <option v-for="p in profiles" :key="p.code" :value="p.code">
               {{ p.name }} ({{ p.code }})
             </option>
           </select>
+          <div v-if="profilesError" class="profile-error">
+            {{ profilesError }}
+          </div>
           <div class="profile-status">
             <span class="status-dot" :class="currentProfile.optimized ? 'optimized' : 'unoptimized'"></span>
             <span class="text-muted">
@@ -58,6 +64,32 @@
 
       <!-- 主内容区 -->
       <main class="main-content">
+        <!-- 连接状态覆盖层 -->
+        <div v-if="pywebviewConnecting" class="connection-overlay">
+          <div class="connection-box">
+            <div class="loading-spinner"></div>
+            <div class="connection-title">正在连接后端...</div>
+            <div class="connection-sub">pywebview API 初始化中</div>
+          </div>
+        </div>
+
+        <div v-else-if="!pywebviewConnected" class="connection-overlay">
+          <div class="connection-box">
+            <div class="connection-icon">⚠️</div>
+            <div class="connection-title">后端连接失败</div>
+            <div class="connection-sub">无法连接到 pywebview 后端</div>
+            <div class="connection-help">
+              <p>请确认：</p>
+              <ol>
+                <li>通过 <code>python app\main.py</code> 启动程序</li>
+                <li>不要直接在浏览器中打开 index.html</li>
+                <li>已安装 pywebview：<code>pip install pywebview</code></li>
+              </ol>
+            </div>
+            <button class="btn btn-primary mt-md" @click="location.reload()">重试</button>
+          </div>
+        </div>
+
         <!-- 数据页 -->
         <div v-if="currentPage === 'data'">
           <div class="page-header">

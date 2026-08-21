@@ -158,6 +158,13 @@ html, body {
   font-size: 11px;
 }
 
+.profile-error {
+  margin-top: var(--space-sm);
+  font-size: 11px;
+  color: var(--color-danger);
+  line-height: 1.4;
+}
+
 .status-dot {
   width: 6px;
   height: 6px;
@@ -244,6 +251,76 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--space-xl);
+  position: relative;
+}
+
+/* 连接状态覆盖层 */
+.connection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.connection-box {
+  text-align: center;
+  max-width: 400px;
+  padding: var(--space-2xl);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.connection-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-lg);
+}
+
+.connection-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.connection-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.connection-help {
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  background: var(--bg-tertiary);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+}
+
+.connection-help p {
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.connection-help ol {
+  padding-left: 20px;
+}
+
+.connection-help code {
+  background: var(--bg-primary);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
 }
 
 .page-header {

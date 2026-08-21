@@ -365,7 +365,8 @@ class V6Strategy:
         raw_buy = (
             buy_behavior_norm * SCORE_BEHAVIOR_WEIGHT +
             buy_final_conf * SCORE_CONFIDENCE_WEIGHT +
-            reward_score * (SCORE_REWARD_WEIGHT * 3)   # reward权重
+            reward_score * (SCORE_REWARD_WEIGHT * 3) -   # reward权重
+            risk_score * SCORE_RISK_WEIGHT               # 补上config注释中缺失的 Risk 扣除项
         )
         buy_score = raw_buy * weights['buy_mult']
 
@@ -416,8 +417,8 @@ class V6Strategy:
         elif psych_state == 'Exhaustion':
             sell_score *= PSYCH_EXHAUSTION_SELL_BOOST  # 衰竭中卖出强烈加分
 
-        # V6.2.3: 牛市止盈后重新入场 Boost
-        if bull_reentry_boost > 1.0:
+        # V6.2.3: 牛市止盈后重新入场 Boost（仅在 Bull/牛市窗口内生效，防止跨regime残留放大）
+        if bull_reentry_boost > 1.0 and regime == 'Bull':
             buy_score *= bull_reentry_boost
             sell_score *= (1.0 / bull_reentry_boost)  # 卖出信号相应减弱
 

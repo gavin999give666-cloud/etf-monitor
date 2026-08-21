@@ -277,19 +277,18 @@ class ApiBridge:
 
             def _worker():
                 try:
-                    # 子线程中重新激活（确保线程安全，各线程有独立config状态？
-                    # 注意：config是模块全局，多线程共用。这里用锁保护。
+                    # 只在激活标的时加锁（config是模块全局，需保护）
                     with self._lock:
                         import config as cfg
                         cfg.activate_profile(target_code)
-                        from data_updater import update_stock_data
-                        # 捕获print输出
-                        import io
-                        from contextlib import redirect_stdout, redirect_stderr
-                        buf = io.StringIO()
-                        with redirect_stdout(buf), redirect_stderr(buf):
-                            update_stock_data()
-                        output = buf.getvalue()
+                    # 数据更新不在锁内执行，避免长时间阻塞
+                    from data_updater import update_stock_data
+                    import io
+                    from contextlib import redirect_stdout, redirect_stderr
+                    buf = io.StringIO()
+                    with redirect_stdout(buf), redirect_stderr(buf):
+                        update_stock_data()
+                    output = buf.getvalue()
                     # 数据更新后失效缓存
                     self._data_cache = None
                     self._strategy_cache = None
@@ -320,13 +319,13 @@ class ApiBridge:
                     with self._lock:
                         import config as cfg
                         cfg.activate_profile(target_code)
-                        from data_updater import update_intraday
-                        import io
-                        from contextlib import redirect_stdout, redirect_stderr
-                        buf = io.StringIO()
-                        with redirect_stdout(buf), redirect_stderr(buf):
-                            success = update_intraday()
-                        output = buf.getvalue()
+                    from data_updater import update_intraday
+                    import io
+                    from contextlib import redirect_stdout, redirect_stderr
+                    buf = io.StringIO()
+                    with redirect_stdout(buf), redirect_stderr(buf):
+                        success = update_intraday()
+                    output = buf.getvalue()
                     self._data_cache = None
                     self._strategy_cache = None
                     self._tasks[task_id]['status'] = 'done'
@@ -356,13 +355,13 @@ class ApiBridge:
                     with self._lock:
                         import config as cfg
                         cfg.activate_profile(target_code)
-                        from data_updater import backfill_estimated_data
-                        import io
-                        from contextlib import redirect_stdout, redirect_stderr
-                        buf = io.StringIO()
-                        with redirect_stdout(buf), redirect_stderr(buf):
-                            count = backfill_estimated_data()
-                        output = buf.getvalue()
+                    from data_updater import backfill_estimated_data
+                    import io
+                    from contextlib import redirect_stdout, redirect_stderr
+                    buf = io.StringIO()
+                    with redirect_stdout(buf), redirect_stderr(buf):
+                        count = backfill_estimated_data()
+                    output = buf.getvalue()
                     self._data_cache = None
                     self._strategy_cache = None
                     self._tasks[task_id]['status'] = 'done'
@@ -503,6 +502,9 @@ class ApiBridge:
         计算路径与 CLI --eval 完全一致：strategy.run(df) -> bt.run(signals)，
         绩效指标取同一 results 字典，保证"指标与 CLI 一致"。
 
+        优化：锁仅保护 activate_profile（config是模块全局），计算本身不在锁内，
+        避免长时间阻塞其他快操作（信号查询/数据概览等）。
+
         Returns: {ok, data: {task_id}}
         """
         def _do():
@@ -514,10 +516,12 @@ class ApiBridge:
 
             def _worker():
                 try:
+                    # 只在激活标的时加锁（config是模块全局变量，需保护）
                     with self._lock:
                         import config as cfg
                         cfg.activate_profile(target_code)
-                        payload = _build_backtest_payload()
+                    # 回测计算不在锁内执行，避免阻塞其他 GUI 操作
+                    payload = _build_backtest_payload()
                     self._tasks[task_id]['status'] = 'done'
                     self._tasks[task_id]['result'] = {'backtest': payload}
                 except Exception as e:
@@ -525,7 +529,9 @@ class ApiBridge:
                     self._tasks[task_id]['status'] = 'error'
                     self._tasks[task_id]['error'] = str(e)
 
-            self._thread_pool.submit(_worker)
+            # 回测用独立 daemon 线程执行，不占用公共线程池（max_workers=2），
+            # 避免被 update_data 等长任务占满 worker 时回测排队，导致前端无限转圈
+            threading.Thread(target=_worker, name='gui_backtest', daemon=True).start()
             return {'task_id': task_id}
         return self._safe(_do)
 

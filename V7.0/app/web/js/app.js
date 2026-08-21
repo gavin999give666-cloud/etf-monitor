@@ -5,15 +5,58 @@
 const { createApp, reactive, computed, onMounted, ref, watch, nextTick } = Vue;
 
 // ------------------------------------------------------------
-// pywebview API 封装 —— 带降级（浏览器直接打开时用 mock 数据）
+// pywebview API 封装 —— 带就绪检测（解决时序问题）
 // ------------------------------------------------------------
-const api = {
-  _hasPywebview() {
-    return window.pywebview && window.pywebview.api;
-  },
+const api = (function () {
+  let _readyPromise = null;
+  let _connected = false;
 
-  async _call(method, ...args) {
-    if (!this._hasPywebview()) {
+  function _waitForPywebview() {
+    if (_readyPromise) return _readyPromise;
+    _readyPromise = new Promise((resolve, reject) => {
+      // 情况1：已经就绪
+      if (window.pywebview && window.pywebview.api) {
+        _connected = true;
+        resolve(true);
+        return;
+      }
+      // 情况2：监听 pywebviewready 事件（pywebview 官方事件）
+      const onReady = () => {
+        _connected = true;
+        document.removeEventListener('pywebviewready', onReady);
+        resolve(true);
+      };
+      document.addEventListener('pywebviewready', onReady);
+
+      // 情况3：轮询兜底（防止事件没触发）
+      let attempts = 0;
+      const maxAttempts = 50; // 最多等 50 * 100ms = 5秒
+      const poll = () => {
+        if (window.pywebview && window.pywebview.api) {
+          _connected = true;
+          resolve(true);
+          return;
+        }
+        attempts++;
+        if (attempts >= maxAttempts) {
+          // 超时，判定为非 pywebview 环境（浏览器直接打开）
+          resolve(false);
+          return;
+        }
+        setTimeout(poll, 100);
+      };
+      setTimeout(poll, 50); // 稍等一下再开始轮询
+    });
+    return _readyPromise;
+  }
+
+  function _hasPywebview() {
+    return _connected || (window.pywebview && window.pywebview.api);
+  }
+
+  async function _call(method, ...args) {
+    const ready = await _waitForPywebview();
+    if (!ready) {
       console.warn('[pywebview not available]', method, args);
       return { ok: false, error: 'pywebview 未连接，请通过 app/main.py 启动' };
     }
@@ -24,29 +67,30 @@ const api = {
       console.error(`API 调用失败: ${method}`, e);
       return { ok: false, error: e.message || String(e) };
     }
-  },
+  }
 
-  // 标的管理
-  list_profiles: () => api._call('list_profiles'),
-  get_current_profile: () => api._call('get_current_profile'),
-  switch_profile: (code) => api._call('switch_profile', code),
-  add_profile: (code, name, market) => api._call('add_profile', code, name, market),
-
-  // 数据
-  get_data_overview: (code) => api._call('get_data_overview', code),
-  get_runtime_context: () => api._call('get_runtime_context'),
-  update_data: (code) => api._call('update_data', code),
-  update_intraday: (code) => api._call('update_intraday', code),
-  backfill_data: (code) => api._call('backfill_data', code),
-  get_task_status: (taskId) => api._call('get_task_status', taskId),
-
-  // 信号
-  get_today_signal: (code) => api._call('get_today_signal', code),
-  get_recent_prices: (code, days) => api._call('get_recent_prices', code, days),
-
-  // 回测
-  run_backtest: (code) => api._call('run_backtest', code),
-};
+  return {
+    isConnected: () => _connected,
+    waitReady: _waitForPywebview,
+    // 标的管理
+    list_profiles: () => _call('list_profiles'),
+    get_current_profile: () => _call('get_current_profile'),
+    switch_profile: (code) => _call('switch_profile', code),
+    add_profile: (code, name, market) => _call('add_profile', code, name, market),
+    // 数据
+    get_data_overview: (code) => _call('get_data_overview', code),
+    get_runtime_context: () => _call('get_runtime_context'),
+    update_data: (code) => _call('update_data', code),
+    update_intraday: (code) => _call('update_intraday', code),
+    backfill_data: (code) => _call('backfill_data', code),
+    get_task_status: (taskId) => _call('get_task_status', taskId),
+    // 信号
+    get_today_signal: (code) => _call('get_today_signal', code),
+    get_recent_prices: (code, days) => _call('get_recent_prices', code, days),
+    // 回测
+    run_backtest: (code) => _call('run_backtest', code),
+  };
+})();
 
 // ------------------------------------------------------------
 // Vue 应用
@@ -55,7 +99,11 @@ createApp({
   setup() {
     // 状态
     const currentPage = ref('signal');
+    const pywebviewConnected = ref(false);
+    const pywebviewConnecting = ref(true);
     const profiles = ref([]);
+    const profilesLoading = ref(false);
+    const profilesError = ref('');
     const currentCode = ref('');
     const currentProfile = reactive({
       code: '',
@@ -70,15 +118,16 @@ createApp({
       description: '',
     });
 
-    // 数据页状态
+    // 数据概览
     const dataOverview = reactive({
       db_exists: false,
-      start_date: null,
-      end_date: null,
+      start_date: '-',
+      end_date: '-',
       row_count: 0,
       has_estimated: false,
       estimated_count: 0,
     });
+    const dataOverviewLoaded = ref(false);
     const taskRunning = ref(false);
     const currentTaskId = ref('');
     const currentTaskOutput = ref('');
@@ -202,9 +251,15 @@ createApp({
 
     // 加载标的列表
     async function loadProfiles() {
+      profilesLoading.value = true;
+      profilesError.value = '';
       const res = await api.list_profiles();
+      profilesLoading.value = false;
       if (res.ok) {
         profiles.value = res.data;
+      } else {
+        profilesError.value = res.error || '加载标的列表失败';
+        console.error('加载标的列表失败:', res.error);
       }
     }
 
@@ -259,6 +314,7 @@ createApp({
         dataOverview.row_count = d.row_count;
         dataOverview.has_estimated = d.has_estimated;
         dataOverview.estimated_count = d.estimated_count || 0;
+        dataOverviewLoaded.value = true;
       }
     }
 
@@ -358,21 +414,34 @@ createApp({
       btBuyMarkers.value = d.buy_markers || [];
       btSellMarkers.value = d.sell_markers || [];
       btTrades.value = d.trades || [];
-      nextTick(() => {
-        renderBtEquityChart();
-        renderBtPriceChart();
-      });
+      // 只有当前在回测页时才立即渲染图表
+      // 如果不在回测页，等用户切换过来时由 watch(currentPage) 负责渲染
+      if (currentPage.value === 'backtest') {
+        nextTick(() => {
+          renderBtEquityChart();
+          renderBtPriceChart();
+        });
+      }
     }
 
     // 回测任务轮询
     function pollBacktest(taskId) {
       btRunning.value = true;
       btError.value = '';
+      const maxWaitMs = 120000;   // 最长等待 120s，防止后端任务异常时无限转圈
+      const startedAt = Date.now();
       const poll = async () => {
+        // 超时兜底：超出最长等待仍无结果则终止轮询、提示用户
+        if (Date.now() - startedAt > maxWaitMs) {
+          btRunning.value = false;
+          btError.value = '回测超时，请检查后端状态后重试';
+          console.error('回测轮询超时: taskId=', taskId);
+          return;
+        }
         const res = await api.get_task_status(taskId);
         if (!res.ok) {
-          btError.value = res.error;
           btRunning.value = false;
+          btError.value = res.error;
           return;
         }
         const task = res.data;
@@ -438,8 +507,18 @@ createApp({
     // 净值 + 回撤图
     function renderBtEquityChart() {
       const el = document.getElementById('btChartEquity');
-      if (!el) return;
-      if (!btCharts.equity) btCharts.equity = echarts.init(el, null, { renderer: 'canvas' });
+      if (!el) {
+        console.warn('renderBtEquityChart: 元素 #btChartEquity 不存在');
+        return;
+      }
+      // 如果已有实例但绑定的 DOM 已失效（v-if 销毁重建），则重新初始化
+      if (btCharts.equity && btCharts.equity.getDom() !== el) {
+        btCharts.equity.dispose();
+        btCharts.equity = null;
+      }
+      if (!btCharts.equity) {
+        btCharts.equity = echarts.init(el, null, { renderer: 'canvas' });
+      }
       const chart = btCharts.equity;
       const dates = btEquity.value.map(p => p.date);
       const strategy = btEquity.value.map(p => p.strategy);
@@ -481,13 +560,27 @@ createApp({
         top: 10, left: 'left', textStyle: { color: BT_CHART_TEXT },
       };
       chart.setOption(option, true);
+      // 强制 resize：v-if 刚渲染时容器可能还没有正确尺寸
+      chart.resize();
+      // 下一帧再 resize 一次，兜底确保布局完成
+      requestAnimationFrame(() => chart.resize());
     }
 
     // 价格 + 买卖标记图
     function renderBtPriceChart() {
       const el = document.getElementById('btChartPrice');
-      if (!el) return;
-      if (!btCharts.price) btCharts.price = echarts.init(el, null, { renderer: 'canvas' });
+      if (!el) {
+        console.warn('renderBtPriceChart: 元素 #btChartPrice 不存在');
+        return;
+      }
+      // 如果已有实例但绑定的 DOM 已失效（v-if 销毁重建），则重新初始化
+      if (btCharts.price && btCharts.price.getDom() !== el) {
+        btCharts.price.dispose();
+        btCharts.price = null;
+      }
+      if (!btCharts.price) {
+        btCharts.price = echarts.init(el, null, { renderer: 'canvas' });
+      }
       const chart = btCharts.price;
       const dates = btPrice.value.map(p => p.date);
       const closes = btPrice.value.map(p => p.close);
@@ -519,23 +612,32 @@ createApp({
         top: 10, left: 'left', textStyle: { color: BT_CHART_TEXT },
       };
       chart.setOption(option, true);
+      // 强制 resize：v-if 刚渲染时容器可能还没有正确尺寸
+      chart.resize();
+      // 下一帧再 resize 一次，兜底确保布局完成
+      requestAnimationFrame(() => chart.resize());
     }
 
-    // 切换页面时刷新对应数据
+    // 切换页面时刷新对应数据（已加载过的数据不重复请求）
     watch(currentPage, (page) => {
       if (page === 'data') {
-        refreshDataOverview();
+        if (!dataOverviewLoaded.value) {
+          refreshDataOverview();
+        }
       } else if (page === 'signal') {
-        if (!signal.available || signalLoading.value === false) {
+        // 只有信号不可用且不在加载中时才请求
+        if (!signal.available && !signalLoading.value) {
           refreshSignal();
         }
       } else if (page === 'backtest') {
         if (!btAvailable.value && !btRunning.value) {
+          // 没有结果且不在运行中 → 启动回测
           doBacktest();
         } else if (btAvailable.value) {
+          // 已有结果：完整渲染图表（处理 v-if 导致的 DOM 重建）
           nextTick(() => {
-            if (btCharts.equity) btCharts.equity.resize();
-            if (btCharts.price) btCharts.price.resize();
+            renderBtEquityChart();
+            renderBtPriceChart();
           });
         }
       }
@@ -557,8 +659,9 @@ createApp({
       if (btCharts.price) { btCharts.price.dispose(); delete btCharts.price; }
     }
 
-    // 全部刷新
+    // 全部刷新（切换标的时调用）
     function refreshAll() {
+      dataOverviewLoaded.value = false;
       refreshDataOverview();
       refreshSignal();
       loadRuntimeContext();
@@ -569,6 +672,17 @@ createApp({
     // 初始化
     // ------------------------------------------------------------
     onMounted(async () => {
+      // 先等待 pywebview 连接就绪（解决时序问题）
+      const connected = await api.waitReady();
+      pywebviewConnected.value = connected;
+      pywebviewConnecting.value = false;
+
+      if (!connected) {
+        // 未连接：在控制台输出提示，UI上也会显示
+        console.warn('pywebview 未连接，所有 API 调用将失败');
+        return;
+      }
+
       await loadProfiles();
       await loadCurrentProfile();
       await loadRuntimeContext();
@@ -588,7 +702,11 @@ createApp({
     return {
       // 状态
       currentPage,
+      pywebviewConnected,
+      pywebviewConnecting,
       profiles,
+      profilesLoading,
+      profilesError,
       currentCode,
       currentProfile,
       runtimeCtx,
@@ -596,6 +714,7 @@ createApp({
 
       // 数据页
       dataOverview,
+      dataOverviewLoaded,
       taskRunning,
       currentTaskOutput,
       taskError,
