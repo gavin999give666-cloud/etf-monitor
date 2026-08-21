@@ -321,18 +321,134 @@
           </template>
         </div>
 
-        <!-- 回测页（占位 - P4实现） -->
+        <!-- 回测页 -->
         <div v-if="currentPage === 'backtest'">
           <div class="page-header">
             <div class="page-title">策略回测</div>
-            <div class="page-desc">绩效评估与历史回测</div>
+            <div class="page-desc">绩效指标 · 净值/回撤 · 交易明细（与 CLI --eval 同源）</div>
           </div>
-          <div class="card">
-            <div class="empty-state">
-              <div class="empty-state-icon">📈</div>
-              <div class="empty-state-text">回测功能开发中（P4 阶段）</div>
+
+          <!-- 操作栏 -->
+          <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="text-secondary text-sm">
+              <template v-if="btMeta.generated_at">
+                回测区间 {{ btMeta.backtest_start }} ~ {{ btMeta.backtest_end }}
+                · {{ btMeta.trading_days }} 个交易日
+                · <span class="text-muted">生成于 {{ btMeta.generated_at }}</span>
+              </template>
+              <template v-else>尚未运行回测</template>
+            </div>
+            <div class="data-actions" style="margin: 0;">
+              <button class="btn btn-primary" @click="doBacktest" :disabled="btRunning">
+                {{ btRunning ? '回测中...' : (btMeta.generated_at ? '重新回测' : '运行回测') }}
+              </button>
+              <button class="btn btn-sm" @click="refreshBacktest" :disabled="btRunning">
+                刷新
+              </button>
             </div>
           </div>
+
+          <div v-if="btRunning" class="loading">
+            <div class="loading-spinner"></div>
+            正在运行回测流水线（信号生成 + 策略执行）...
+          </div>
+
+          <div v-else-if="btError" class="error-box">
+            回测失败：{{ btError }}
+          </div>
+
+          <div v-else-if="!btAvailable">
+            <div class="card">
+              <div class="empty-state">
+                <div class="empty-state-icon">📈</div>
+                <div class="empty-state-text">{{ btReason || '暂无回测数据，点击“运行回测”开始' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <template v-else>
+            <!-- 绩效指标卡片 -->
+            <div class="metric-grid bt-metrics">
+              <div v-for="m in btMetrics" :key="m.key" class="metric-card" :class="m.dim ? 'metric-dim' : ''">
+                <div class="metric-label">{{ m.label }}</div>
+                <div class="metric-value" :class="m.color" :style="{ fontSize: m.size + 'px' }">{{ m.value }}</div>
+                <div v-if="m.sub" class="metric-sub">{{ m.sub }}</div>
+              </div>
+            </div>
+
+            <!-- 净值 / 回撤曲线 -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">净值曲线 vs 基准</div>
+                  <div class="card-subtitle">策略净值（实线）· 买入持有基准（虚线）· 下轴为回撤</div>
+                </div>
+              </div>
+              <div id="btChartEquity" class="bt-chart bt-chart-equity"></div>
+            </div>
+
+            <!-- 价格 + 买卖标记 -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">价格走势与成交标记</div>
+                  <div class="card-subtitle">▲ 买入成交 · ▼ 卖出成交（按回测执行记录绘制）</div>
+                </div>
+              </div>
+              <div id="btChartPrice" class="bt-chart bt-chart-price"></div>
+            </div>
+
+            <!-- 交易明细 -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">交易明细</div>
+                  <div class="card-subtitle">共 {{ btTrades.length }} 笔 · 盈利 {{ btPerformance.winning_trades }} · 亏损 {{ btPerformance.losing_trades }}</div>
+                </div>
+              </div>
+              <table class="bt-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>买入日期</th>
+                    <th>卖出日期</th>
+                    <th>买入价</th>
+                    <th>卖出价</th>
+                    <th>收益率</th>
+                    <th>结果</th>
+                    <th>买入行为</th>
+                    <th>市场</th>
+                    <th>情绪</th>
+                    <th>买入分</th>
+                    <th>卖出分</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="t in btTrades" :key="t.trade_id">
+                    <td class="text-muted">{{ t.trade_id }}</td>
+                    <td class="text-mono">{{ t.entry_date.slice(0,10) }}</td>
+                    <td class="text-mono">{{ t.exit_date.slice(0,10) }}</td>
+                    <td class="text-mono">{{ t.entry_price }}</td>
+                    <td class="text-mono">{{ t.exit_price }}</td>
+                    <td class="text-mono" :class="t.pnl_pct >= 0 ? 'buy' : 'sell'">
+                      {{ t.pnl_pct >= 0 ? '+' : '' }}{{ t.pnl_pct }}%
+                    </td>
+                    <td>
+                      <span class="badge" :class="t.pnl_label === 'WIN' ? 'success' : 'danger'">{{ t.pnl_label }}</span>
+                    </td>
+                    <td class="text-secondary text-sm">{{ (t.entry_behavior && t.entry_behavior.length) ? t.entry_behavior.join(', ') : '—' }}</td>
+                    <td class="text-sm">{{ t.entry_regime }}</td>
+                    <td class="text-sm">{{ t.entry_psychology }}</td>
+                    <td class="text-mono">{{ t.entry_score }}</td>
+                    <td class="text-mono">{{ t.exit_score }}</td>
+                  </tr>
+                  <tr v-if="!btTrades.length">
+                    <td colspan="12" class="text-muted" style="text-align:center; padding: 16px;">无交易记录</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
         </div>
 
         <!-- 优化页（占位 - P5实现） -->

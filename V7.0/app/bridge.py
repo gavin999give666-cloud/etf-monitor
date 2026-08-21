@@ -493,3 +493,209 @@ class ApiBridge:
                 })
             return result
         return self._safe(_do)
+
+    # ============================================================
+    # 4. 回测
+    # ============================================================
+
+    def run_backtest(self, code=None):
+        """异步运行回测，返回 task_id（结果载荷在前端轮询时通过 get_task_status 获取）。
+        计算路径与 CLI --eval 完全一致：strategy.run(df) -> bt.run(signals)，
+        绩效指标取同一 results 字典，保证"指标与 CLI 一致"。
+
+        Returns: {ok, data: {task_id}}
+        """
+        def _do():
+            import config
+            self._ensure_profile(code)
+            target_code = config.CURRENT_PROFILE_CODE
+            task_id = self._new_task_id()
+            self._tasks[task_id] = {'status': 'running', 'progress': 0, 'result': None, 'error': None}
+
+            def _worker():
+                try:
+                    with self._lock:
+                        import config as cfg
+                        cfg.activate_profile(target_code)
+                        payload = _build_backtest_payload()
+                    self._tasks[task_id]['status'] = 'done'
+                    self._tasks[task_id]['result'] = {'backtest': payload}
+                except Exception as e:
+                    traceback.print_exc()
+                    self._tasks[task_id]['status'] = 'error'
+                    self._tasks[task_id]['error'] = str(e)
+
+            self._thread_pool.submit(_worker)
+            return {'task_id': task_id}
+        return self._safe(_do)
+
+
+def _sanitize(value):
+    """递归把 numpy 标量转换为原生 Python 类型（保证 JSON 可序列化）"""
+    import numpy as np
+    if isinstance(value, (np.integer,)):
+        return int(value)
+    if isinstance(value, (np.floating,)):
+        return round(float(value), 4)
+    if isinstance(value, np.bool_):
+        return bool(value)
+    if isinstance(value, dict):
+        return {k: _sanitize(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_sanitize(v) for v in value]
+    return value
+
+
+def _build_backtest_payload():
+    """运行与 CLI --eval 完全一致的回测，返回可直接交给前端的 JSON 载荷。
+
+    计算路径：strategy.run(df) -> bt.run(signals)，绩效指标读取同一 results 字典，
+    进位规则与 evaluation.print_performance / backtest.export_all 保持一致。
+    同时写入 runs\{code}\backtest_records.json（与 CLI 行为一致）。
+    """
+    import config
+    from data_updater import load_data_from_db
+    from strategy import V6Strategy
+    from backtest import V6Backtest
+
+    df = load_data_from_db()
+    if df is None or len(df) == 0:
+        return {'available': False, 'reason': '无法加载数据，请先更新数据'}
+
+    strategy = V6Strategy(use_ml=True, emotion_method='weighted')
+    signals = strategy.run(df)
+    bt = V6Backtest(df, strategy=strategy)
+    results = bt.run(signals)
+
+    if not results:
+        return {'available': False, 'reason': '回测失败，未生成结果'}
+
+    # 写回测档案（与 CLI --eval 每次覆盖行为一致）
+    try:
+        bt.export_all(results=results)
+    except Exception:
+        pass
+
+    # ---- 绩效指标（进位规则与 evaluation::print_performance / export_all 相同）----
+    r = results
+    performance = {
+        'strategy_return_pct': round(r.get('strategy_return', 0) * 100, 2),
+        'benchmark_return_pct': round(r.get('benchmark_return', 0) * 100, 2),
+        'excess_return_pct': round(r.get('excess_return', 0) * 100, 2),
+        'max_drawdown_pct': round(r.get('max_drawdown', 0) * 100, 2),
+        'annualized_return_pct': round(r.get('annualized_return', 0) * 100, 2),
+        'volatility_pct': round(r.get('volatility', 0) * 100, 2),
+        'sharpe_ratio': round(r.get('sharpe_ratio', 0), 3),
+        'sortino_ratio': round(r.get('sortino_ratio', 0), 3),
+        'calmar_ratio': round(r.get('calmar_ratio', 0), 3),
+        'profit_factor': round(r.get('profit_factor', 0), 2),
+        'win_rate_pct': round(r.get('win_rate', 0) * 100, 1),
+        'kelly': round(r.get('kelly', 0), 3),
+        'expectancy_pct': round(r.get('expectancy', 0), 2),
+        'total_trades': int(r.get('total_trades', 0)),
+        'winning_trades': int(r.get('winning_trades', 0)),
+        'losing_trades': int(r.get('losing_trades', 0)),
+        'avg_hold_days': round(r.get('avg_hold_days', 0), 1),
+        'final_equity': round(r.get('final_equity', 0), 2),
+        'start_equity': round(r.get('start_equity', 0), 2),
+        'max_consecutive_wins': int(r.get('max_consecutive_wins', 0)),
+        'max_consecutive_losses': int(r.get('max_consecutive_losses', 0)),
+    }
+
+    # ---- 净值 / 基准 / 回撤曲线 ----
+    import numpy as np
+    eq_map = {e['date']: e['equity'] for e in bt.daily_equity}
+    start_price = bt.df['close'].iloc[0]
+    start_eq = r.get('start_equity', eq_map.get(bt.df.index[0], 0))
+    equity = []
+    eq_series = []
+    for date, row in bt.df.iterrows():
+        eq = eq_map.get(date)
+        if eq is None:
+            continue
+        bench = start_eq * (float(row['close']) / float(start_price))
+        equity.append({
+            'date': date.strftime('%Y-%m-%d') if hasattr(date, 'strftime') else str(date),
+            'strategy': round(float(eq), 2),
+            'benchmark': round(float(bench), 2),
+        })
+        eq_series.append(float(eq))
+
+    # 回撤序列（基于策略净值）
+    if eq_series:
+        cummax = np.maximum.accumulate(eq_series)
+        dd = [(float(e) - float(c)) / float(c) * 100 for e, c in zip(eq_series, cummax)]
+        for p, d in zip(equity, dd):
+            p['drawdown'] = round(d, 2)
+
+    # ---- K线 + 买卖成交标记 ----
+    price_series = []
+    for date, row in bt.df.iterrows():
+        price_series.append({
+            'date': date.strftime('%Y-%m-%d') if hasattr(date, 'strftime') else str(date),
+            'open': round(float(row['open']), 4),
+            'high': round(float(row['high']), 4),
+            'low': round(float(row['low']), 4),
+            'close': round(float(row['close']), 4),
+        })
+    buy_markers, sell_markers = [], []
+    for ds in bt.daily_signals:
+        if not ds.get('executed'):
+            continue
+        action = ds.get('action', '')
+        date = ds.get('date')
+        if date is None:
+            continue
+        try:
+            close = float(bt.df.loc[date, 'close'])
+        except Exception:
+            continue
+        ds_date = date.strftime('%Y-%m-%d') if hasattr(date, 'strftime') else str(date)
+        if action == 'BUY':
+            buy_markers.append({'date': ds_date, 'price': round(close, 4)})
+        elif action == 'SELL':
+            sell_markers.append({'date': ds_date, 'price': round(close, 4)})
+
+    # ---- 交易明细 ----
+    trades = []
+    for t in bt.trades:
+        trades.append({
+            'trade_id': int(t.get('trade_id', 0)),
+            'entry_date': str(t.get('entry_date', '')),
+            'exit_date': str(t.get('exit_date', '')),
+            'entry_price': round(float(t.get('entry_price', 0)), 4),
+            'exit_price': round(float(t.get('exit_price', 0)), 4),
+            'pnl_pct': round(float(t.get('pnl_pct', 0)), 2),
+            'pnl_label': t.get('pnl_label', ''),
+            'entry_behavior': t.get('entry_behavior', []),
+            'exit_behavior': t.get('exit_behavior', []),
+            'entry_regime': t.get('entry_regime', 'Unknown'),
+            'entry_psychology': t.get('entry_psychology', 'Unknown'),
+            'exit_psychology': t.get('exit_psychology', 'Unknown'),
+            'entry_score': round(float(t.get('entry_score', 0)), 1),
+            'exit_score': round(float(t.get('exit_score', 0)), 1),
+            'entry_emotion_improving': bool(t.get('entry_emotion_improving', False)),
+            'entry_factors': _sanitize(t.get('entry_factors', {})),
+            'exit_factors': _sanitize(t.get('exit_factors', {})),
+        })
+
+    return {
+        'available': True,
+        'meta': {
+            'etf_name': config.ETF_NAME,
+            'code': config.CURRENT_PROFILE_CODE or config.STOCK_CODE,
+            'data_start': df.index[0].strftime('%Y-%m-%d'),
+            'data_end': df.index[-1].strftime('%Y-%m-%d'),
+            'data_rows': int(len(df)),
+            'backtest_start': str(bt.df.index[0])[:10],
+            'backtest_end': str(bt.df.index[-1])[:10],
+            'trading_days': int(r.get('trading_days', len(bt.daily_equity))),
+            'generated_at': __import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        },
+        'performance': performance,
+        'equity': equity,
+        'price': price_series,
+        'buy_markers': buy_markers,
+        'sell_markers': sell_markers,
+        'trades': trades,
+    }

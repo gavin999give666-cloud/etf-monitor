@@ -43,6 +43,9 @@ const api = {
   // 信号
   get_today_signal: (code) => api._call('get_today_signal', code),
   get_recent_prices: (code, days) => api._call('get_recent_prices', code, days),
+
+  // 回测
+  run_backtest: (code) => api._call('run_backtest', code),
 };
 
 // ------------------------------------------------------------
@@ -105,6 +108,54 @@ createApp({
       evidence_sell: [],
       last_date: '',
       data_rows: 0,
+    });
+
+    // 回测页状态
+    const btRunning = ref(false);
+    const btAvailable = ref(false);
+    const btReason = ref('');
+    const btError = ref('');
+    const btMeta = reactive({});
+    const btPerformance = reactive({});
+    const btEquity = ref([]);
+    const btPrice = ref([]);
+    const btBuyMarkers = ref([]);
+    const btSellMarkers = ref([]);
+    const btTrades = ref([]);
+    let btCharts = {}; // 已初始化的 ECharts 实例缓存
+
+    // 绩效指标卡片配置
+    const btMetricDefs = [
+      { key: 'strategy_return_pct', label: '策略收益率', fmt: v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%', size: 22, color: v => v >= 0 ? 'buy' : 'sell', sub: p => `超额 ${fmtSigned(p.excess_return_pct)}%` },
+      { key: 'benchmark_return_pct', label: '基准收益率', fmt: v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%', size: 18, color: 'info', sub: '买入持有' },
+      { key: 'annualized_return_pct', label: '年化收益率', fmt: v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%', size: 18, color: v => v >= 0 ? 'buy' : 'sell' },
+      { key: 'max_drawdown_pct', label: '最大回撤', fmt: v => v.toFixed(2) + '%', size: 18, color: 'sell' },
+      { key: 'sharpe_ratio', label: '夏普比率', fmt: v => v.toFixed(2), size: 18, color: v => v >= 1 ? 'buy' : (v > 0 ? 'info' : 'sell') },
+      { key: 'sortino_ratio', label: 'Sortino', fmt: v => v.toFixed(2), size: 18, color: v => v >= 1 ? 'buy' : 'info' },
+      { key: 'calmar_ratio', label: 'Calmar', fmt: v => v.toFixed(2), size: 18, color: v => v >= 1 ? 'buy' : 'info' },
+      { key: 'volatility_pct', label: '年化波动率', fmt: v => v.toFixed(2) + '%', size: 18, color: 'info' },
+      { key: 'win_rate_pct', label: '胜率', fmt: v => v.toFixed(1) + '%', size: 18, color: v => v >= 50 ? 'buy' : 'sell', sub: p => `${p.winning_trades}胜 / ${p.losing_trades}负` },
+      { key: 'profit_factor', label: '盈亏比', fmt: v => v === Infinity ? '∞' : v.toFixed(2), size: 18, color: v => v >= 1 ? 'buy' : 'sell' },
+      { key: 'kelly', label: 'Kelly值', fmt: v => v.toFixed(2), size: 18, color: v => v > 0 ? 'buy' : 'sell' },
+      { key: 'expectancy_pct', label: '期望收益/笔', fmt: v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%', size: 18, color: 'buy' },
+      { key: 'total_trades', label: '总交易次数', fmt: v => v, size: 18, color: 'info', sub: p => `连续胜 ${p.max_consecutive_wins} · 连续亏 ${p.max_consecutive_losses}` },
+      { key: 'avg_hold_days', label: '平均持仓', fmt: v => v.toFixed(1) + ' 天', size: 18, color: 'info' },
+      { key: 'final_equity', label: '最终资产', fmt: v => v.toLocaleString(), size: 18, color: 'info', sub: p => `初始 ${Number(p.start_equity || 0).toLocaleString()}` },
+    ];
+    function fmtSigned(v) { return (v >= 0 ? '+' : '') + Number(v).toFixed(2); }
+    const btMetrics = computed(() => {
+      return btMetricDefs.map(d => {
+        const raw = btPerformance[d.key];
+        return {
+          key: d.key,
+          label: d.label,
+          value: d.fmt(raw),
+          color: typeof d.color === 'function' ? d.color(raw) : d.color,
+          size: d.size,
+          sub: d.sub ? d.sub(btPerformance) : '',
+          dim: raw === undefined || raw === null,
+        };
+      });
     });
 
     // 导航
@@ -295,6 +346,181 @@ createApp({
       }
     }
 
+    // 回测页：应用结果载荷
+    function applyBacktestPayload(d) {
+      btAvailable.value = !!d.available;
+      btReason.value = d.reason || '';
+      if (!d.available) return;
+      Object.keys(d.meta || {}).forEach(k => { btMeta[k] = d.meta[k]; });
+      Object.keys(d.performance || {}).forEach(k => { btPerformance[k] = d.performance[k]; });
+      btEquity.value = d.equity || [];
+      btPrice.value = d.price || [];
+      btBuyMarkers.value = d.buy_markers || [];
+      btSellMarkers.value = d.sell_markers || [];
+      btTrades.value = d.trades || [];
+      nextTick(() => {
+        renderBtEquityChart();
+        renderBtPriceChart();
+      });
+    }
+
+    // 回测任务轮询
+    function pollBacktest(taskId) {
+      btRunning.value = true;
+      btError.value = '';
+      const poll = async () => {
+        const res = await api.get_task_status(taskId);
+        if (!res.ok) {
+          btError.value = res.error;
+          btRunning.value = false;
+          return;
+        }
+        const task = res.data;
+        if (task.status === 'done') {
+          btRunning.value = false;
+          const btRes = (task.result && task.result.backtest) || {};
+          applyBacktestPayload(btRes);
+          return;
+        }
+        if (task.status === 'error') {
+          btRunning.value = false;
+          btError.value = task.error;
+          return;
+        }
+        setTimeout(poll, 1200);
+      };
+      setTimeout(poll, 500);
+    }
+
+    // 运行回测
+    async function doBacktest() {
+      if (btRunning.value) return;
+      const res = await api.run_backtest();
+      if (res.ok) {
+        pollBacktest(res.data.task_id);
+      } else {
+        btError.value = res.error;
+      }
+    }
+
+    // 回测页：刷新（有结果时重绘图表）
+    function refreshBacktest() {
+      if (btRunning.value) return;
+      btError.value = '';
+      if (btAvailable.value) {
+        nextTick(() => {
+          renderBtEquityChart();
+          renderBtPriceChart();
+        });
+      } else {
+        doBacktest();
+      }
+    }
+
+    // ECharts 通用主题
+    const BT_CHART_TEXT = '#94a3b8';
+    const BT_CHART_AXIS = '#334155';
+    function btChartBase(grid, yAxis) {
+      return {
+        backgroundColor: 'transparent',
+        textStyle: { color: BT_CHART_TEXT, fontFamily: 'Consolas, monospace' },
+        grid,
+        xAxis: { type: 'category', data: [], boundaryGap: true, axisLine: { lineStyle: { color: BT_CHART_AXIS } }, axisLabel: { color: BT_CHART_TEXT }, axisTick: { show: false } },
+        yAxis,
+        tooltip: { trigger: 'axis', backgroundColor: '#0f172a', borderColor: BT_CHART_AXIS, textStyle: { color: '#e2e8f0', fontSize: 12 } },
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0], start: 0, end: 100 },
+          { type: 'slider', xAxisIndex: [0], height: 16, bottom: 6, borderColor: BT_CHART_AXIS, backgroundColor: '#1e293b', fillerColor: 'rgba(59,130,246,0.15)' },
+        ],
+      };
+    }
+
+    // 净值 + 回撤图
+    function renderBtEquityChart() {
+      const el = document.getElementById('btChartEquity');
+      if (!el) return;
+      if (!btCharts.equity) btCharts.equity = echarts.init(el, null, { renderer: 'canvas' });
+      const chart = btCharts.equity;
+      const dates = btEquity.value.map(p => p.date);
+      const strategy = btEquity.value.map(p => p.strategy);
+      const benchmark = btEquity.value.map(p => p.benchmark);
+      const drawdown = btEquity.value.map(p => p.drawdown);
+      const option = btChartBase(
+        { top: 40, left: 70, right: 30, bottom: 70, height: '52%' },
+        [
+          { type: 'value', name: '净值', position: 'left', nameTextStyle: { color: BT_CHART_TEXT }, axisLabel: { color: BT_CHART_TEXT }, splitLine: { lineStyle: { color: '#1e293b' } } },
+          null,
+        ],
+      );
+      Object.assign(option, { grid: [option.grid, { top: '58%', left: 70, right: 30, bottom: 70, height: '30%' }] });
+      option.yAxis = [
+        { type: 'value', name: '净值', axisLabel: { color: BT_CHART_TEXT }, splitLine: { lineStyle: { color: '#1e293b' } }, nameTextStyle: { color: BT_CHART_TEXT } },
+        { type: 'value', name: '回撤%', gridIndex: 1, axisLabel: { color: BT_CHART_TEXT }, splitLine: { show: false }, nameTextStyle: { color: BT_CHART_TEXT } },
+      ];
+      option.xAxis = [option.xAxis, { type: 'category', gridIndex: 1, data: [], axisLabel: { show: false }, axisLine: { show: false }, axisTick: { show: false } }];
+      option.xAxis[0].data = dates;
+      option.xAxis[1].data = dates;
+      option.dataZoom.forEach(dz => { dz.xAxisIndex = [0, 1]; });
+      option.series = [
+        {
+          name: '策略净值', type: 'line', data: strategy, showSymbol: false,
+          lineStyle: { color: '#10b981', width: 1.6 }, itemStyle: { color: '#10b981' }, smooth: true,
+        },
+        {
+          name: '基准(买入持有)', type: 'line', data: benchmark, showSymbol: false,
+          lineStyle: { color: '#3b82f6', width: 1.4, type: 'dashed' }, itemStyle: { color: '#3b82f6' }, smooth: true,
+        },
+        {
+          name: '回撤', type: 'line', data: drawdown, xAxisIndex: 1, yAxisIndex: 1, showSymbol: false,
+          lineStyle: { color: '#ef4444', width: 1.2 }, itemStyle: { color: '#ef4444' },
+          areaStyle: { color: 'rgba(239,68,68,0.15)' }, smooth: true,
+        },
+      ];
+      option.legend = {
+        data: ['策略净值', '基准(买入持有)', '回撤'],
+        top: 10, left: 'left', textStyle: { color: BT_CHART_TEXT },
+      };
+      chart.setOption(option, true);
+    }
+
+    // 价格 + 买卖标记图
+    function renderBtPriceChart() {
+      const el = document.getElementById('btChartPrice');
+      if (!el) return;
+      if (!btCharts.price) btCharts.price = echarts.init(el, null, { renderer: 'canvas' });
+      const chart = btCharts.price;
+      const dates = btPrice.value.map(p => p.date);
+      const closes = btPrice.value.map(p => p.close);
+      const buyPts = btBuyMarkers.value.map(m => [m.date, m.price]);
+      const sellPts = btSellMarkers.value.map(m => [m.date, m.price]);
+      const option = btChartBase(
+        { top: 40, left: 70, right: 30, bottom: 60 },
+        [{ type: 'value', axisLabel: { color: BT_CHART_TEXT }, splitLine: { lineStyle: { color: '#1e293b' } } }],
+      );
+      option.xAxis = [{ type: 'category', data: dates, axisLine: { lineStyle: { color: BT_CHART_AXIS } }, axisLabel: { color: BT_CHART_TEXT }, axisTick: { show: false } }];
+      option.yAxis = [{ type: 'value', axisLabel: { color: BT_CHART_TEXT }, splitLine: { lineStyle: { color: '#1e293b' } } }];
+      option.dataZoom.forEach(dz => { dz.xAxisIndex = [0]; });
+      option.series = [
+        {
+          name: '收盘价', type: 'line', data: closes, showSymbol: false,
+          lineStyle: { color: '#38bdf8', width: 1.4 }, itemStyle: { color: '#38bdf8' }, smooth: false,
+        },
+        {
+          name: '买入成交', type: 'scatter', data: buyPts, symbol: 'triangle', symbolSize: 14,
+          itemStyle: { color: 'transparent', borderColor: '#10b981', borderWidth: 1.6 },
+        },
+        {
+          name: '卖出成交', type: 'scatter', data: sellPts, symbol: 'triangle', symbolRotate: 180, symbolSize: 14,
+          itemStyle: { color: 'transparent', borderColor: '#ef4444', borderWidth: 1.6 },
+        },
+      ];
+      option.legend = {
+        data: ['收盘价', '买入成交', '卖出成交'],
+        top: 10, left: 'left', textStyle: { color: BT_CHART_TEXT },
+      };
+      chart.setOption(option, true);
+    }
+
     // 切换页面时刷新对应数据
     watch(currentPage, (page) => {
       if (page === 'data') {
@@ -303,14 +529,40 @@ createApp({
         if (!signal.available || signalLoading.value === false) {
           refreshSignal();
         }
+      } else if (page === 'backtest') {
+        if (!btAvailable.value && !btRunning.value) {
+          doBacktest();
+        } else if (btAvailable.value) {
+          nextTick(() => {
+            if (btCharts.equity) btCharts.equity.resize();
+            if (btCharts.price) btCharts.price.resize();
+          });
+        }
       }
     });
+
+    // 清空回测状态（切换标的时调用，避免展示旧标的回测）
+    function clearBacktest() {
+      btAvailable.value = false;
+      btReason.value = '';
+      btError.value = '';
+      Object.keys(btMeta).forEach(k => delete btMeta[k]);
+      Object.keys(btPerformance).forEach(k => delete btPerformance[k]);
+      btTrades.value = [];
+      btEquity.value = [];
+      btPrice.value = [];
+      btBuyMarkers.value = [];
+      btSellMarkers.value = [];
+      if (btCharts.equity) { btCharts.equity.dispose(); delete btCharts.equity; }
+      if (btCharts.price) { btCharts.price.dispose(); delete btCharts.price; }
+    }
 
     // 全部刷新
     function refreshAll() {
       refreshDataOverview();
       refreshSignal();
       loadRuntimeContext();
+      clearBacktest();
     }
 
     // ------------------------------------------------------------
@@ -359,6 +611,18 @@ createApp({
       sellEvidenceNormalized,
       getEvidenceValue,
       refreshSignal,
+
+      // 回测页
+      btRunning,
+      btAvailable,
+      btReason,
+      btError,
+      btMeta,
+      btPerformance,
+      btMetrics,
+      btTrades,
+      doBacktest,
+      refreshBacktest,
 
       // 方法
       onProfileChange,
