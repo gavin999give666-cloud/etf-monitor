@@ -623,17 +623,17 @@ class V6Backtest:
         - 评分历史
 
         Args:
-            filepath: 输出文件路径，默认 {当前目录}/backtest_records.json
+            filepath: 输出文件路径，默认 runs\{code}\backtest_records.json
             results: 回测结果dict（可选，若不提供则自动计算）
 
         Returns:
-            filepath: 实际输出的文件路径
+            filepath: 输出文件路径，默认 runs\{code}\backtest_records.json
         """
         import json, os
         from datetime import datetime
 
         if filepath is None:
-            filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backtest_records.json')
+            filepath = _cfg.runs_path('backtest_records.json')
 
         if results is None:
             results = self._compute_results()
@@ -751,7 +751,7 @@ class V6Backtest:
         from datetime import datetime
 
         if filepath is None:
-            filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trades_v6.json')
+            filepath = _cfg.runs_path('trades_v6.json')
 
         # 如果是JSON格式，用完整导出
         if format == 'json':

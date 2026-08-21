@@ -63,9 +63,14 @@ from indicators import calculate_indicators
 from strategy import V6Strategy
 from backtest import V6Backtest
 
-# ═══ 数据缓存文件（子进程通过 pickle 高速反序列化）═══
-_DATA_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 '.data_cache.pkl')
+def _runs_path(name):
+    """标的产品隔离路径（委托 config.runs_path，RUNS_DIR 由 activate_profile 同步）"""
+    return config.runs_path(name)
+
+
+# ═══ 数据缓存文件（子进程通过 pickle 高速反序列化，按标的隔离）═══
+def _data_cache_path():
+    return _runs_path('.data_cache.pkl')
 
 
 def _prepare_data_cache(df, regenerate=False):
@@ -73,7 +78,7 @@ def _prepare_data_cache(df, regenerate=False):
     将预处理后的 DataFrame 写入 pickle 缓存文件。
     子进程通过 `_load_data_cache()` 直接反序列化，比 JSON 快 10 倍以上。
     """
-    if os.path.exists(_DATA_CACHE_PATH) and not regenerate:
+    if os.path.exists(_data_cache_path()) and not regenerate:
         return
     df_with = calculate_indicators(df.copy())
     cache = {
@@ -82,7 +87,7 @@ def _prepare_data_cache(df, regenerate=False):
         'values_dict': {col: df_with[col].tolist() for col in df_with.columns},
         'start_date': str(df_with.index[0].date()),
     }
-    with open(_DATA_CACHE_PATH, 'wb') as f:
+    with open(_data_cache_path(), 'wb') as f:
         pickle.dump(cache, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
@@ -95,7 +100,7 @@ def _load_data_cache():
     global _DATA_CACHE_MEMORY
     if _DATA_CACHE_MEMORY is not None:
         return _DATA_CACHE_MEMORY
-    with open(_DATA_CACHE_PATH, 'rb') as f:
+    with open(_data_cache_path(), 'rb') as f:
         cache = pickle.load(f)
     df = pd.DataFrame(cache['values_dict'], columns=cache['columns'])
     df.index = pd.to_datetime(cache['index_str'])
@@ -740,10 +745,7 @@ class BaseOptimizer(ABC):
         self._df_json = None
         self._original_config = {}
         self._original_regime = None
-        self._checkpoint_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            '.optimizer_checkpoint.json'
-        )
+        self._checkpoint_path = _runs_path('.optimizer_checkpoint.json')
 
     def _save_config(self):
         for attr in dir(config):
@@ -1178,8 +1180,7 @@ class BayesianOptimizer(BaseOptimizer):
         # ─── 存储后端选择 ───
         # InMemoryStorage: 零 I/O，但不支持多进程和断点续算
         # JournalStorage: 支持多进程 + 断点续算，有文件 I/O 开销
-        _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                      '.optuna_journal.log')
+        _journal_path = _runs_path('.optuna_journal.log')
         _use_in_memory = (n_jobs == 1) and (not self.resume or not os.path.exists(_journal_path))
 
         if _use_in_memory:
@@ -1285,8 +1286,7 @@ class BayesianOptimizer(BaseOptimizer):
 
         # Optuna journal 文件清理（数据已全部读取后删除，仅 JournalStorage 时需要）
         if not _use_in_memory and (len(self.results) >= n_trials or not self.resume):
-            _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                          '.optuna_journal.log')
+            _journal_path = _runs_path('.optuna_journal.log')
             try:
                 if os.path.exists(_journal_path):
                     os.remove(_journal_path)
@@ -1745,8 +1745,7 @@ def _export_standard_results(optimizers, method):
         'top20': top20_export,
     }
 
-    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            'standard_results.json')
+    out_path = _runs_path('standard_results.json')
     with open(out_path, 'w', encoding='utf-8') as f:
         _json.dump(output, f, ensure_ascii=False, indent=2, default=str)
 
@@ -2441,10 +2440,7 @@ class HeavyOptimizer:
         self.phase_results: Dict[str, List[TrialResult]] = {}
         self._original_config = {}
         self._original_regime = None
-        self._checkpoint_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            '.heavy_checkpoint.json'
-        )
+        self._checkpoint_path = _runs_path('.heavy_checkpoint.json')
         self._completed_phases = set()
         self._checkpoint = {}  # 断点元数据
         # ── 保留验证段（三阶段搜索早停监控，独立于 Phase 4 Walk-Forward）──
@@ -2714,8 +2710,7 @@ class HeavyOptimizer:
             # ─── 存储后端选择 ───
             # InMemoryStorage: 零 I/O，仅 n_jobs=1 时使用
             # JournalStorage: 支持多进程 + 断点续算（多进程模式强制使用）
-            _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                          '.heavy_optuna_journal.log')
+            _journal_path = _runs_path('.heavy_optuna_journal.log')
             _use_in_memory = (n_jobs == 1) and (not resume or not os.path.exists(_journal_path))
             if ADAPTIVE_ENABLED and HAS_ADAPTIVE:
                 # 自适应进程调度需要多进程共享结果 → 强制 JournalStorage
@@ -3187,8 +3182,7 @@ class HeavyOptimizer:
             _results_pkl_path = self._checkpoint_path.replace('.json', '_results.pkl')
             for _f in [self._checkpoint_path,
                        _results_pkl_path,
-                       os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    '.heavy_optuna_journal.log')]:
+                       _runs_path('.heavy_optuna_journal.log')]:
                 try:
                     if os.path.exists(_f):
                         os.remove(_f)
@@ -3219,8 +3213,7 @@ class HeavyOptimizer:
                 os.makedirs(_dir, exist_ok=True)
             _final_path = out_path
         else:
-            _final_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                       'heavy_results.json')
+            _final_path = _runs_path('heavy_results.json')
 
         # Phase 汇总
         phase_summary = {}
@@ -3631,8 +3624,7 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
     _prepare_data_cache(df)
 
     # 轻量模式每次全新运行：清理旧 journal，保证结果可复现
-    _journal_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 '.light_optuna_journal.log')
+    _journal_path = _runs_path('.light_optuna_journal.log')
     for _f in (_journal_path, _journal_path + '.lock'):
         try:
             if os.path.exists(_f):
@@ -3751,8 +3743,7 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
 
     # 导出结果
     if results:
-        _out_path = output_path or os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'light_results.json')
+        _out_path = output_path or _runs_path('light_results.json')
         _export_light_results(results, _out_path)
 
     return results
@@ -3811,15 +3802,54 @@ def _export_light_results(results, out_path):
     print(f"\n  结果已保存到: {out_path}")
 
 
+def _view_checkpoint_state():
+    """无最终 heavy_results.json 时，读取断点 json + results.pkl 展示旧优化残存结果"""
+    import json as _json
+    ckpt_path = _runs_path('.heavy_checkpoint.json')
+    if not os.path.exists(ckpt_path):
+        print(f"未找到结果文件: {_runs_path('heavy_results.json')}")
+        print("请先运行 --method heavy 完成优化")
+        return
+    with open(ckpt_path, 'r', encoding='utf-8') as f:
+        ckpt = _json.load(f)
+    print("=" * 70)
+    print(f"  该标的暂无最终优化结果（heavy_results.json）")
+    print(f"  检测到未完成的优化断点（旧版迁移）:")
+    print("=" * 70)
+    print(f"  版本: {ckpt.get('version')} | 更新: {ckpt.get('updated_at')}")
+    phases = ', '.join(ckpt.get('completed_phases', [])) or '无'
+    print(f"  已完成阶段: {phases}")
+    pc = ckpt.get('phase_results_count', {})
+    if pc:
+        print(f"  阶段样本量: {', '.join(f'{k}={v}' for k, v in pc.items() if v)}")
+    print(f"  计划规模: trials={ckpt.get('n_trials')} GA={ckpt.get('ga_generations')}代×{ckpt.get('ga_population')}")
+    print(f"  已累计评估: {ckpt.get('total_results')} 次（未达阈值，优化中断，可用 --heavy 断点续算）")
+    # 从 results.pkl 恢复各阶段最优
+    pkl_path = ckpt_path.replace('.json', '_results.pkl')
+    if os.path.exists(pkl_path):
+        try:
+            with open(pkl_path, 'rb') as f:
+                phase_results = pickle.load(f)
+            print(f"\n  {'Phase':<18} {'目标分':>8} {'收益%':>9} {'年化%':>9} {'夏普':>7} {'回撤%':>8} {'交易':>5}")
+            print(f"  {'-'*68}")
+            for pname, res in phase_results.items():
+                if res:
+                    best = max(res, key=lambda x: x.objective)
+                    print(f"  {pname:<18} {best.objective:>8.2f} {best.strategy_return*100:>8.2f}% "
+                          f"{best.annualized_return*100:>8.2f}% {best.sharpe_ratio:>7.3f} "
+                          f"{best.max_drawdown*100:>7.2f}% {best.total_trades:>5}")
+        except Exception as e:
+            print(f"\n  [警告] results.pkl 读取失败: {e}")
+    print(f"\n  提示: 继续优化请运行 --heavy（复用此断点）; 查看最终结果请先完成优化。")
+
+
 def view_saved_results():
-    """查看已保存的 heavy_results.json"""
+    """查看已保存的 heavy_results.json（无最终 JSON 时回退展示断点状态）"""
     import json as _json
 
-    json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             'heavy_results.json')
+    json_path = _runs_path('heavy_results.json')
     if not os.path.exists(json_path):
-        print(f"未找到结果文件: {json_path}")
-        print("请先运行 --method heavy 完成优化")
+        _view_checkpoint_state()
         return
 
     with open(json_path, 'r', encoding='utf-8') as f:

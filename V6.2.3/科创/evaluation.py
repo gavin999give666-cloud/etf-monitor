@@ -337,8 +337,8 @@ def plot_results(df, signals, bt, results):
             sell_labels.append(sell_behaviors[0] if sell_behaviors else 'SELL')
 
     # 空心建议标记：策略"想要"执行的买卖（与回测持仓无关，不受持仓锁定影响）
-    # 判定标准：绝对分数 >= config.REC_MARKER_THRESHOLD 且净评分突破 ±SCORE_HOLD_ZONE
-    # （与策略目标仓位映射一致；同日买卖双高但净分在HOLD区内的矛盾日不画，每天最多一个标记）
+    # 判定标准：绝对分数 >= config.REC_MARKER_THRESHOLD 且净评分突破 ±config.REC_MARKER_NET_ZONE
+    # （仅影响回测图标记，不影响实盘交易判定；同日买卖双高但净分在阈值区内的矛盾日不画，每天最多一个标记）
     rec_buy_dates, rec_buy_prices = [], []
     rec_sell_dates, rec_sell_prices = [], []
     for ds in bt.daily_signals:
@@ -347,10 +347,10 @@ def plot_results(df, signals, bt, results):
             continue
         price = df_plot.loc[date, 'close']
         net = ds.get('buy_score', 0) - ds.get('sell_score', 0)
-        if ds.get('buy_score', 0) >= config.REC_MARKER_THRESHOLD and net > config.SCORE_HOLD_ZONE:
+        if ds.get('buy_score', 0) >= config.REC_MARKER_THRESHOLD and net > config.REC_MARKER_NET_ZONE:
             rec_buy_dates.append(date)
             rec_buy_prices.append(price * 0.991)  # 略低于收盘价，避免与实心成交标记重叠
-        elif ds.get('sell_score', 0) >= config.REC_MARKER_THRESHOLD and net < -config.SCORE_HOLD_ZONE:
+        elif ds.get('sell_score', 0) >= config.REC_MARKER_THRESHOLD and net < -config.REC_MARKER_NET_ZONE:
             rec_sell_dates.append(date)
             rec_sell_prices.append(price * 1.009)  # 略高于收盘价
 

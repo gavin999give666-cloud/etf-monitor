@@ -137,6 +137,11 @@ def fetch_from_baostock(stock_code='563360', start_date=None, end_date=None):
 
             start = (start_date or "2020-01-01").replace('_', '-').replace('/', '-')
             end = (end_date or datetime.now().strftime("%Y-%m-%d")).replace('_', '-').replace('/', '-')
+            # baostock 要求 YYYY-MM-DD，兼容外部传入的 YYYYMMDD 格式
+            if '-' not in start and len(start) == 8:
+                start = f"{start[:4]}-{start[4:6]}-{start[6:]}"
+            if '-' not in end and len(end) == 8:
+                end = f"{end[:4]}-{end[4:6]}-{end[6:]}"
 
             rs = bs.query_history_k_data_plus(
                 bs_code, "date,open,high,low,close,volume",

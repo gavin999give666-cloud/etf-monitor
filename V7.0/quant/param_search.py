@@ -41,8 +41,7 @@ except ImportError:
     HAS_TQDM = False
 
 # 断点文件路径
-CHECKPOINT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                '.grid_search_checkpoint.json')
+CHECKPOINT_FILE = config.runs_path('.grid_search_checkpoint.json')
 
 
 # ============================================================

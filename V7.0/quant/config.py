@@ -527,3 +527,13 @@ def config_module_self():
     """返回本模块自身，供 activate_profile 的 setattr 使用"""
     import sys
     return sys.modules[__name__]
+
+
+def runs_path(name):
+    """标的产品隔离路径：runs\{code}\{name}（RUNS_DIR 随激活标的更新）"""
+    d = globals().get('RUNS_DIR') or CONFIG_DIR
+    try:
+        os.makedirs(d, exist_ok=True)
+    except OSError:
+        pass
+    return os.path.join(d, name)

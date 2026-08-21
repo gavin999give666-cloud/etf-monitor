@@ -1,0 +1,14 @@
+{
+  "version": "V6.2.3",
+  "updated_at": "2026-08-07 20:26:26",
+  "completed_phases": [
+    "optuna"
+  ],
+  "phase_results_count": {
+    "optuna": 3247
+  },
+  "total_results": 3247,
+  "n_trials": 10000,
+  "ga_generations": 100,
+  "ga_population": 60
+}
