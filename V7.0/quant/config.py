@@ -313,6 +313,59 @@ SLIPPAGE = 0.001
 COMMISSION = 0.0003
 
 # ============================================================
+# V7.0 P6 新增：L1 战略层参数（scoring_engine center+offset）
+# ============================================================
+# 仓位中枢表（Regime → center；P6.5 接线后由 L1 战略层使用）
+CENTER_BULL = 0.75
+CENTER_RANGE = 0.45
+CENTER_BEAR = 0.15
+CENTER_UNKNOWN = 0.45
+# 波动率目标：center *= min(1.0, TARGET_VOL / realized_vol_20d)
+TARGET_VOL = 0.20
+# 相位开关对中枢/偏移的作用
+OVERHEAT_CENTER_MULT = 0.5      # Overheat 相位：center *= 0.5
+BOTTOMFISHING_BOOST = 0.15      # BottomFishing 相位：offset += 0.15（左侧建仓通道）
+OVERHEAT_OFFSET_PENALTY = -0.30 # Overheat 相位：offset += -0.30（越中枢减仓）
+# L2 offset 映射表（buy_score → offset；sell_score → offset）
+BUY_OFFSET_THRESHOLDS = [
+    (68, 0.20),
+    (62, 0.15),
+    (56, 0.10),
+    (50, 0.05),
+]
+SELL_OFFSET_THRESHOLDS = [
+    (68, -0.25),
+    (62, -0.18),
+    (56, -0.12),
+    (50, -0.06),
+]
+# 仓位下限（架构决策，固定 0.0，不进搜索空间）
+POSITION_FLOOR = 0.0
+
+# 相位检测阈值（P6.4；不进搜索空间，用固定默认值）
+OVERHEAT_DIST_HIGH = 0.03        # Overheat：距 60 日高点 <3%
+OVERHEAT_VOL_RATIO = 1.3         # Overheat：放量滞涨量比 >1.3
+VWAP_DEV_EXTREME = 0.02          # Overheat：VWAP_dev > 2%（2σ 近似），持续 3 日
+BOTTOMFISHING_VOL_PERCENTILE = 80  # BottomFishing：波动率分位数 > 80
+
+# ============================================================
+# V7.0 P6 新增：L3 风控层参数（risk_guard.py）
+# ============================================================
+STRATEGY_MODE = 'V7'              # 'V6'=完整旧决策路径（回退/影子对照） | 'V7'=三层架构（P6.5 已接线）
+# 硬止损
+STOP_LOSS_PCT = -0.08             # 浮亏 ≤ -8% → 仓位减半
+STOP_LOSS_HARD = -0.12            # 浮亏 ≤ -12% → 清仓
+STOP_LOSS_COOLDOWN_DAYS = 180     # 止损触发后冷静期（日内不重复触发）
+# 阶梯止盈
+TAKE_PROFIT_T1 = 0.15             # 浮盈 ≥ +15% → 减 1/3
+TAKE_PROFIT_T2 = 0.25             # 浮盈 ≥ +25% → 再减 1/3
+TRAIL_EXIT_DRAWDOWN = 0.04        # 距 60 日高点回撤 ≥ 4% → 清仓锁利
+# 回撤熔断
+DRAWDOWN_CIRCUIT = 0.12           # 策略净值自峰值回撤 ≥ 12% → 仓位上限强制 20%
+CIRCUIT_BREAKER_CAP = 0.20        # 熔断期仓位上限
+CIRCUIT_RELEASE_DAYS = 5          # 收盘站上 MA20 且连续 N 日 → 解除熔断
+
+# ============================================================
 # 回测参数
 # ============================================================
 BACKTEST_START = None  # None = 使用数据库最早日期

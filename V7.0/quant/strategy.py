@@ -203,6 +203,36 @@ class V6Strategy:
                 current_date, behavior_result, regime, psych_state, df, i
             )
 
+            # ---- V7.0 P6.5: L1 战略层（相位 + 波动率目标 → center）----
+            # 相位不进 Replay 三维键，只作中枢乘数/offset 通道（见设计方案 §2.2）
+            center = None
+            offset_boost = 0.0
+            offset_penalty = 0.0
+            phase = {'overheat': False, 'bottom_fishing': False}
+            # 动态读取 STRATEGY_MODE（from config import * 在导入时绑定，切换模式不生效）
+            import config as _cfg
+            if _cfg.STRATEGY_MODE == 'V7':
+                from regime_detector import detect_phases, volatility_target_multiplier
+                from scoring_engine import get_center
+                panic_events_confirmed = any(
+                    e.behavior_name in ('PanicSell', 'DoubleBottom')
+                    for e in self.event_engine.get_confirmed_buy_events()
+                )
+                overheat, bottom_fishing, phase_detail = detect_phases(
+                    df, i, psych_state, panic_events_confirmed
+                )
+                phase = {
+                    'overheat': overheat,
+                    'bottom_fishing': bottom_fishing,
+                    'detail': phase_detail,
+                }
+                center = get_center(regime) * volatility_target_multiplier(df, i)
+                if overheat:
+                    center *= OVERHEAT_CENTER_MULT
+                    offset_penalty = OVERHEAT_OFFSET_PENALTY
+                if bottom_fishing:
+                    offset_boost = BOTTOMFISHING_BOOST
+
             # ---- Layer 5: Reward / Risk Evaluation ----
             reward_score, risk_score, reward_detail, risk_detail = evaluate_reward_risk(
                 df, i, regime, psych_state
@@ -276,6 +306,11 @@ class V6Strategy:
                 # V6.2.3: 牛市直入状态
                 'bull_reentry': in_reentry_window,
                 'reentry_days_left': reentry_days_left,
+                # V7.0 P6.5: L1 战略层输出（V6 模式为 None/0）
+                'center': center,
+                'offset_boost': offset_boost,
+                'offset_penalty': offset_penalty,
+                'phase': phase,
             }
             self.signals.append(signal)
 
@@ -301,8 +336,11 @@ class V6Strategy:
         # 核心逻辑：在 Euphoria/Exhaustion 时严格禁止高位买入；
         #           在 Bull+Hope 时则放松（牛市持续创新高是正常的）
         # ============================================================
+        # V7.0 P6.5: near_ath_suppression 并入 Overheat 相位（L1 center*0.5 + offset_penalty），
+        # V7 模式下不再抑制买入评分，避免双重惩罚
         near_ath_suppression = 1.0
-        if df_slice is not None and idx is not None and idx >= 60:
+        import config as _cfg
+        if _cfg.STRATEGY_MODE != 'V7' and df_slice is not None and idx is not None and idx >= 60:
             try:
                 close_val = get_value(df_slice, idx, 'close')
                 if close_val:

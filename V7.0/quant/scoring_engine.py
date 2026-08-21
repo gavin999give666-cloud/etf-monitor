@@ -141,47 +141,97 @@ def calculate_final_score(event_engine, reward_score, risk_score, psychology_sta
     return round(buy_score, 1), round(sell_score, 1), score_breakdown
 
 
-def score_to_target_position(buy_score, sell_score, current_position):
-    """
-    V6.2.3 优化版：平衡买卖信号的目标仓位映射
+def get_center(regime):
+    """L1 战略层：Regime 主态 → 仓位中枢 center"""
+    import config as _cfg
+    return {
+        'Bull': _cfg.CENTER_BULL,
+        'Range': _cfg.CENTER_RANGE,
+        'Bear': _cfg.CENTER_BEAR,
+    }.get(regime, _cfg.CENTER_UNKNOWN)
 
-    核心改进：
-    1. 买入门槛大幅提高（55分起步，原35分）
-    2. 卖出门槛大幅降低（30分起步，原55分）
-    3. HOLD区间缩窄（net_score阈值从±15改为+12/-8）
-    4. 卖出按比例减仓（current_position × (1 - reduction)），而非固定点数
-    5. 信号平衡时高仓位缓慢减仓（向中性靠拢）
+
+def get_offset(buy_score, sell_score):
+    """
+    L2 战术层：评分 → 偏移量 offset（有界，不再造成单边失衡）
+
+    净评分在 SCORE_HOLD_ZONE 内 → offset=0（持有区，维持中枢仓位）；
+    买入占优 → 正偏移；卖出占优 → 负偏移。
     """
     import config as _cfg
 
-    # 确定买入目标
+    buy_offset = 0.0
+    for threshold, off in _cfg.BUY_OFFSET_THRESHOLDS:
+        if buy_score >= threshold:
+            buy_offset = off
+            break
+
+    sell_offset = 0.0
+    for threshold, off in _cfg.SELL_OFFSET_THRESHOLDS:
+        if sell_score >= threshold:
+            sell_offset = off
+            break
+
+    net_score = buy_score - sell_score
+    if net_score > _cfg.SCORE_HOLD_ZONE:
+        return buy_offset
+    elif net_score < -_cfg.SCORE_HOLD_ZONE:
+        return sell_offset
+    return 0.0
+
+
+def score_to_target_position(buy_score, sell_score, current_position,
+                             regime='Unknown', center=None,
+                             offset_boost=0.0, offset_penalty=0.0):
+    """
+    V7.0 P6 三层架构：target = clamp(center + offset, POSITION_FLOOR, MAX_POSITION)
+
+    - L1 战略层：center 由 Regime 主态决定（可外部传入，P6.5 由 strategy 合成）
+    - L2 战术层：offset 由 buy/sell 评分决定（get_offset）
+    - 相位通道：offset_boost（BottomFishing 左侧建仓）/ offset_penalty（Overheat 越中枢减仓）
+
+    STRATEGY_MODE='V6' 时走完整旧决策路径（_v6_target_position），行为与 V6.2.3 完全一致。
+    """
+    import config as _cfg
+
+    if _cfg.STRATEGY_MODE == 'V6':
+        return _v6_target_position(buy_score, sell_score, current_position)
+
+    if center is None:
+        center = get_center(regime)
+    offset = get_offset(buy_score, sell_score) + offset_boost + offset_penalty
+    target = center + offset
+    return max(_cfg.POSITION_FLOOR, min(_cfg.MAX_POSITION, target))
+
+
+def _v6_target_position(buy_score, sell_score, current_position):
+    """
+    V6.2.3 旧版映射（STRATEGY_MODE='V6' 时使用，行为与旧版完全一致）。
+    保留：最低仓位 70%、按比例减仓、HOLD 区间作用于绝对仓位。
+    """
+    import config as _cfg
+
     buy_target = 0
     for threshold, position in _cfg.BUY_SCORE_THRESHOLDS:
         if buy_score >= threshold:
             buy_target = position
             break
 
-    # 确定卖出减仓比例
     sell_reduction = 0
     for threshold, reduction in _cfg.SELL_SCORE_THRESHOLDS:
         if sell_score >= threshold:
             sell_reduction = reduction
             break
 
-    # 净评分
     net_score = buy_score - sell_score
 
     if net_score > _cfg.SCORE_HOLD_ZONE:
-        # 买入信号占优
         target = buy_target
     elif net_score < -_cfg.SCORE_HOLD_ZONE:
-        # 卖出信号占优：最低仓位70%，仅允许小幅减仓
         target = max(0.70, current_position * (1 - sell_reduction))
     else:
-        # 信号在HOLD区间内：维持当前仓位
         target = current_position
 
-    # 安全边界：最低仓位70%
     target = max(0.70, min(_cfg.MAX_POSITION, target))
     return target
 

@@ -18,6 +18,7 @@ from position_manager import PositionManager
 from scoring_engine import score_to_target_position
 from replay_engine import ReplayEngine
 from feature_builder import FeatureBuilder
+from risk_guard import RiskGuard
 
 
 class V6Backtest:
@@ -43,6 +44,9 @@ class V6Backtest:
         self.df = df[df.index >= start_dt].copy()
 
         self.pm = PositionManager(initial_cash, initial_position)
+
+        # V7.0 P6.5: L3 风控层实例（跨日状态：止损/止盈/熔断）
+        self.risk_guard = RiskGuard()
 
         self.daily_equity = []
         self.daily_returns = []
@@ -71,6 +75,14 @@ class V6Backtest:
             signals: list of dict，来自 V5Strategy.run()
         """
         signal_map = {s['date']: s for s in signals}
+
+        # V7.0 P6.5: 初始仓位由首日 Regime 的 center 决定（消除"回测起点即满仓"偏差）
+        if _cfg.STRATEGY_MODE == 'V7' and signals:
+            first_center = signals[0].get('center')
+            if first_center is not None:
+                init_pos = max(0.0, min(_cfg.MAX_POSITION, first_center))
+                self.pm.position_pct = init_pos
+                self.pm.cash = self.initial_cash * (1 - init_pos)
 
         start_price = self.df.iloc[0]['close']
         self.pm.set_initial_shares(start_price)
@@ -146,13 +158,32 @@ class V6Backtest:
             total_value = self.pm.get_total_value(current_price)
             actual_pos = self.pm.shares * current_price / total_value if total_value > 0 else 0
             actual_pos = max(0.0, min(1.0, actual_pos))
-            target_pos = score_to_target_position(buy_score, sell_score, actual_pos)
+
+            # V7.0 P6.5: L1/L2 合成（center+offset）+ L3 风控覆写（cap）
+            risk_actions = []
+            if _cfg.STRATEGY_MODE == 'V7':
+                target_pos = score_to_target_position(
+                    buy_score, sell_score, actual_pos,
+                    regime=day_signal.get('regime', 'Unknown'),
+                    center=day_signal.get('center'),
+                    offset_boost=day_signal.get('offset_boost', 0.0),
+                    offset_penalty=day_signal.get('offset_penalty', 0.0),
+                )
+                cap, risk_actions = self.risk_guard.evaluate(
+                    current_price, actual_pos, total_value,
+                    ma20=row.get('MA20'), high_60d=row.get('high_60d'), date=date,
+                )
+                if cap is not None:
+                    target_pos = min(target_pos, cap)
+            else:
+                target_pos = score_to_target_position(buy_score, sell_score, actual_pos)
 
             prev_target = self.pm.position_pct
             if abs(target_pos - prev_target) > _cfg.TRADE_TARGET_DELTA or ((buy_behaviors or sell_behaviors) and abs(target_pos - actual_pos) > _cfg.TRADE_ACTUAL_DELTA):
 
-                # V6.2.3: 最低持仓天数检查 —— 买入后5天内不允许卖出
-                if target_pos < prev_target and self.current_trade is not None:
+                # V6.2.3: 最低持仓天数检查 —— 买入后N天内不允许卖出
+                # V7.0 P6.5: L3 风控动作豁免锁仓（止损/止盈/熔断优先级最高，见设计方案 §2.4）
+                if target_pos < prev_target and self.current_trade is not None and not risk_actions:
                     min_hold = _cfg.MIN_HOLD_DAYS
                     entry_date = self.current_trade.get('entry_date')
                     if entry_date is not None:
@@ -183,6 +214,10 @@ class V6Backtest:
                 'target_position': target_pos,
                 'current_position': actual_pos,
                 'executed': trade_info is not None,
+                # V7.0 P6.5: L3 风控动作 + 相位（记录进 backtest_records）
+                'risk_actions': risk_actions,
+                'phase': day_signal.get('phase', {}),
+                'center': day_signal.get('center'),
             }
             if trade_info:
                 signal_record.update({
@@ -220,6 +255,10 @@ class V6Backtest:
                                 'final_score': entry_breakdown.get('final_score', 0),
                             },
                         }
+                        # V7.0 P6.5: 通知 L3 风控层建仓（记录持仓成本）
+                        if _cfg.STRATEGY_MODE == 'V7':
+                            self.risk_guard.on_entry(trade_info['executed_price'], date)
+
                         # V6.2.3: 买入后标记买卖确认事件，防止重复贡献评分
                         if self.strategy:
                             for e in list(self.strategy.event_engine.get_confirmed_buy_events()):
@@ -305,6 +344,10 @@ class V6Backtest:
                             # 卖出方向已确定，清除反方向的买入确认事件
                             for e in list(self.strategy.event_engine.get_confirmed_buy_events()):
                                 e.mark_finished()
+
+                        # V7.0 P6.5: 通知 L3 风控层平仓（清空持仓状态，保留熔断状态）
+                        if _cfg.STRATEGY_MODE == 'V7':
+                            self.risk_guard.on_exit()
 
                         self.current_trade = None
 
@@ -658,6 +701,10 @@ class V6Backtest:
                 'action': s.get('action', ''),
                 'executed_price': s.get('executed_price'),
                 'trade_value': s.get('trade_value', 0),
+                # V7.0 P6.5: L3 风控动作 + 相位 + 中枢
+                'risk_actions': s.get('risk_actions', []),
+                'phase': s.get('phase', {}),
+                'center': s.get('center'),
             })
 
         # ---- 每日净值 ----

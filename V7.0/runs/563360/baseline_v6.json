@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "version": "V6.2.3",
+    "code": "563360",
+    "name": "中证 A500 ETF",
+    "backtest_start": "2024-10-15",
+    "backtest_end": "2026-08-21",
+    "trading_days": 454,
+    "data_rows": 453,
+    "generated_at": "2026-08-21 21:01:14"
+  },
+  "performance": {
+    "benchmark_return_pct": 30.54,
+    "strategy_return_pct": 30.69,
+    "excess_return_pct": 0.16,
+    "max_drawdown_pct": -13.27,
+    "annualized_return_pct": 16.02,
+    "volatility_pct": 15.82,
+    "sharpe_ratio": 1.021,
+    "sortino_ratio": 1.166,
+    "calmar_ratio": 1.207,
+    "profit_factor": 95.21,
+    "win_rate_pct": 90.0,
+    "kelly": 0.891,
+    "expectancy_pct": 3.96,
+    "total_trades": 10,
+    "winning_trades": 9,
+    "losing_trades": 1,
+    "avg_hold_days": 24.4,
+    "final_equity": 13069.4,
+    "max_consecutive_wins": 7,
+    "max_consecutive_losses": 1
+  },
+  "position_stats": {
+    "min": 0.6721,
+    "max": 0.9551,
+    "mean": 0.8191,
+    "pct_ge_90": 40.8,
+    "pct_lt_30": 0.0,
+    "pct_lt_70": 11.5
+  },
+  "config_snapshot": {
+    "initial_cash": 10000.0,
+    "initial_position": 0.95,
+    "max_position": 0.95,
+    "min_hold_days": 10,
+    "slippage": 0.001,
+    "commission": 0.0003
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "version": "V6.2.3",
+    "code": "589800",
+    "name": "科创综指 ETF",
+    "backtest_start": "2025-03-04",
+    "backtest_end": "2026-08-18",
+    "trading_days": 358,
+    "data_rows": 357,
+    "generated_at": "2026-08-21 21:00:55"
+  },
+  "performance": {
+    "benchmark_return_pct": 72.17,
+    "strategy_return_pct": 50.06,
+    "excess_return_pct": -22.1,
+    "max_drawdown_pct": -25.02,
+    "annualized_return_pct": 33.07,
+    "volatility_pct": 28.36,
+    "sharpe_ratio": 1.154,
+    "sortino_ratio": 1.362,
+    "calmar_ratio": 1.322,
+    "profit_factor": 13.42,
+    "win_rate_pct": 83.3,
+    "kelly": 0.771,
+    "expectancy_pct": 7.6,
+    "total_trades": 6,
+    "winning_trades": 5,
+    "losing_trades": 1,
+    "avg_hold_days": 32.8,
+    "final_equity": 15006.25,
+    "max_consecutive_wins": 4,
+    "max_consecutive_losses": 1
+  },
+  "position_stats": {
+    "min": 0.6746,
+    "max": 0.9825,
+    "mean": 0.8136,
+    "pct_ge_90": 18.5,
+    "pct_lt_30": 0.0,
+    "pct_lt_70": 12.0
+  },
+  "config_snapshot": {
+    "initial_cash": 10000.0,
+    "initial_position": 0.89,
+    "max_position": 0.98,
+    "min_hold_days": 34,
+    "slippage": 0.001,
+    "commission": 0.0003
+  }
+}
