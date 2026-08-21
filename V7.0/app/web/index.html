@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V7.0 多标的量化平台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="app-layout">
+      <!-- 侧边栏 -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">V7.0 量化平台</div>
+          <div class="sidebar-subtitle">Evidence Engine</div>
+        </div>
+
+        <!-- 标的选择器 -->
+        <div class="profile-selector">
+          <div class="profile-label">当前标的</div>
+          <select class="profile-select" v-model="currentCode" @change="onProfileChange">
+            <option v-for="p in profiles" :key="p.code" :value="p.code">
+              {{ p.name }} ({{ p.code }})
+            </option>
+          </select>
+          <div class="profile-status">
+            <span class="status-dot" :class="currentProfile.optimized ? 'optimized' : 'unoptimized'"></span>
+            <span class="text-muted">
+              {{ currentProfile.optimized ? '参数已优化' : '未优化（冷启动）' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 导航菜单 -->
+        <nav class="nav-menu">
+          <div class="nav-section">核心功能</div>
+          <div
+            v-for="item in navItems"
+            :key="item.id"
+            class="nav-item"
+            :class="{ active: currentPage === item.id }"
+            @click="currentPage = item.id"
+          >
+            <span class="nav-icon" v-html="item.icon"></span>
+            <span class="nav-label">{{ item.label }}</span>
+          </div>
+        </nav>
+
+        <!-- 底部运行时信息 -->
+        <div class="sidebar-footer">
+          <div class="runtime-info">
+            <span>{{ runtimeCtx.description || '加载中...' }}</span>
+            <span class="text-muted">{{ runtimeCtx.now || '' }}</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 主内容区 -->
+      <main class="main-content">
+        <!-- 数据页 -->
+        <div v-if="currentPage === 'data'">
+          <div class="page-header">
+            <div class="page-title">数据管理</div>
+            <div class="page-desc">{{ currentProfile.name }} 的日线数据更新与维护</div>
+          </div>
+
+          <!-- 数据概览 -->
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="metric-label">数据起始</div>
+              <div class="metric-value text-mono" style="font-size: 16px;">
+                {{ dataOverview.start_date || '—' }}
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">数据截止</div>
+              <div class="metric-value text-mono" style="font-size: 16px;">
+                {{ dataOverview.end_date || '—' }}
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">数据条数</div>
+              <div class="metric-value info">{{ dataOverview.row_count || 0 }}</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">估算记录</div>
+              <div class="metric-value" :class="dataOverview.has_estimated ? 'sell' : ''">
+                {{ dataOverview.estimated_count || 0 }}
+              </div>
+              <div class="metric-sub">待回填</div>
+            </div>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">数据操作</div>
+                <div class="card-subtitle">增量更新 / 盘中估算 / T+1 回填</div>
+              </div>
+            </div>
+            <div class="data-actions">
+              <button class="btn btn-primary" @click="doUpdate" :disabled="taskRunning">
+                {{ taskRunning ? '更新中...' : '更新数据' }}
+              </button>
+              <button class="btn" @click="doIntraday" :disabled="taskRunning">
+                盘中估算
+              </button>
+              <button class="btn" @click="doBackfill" :disabled="taskRunning">
+                T+1 回填
+              </button>
+              <button class="btn btn-sm" @click="refreshDataOverview">
+                刷新
+              </button>
+            </div>
+
+            <!-- 任务输出 -->
+            <div v-if="currentTaskOutput" class="task-output">{{ currentTaskOutput }}</div>
+            <div v-if="taskError" class="error-box mt-md">
+              错误：{{ taskError }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 信号页 -->
+        <div v-if="currentPage === 'signal'">
+          <div class="page-header">
+            <div class="page-title">今日信号</div>
+            <div class="page-desc">{{ currentProfile.name }} · Evidence Engine 四源融合</div>
+          </div>
+
+          <div v-if="signalLoading" class="loading">
+            <div class="loading-spinner"></div>
+            正在计算信号...
+          </div>
+
+          <div v-else-if="!signal.available" class="card">
+            <div class="empty-state">
+              <div class="empty-state-icon">📊</div>
+              <div class="empty-state-text">{{ signal.reason || '暂无信号' }}</div>
+              <button class="btn btn-primary mt-md" @click="refreshSignal">重新计算</button>
+            </div>
+          </div>
+
+          <template v-else>
+            <!-- 核心指标区 -->
+            <div class="signal-hero">
+              <div class="signal-score-box">
+                <div class="signal-score-label">买入评分</div>
+                <div class="signal-score-value buy">{{ signal.buy_score }}</div>
+                <div class="signal-score-sub">Reward {{ signal.reward_score }} · Risk {{ signal.risk_score }}</div>
+              </div>
+              <div class="position-box">
+                <div class="signal-score-label">目标仓位</div>
+                <div class="position-value">{{ signal.target_position }}%</div>
+                <div class="position-label">
+                  净评分 <span :class="signal.net_score >= 0 ? 'buy' : 'sell'" style="font-weight: 600;">
+                    {{ signal.net_score >= 0 ? '+' : '' }}{{ signal.net_score }}
+                  </span>
+                </div>
+              </div>
+              <div class="signal-score-box">
+                <div class="signal-score-label">卖出评分</div>
+                <div class="signal-score-value sell">{{ signal.sell_score }}</div>
+                <div class="signal-score-sub">
+                  卖出行为 {{ signal.sell_behaviors?.length || 0 }} 项
+                </div>
+              </div>
+            </div>
+
+            <!-- 市场状态 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">市场状态</div>
+                <span class="badge info">{{ signal.last_date }}</span>
+              </div>
+              <div class="metric-grid" style="margin-bottom: 0;">
+                <div class="metric-card">
+                  <div class="metric-label">市场格局</div>
+                  <div class="metric-value" style="font-size: 18px;">{{ signal.regime }}</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">市场情绪</div>
+                  <div class="metric-value" style="font-size: 18px;">{{ signal.psychology }}</div>
+                  <div class="metric-sub">Score: {{ signal.emotion_score }}</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">情绪改善</div>
+                  <div class="metric-value" style="font-size: 18px;">
+                    <span :class="signal.emotion_improving ? 'buy' : 'text-muted'">
+                      {{ signal.emotion_improving ? '是' : '否' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">活跃事件</div>
+                  <div class="metric-value info">{{ signal.active_events }}</div>
+                  <div class="metric-sub">
+                    确认买:{{ signal.confirmed_buy_events }} · 确认卖:{{ signal.confirmed_sell_events }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Evidence Engine 分解 -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Evidence Engine 四源分解</div>
+                  <div class="card-subtitle">规则 / 历史回放 / 机器学习 / 情绪</div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: var(--space-lg);">
+                <div class="text-sm text-secondary mb-sm">买入贡献</div>
+                <div class="evidence-bar">
+                  <div
+                    v-for="ev in buyEvidenceNormalized"
+                    :key="ev.source"
+                    class="evidence-segment"
+                    :class="ev.source"
+                    :style="{ width: ev.pct + '%' }"
+                    :title="ev.source + ': ' + ev.contribution"
+                  >
+                    {{ ev.pct >= 10 ? (ev.source.toUpperCase()) : '' }}
+                  </div>
+                </div>
+                <div class="evidence-legend">
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-rule);"></span>
+                    RULE: {{ getEvidenceValue(signal.evidence_buy, 'rule') }}
+                  </div>
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-replay);"></span>
+                    REPLAY: {{ getEvidenceValue(signal.evidence_buy, 'replay') }}
+                  </div>
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-ml);"></span>
+                    ML: {{ getEvidenceValue(signal.evidence_buy, 'ml') }}
+                  </div>
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-emotion);"></span>
+                    EMOTION: {{ getEvidenceValue(signal.evidence_buy, 'emotion') }}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm text-secondary mb-sm">卖出贡献</div>
+                <div class="evidence-bar">
+                  <div
+                    v-for="ev in sellEvidenceNormalized"
+                    :key="ev.source"
+                    class="evidence-segment"
+                    :class="ev.source"
+                    :style="{ width: ev.pct + '%' }"
+                    :title="ev.source + ': ' + ev.contribution"
+                  >
+                    {{ ev.pct >= 10 ? (ev.source.toUpperCase()) : '' }}
+                  </div>
+                </div>
+                <div class="evidence-legend">
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-rule);"></span>
+                    RULE: {{ getEvidenceValue(signal.evidence_sell, 'rule') }}
+                  </div>
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-replay);"></span>
+                    REPLAY: {{ getEvidenceValue(signal.evidence_sell, 'replay') }}
+                  </div>
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-ml);"></span>
+                    ML: {{ getEvidenceValue(signal.evidence_sell, 'ml') }}
+                  </div>
+                  <div class="evidence-legend-item">
+                    <span class="evidence-legend-dot" style="background: var(--ev-emotion);"></span>
+                    EMOTION: {{ getEvidenceValue(signal.evidence_sell, 'emotion') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 行为检测 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">候选行为</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+                <div>
+                  <div class="text-sm text-secondary mb-sm">买入行为</div>
+                  <div v-if="signal.buy_behaviors && signal.buy_behaviors.length">
+                    <span
+                      v-for="b in signal.buy_behaviors"
+                      :key="b"
+                      class="badge success"
+                      style="margin-right: 4px; margin-bottom: 4px;"
+                    >{{ b }}</span>
+                  </div>
+                  <div v-else class="text-muted text-sm">无</div>
+                </div>
+                <div>
+                  <div class="text-sm text-secondary mb-sm">卖出行为</div>
+                  <div v-if="signal.sell_behaviors && signal.sell_behaviors.length">
+                    <span
+                      v-for="s in signal.sell_behaviors"
+                      :key="s"
+                      class="badge danger"
+                      style="margin-right: 4px; margin-bottom: 4px;"
+                    >{{ s }}</span>
+                  </div>
+                  <div v-else class="text-muted text-sm">无</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-muted text-sm">数据日期：{{ signal.last_date }} · 共 {{ signal.data_rows }} 条</span>
+              <button class="btn btn-sm" @click="refreshSignal">刷新信号</button>
+            </div>
+          </template>
+        </div>
+
+        <!-- 回测页（占位 - P4实现） -->
+        <div v-if="currentPage === 'backtest'">
+          <div class="page-header">
+            <div class="page-title">策略回测</div>
+            <div class="page-desc">绩效评估与历史回测</div>
+          </div>
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-state-icon">📈</div>
+              <div class="empty-state-text">回测功能开发中（P4 阶段）</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 优化页（占位 - P5实现） -->
+        <div v-if="currentPage === 'optimize'">
+          <div class="page-header">
+            <div class="page-title">参数优化</div>
+            <div class="page-desc">高算力参数寻优</div>
+          </div>
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-state-icon">⚙️</div>
+              <div class="empty-state-text">优化功能开发中（P5 阶段）</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 参数页（占位） -->
+        <div v-if="currentPage === 'params'">
+          <div class="page-header">
+            <div class="page-title">参数对比</div>
+            <div class="page-desc">各标的策略参数一览</div>
+          </div>
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔧</div>
+              <div class="empty-state-text">参数管理功能开发中</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="vendor/echarts.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
