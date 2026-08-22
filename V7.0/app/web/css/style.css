@@ -794,6 +794,195 @@ html, body {
 }
 
 /* ============================================================
+   优化页专属
+   ============================================================ */
+
+/* 诊断卡布局 */
+.diag-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+.diag-panel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.diag-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.diag-chart {
+  width: 100%;
+  height: 200px;
+}
+
+.diag-chart-excess {
+  height: 120px;
+}
+
+.diag-stats {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.diag-stat {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.diag-stat b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.diag-corr {
+  text-align: center;
+  padding: var(--space-sm) 0;
+}
+
+.diag-corr-value {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1.1;
+}
+
+.diag-corr-value.buy { color: var(--color-buy); }
+.diag-corr-value.sell { color: var(--color-sell); }
+
+.diag-corr-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: var(--space-sm);
+}
+
+.diag-legend {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.diag-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.diag-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* 参数对比表 */
+.opt-diff-wrap {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.opt-diff-table td {
+  white-space: nowrap;
+}
+
+.opt-diff-row-changed td {
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.opt-diff-row-new td {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+/* 优化控制表单 */
+.opt-form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.opt-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.opt-form-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.opt-form-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.opt-slider {
+  width: 100%;
+  accent-color: var(--color-info);
+  cursor: pointer;
+}
+
+.opt-form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* 进度日志面板 */
+.opt-log {
+  margin-top: var(--space-md);
+  background: #0a0f1a;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  max-height: 240px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.opt-log-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 结果表 */
+.opt-table-wrap {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.opt-table-top td {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.opt-apply-ok {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--color-success);
+  font-size: 12px;
+}
+
+/* ============================================================
    滚动条
    ============================================================ */
 

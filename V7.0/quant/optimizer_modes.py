@@ -42,6 +42,25 @@ MODES = (
         default_file='light_results',
         params={'wf_top_k': 10},
     ),
+    # ── V7.0 P6.6: excess 系列（新目标函数 benchmark_beating + 搜索空间 v2）──
+    OptimizeMode(
+        key='heavy-excess',
+        label='全量运算(excess)',
+        desc='V7 三层架构专用：EXCESS_SEARCH_SPACE(31维) + benchmark_beating 目标'
+             '（超额收益为主 + 回撤≤基准一半）。四阶段级联管道，耗时长，支持断点续算。',
+        default_trials=10000,
+        default_file='heavy_excess_results',
+        params={'ga_generations': 100, 'ga_population': 60, 'wf_top_k': 20},
+    ),
+    OptimizeMode(
+        key='light-excess',
+        label='轻量运算(excess)',
+        desc='V7 三层架构专用：单阶段 Optuna 快速搜索（EXCESS_SEARCH_SPACE + '
+             'benchmark_beating 目标），分钟级完成，适合 V7 参数快速迭代。',
+        default_trials=300,
+        default_file='light_excess_results',
+        params={'wf_top_k': 10},
+    ),
 )
 
 
@@ -88,6 +107,27 @@ def build_run(mode_key: str, trials: int, output_path: str,
             ga_n_jobs=ga_n_jobs,
             wf_top_k=20,
             output_path=output_path,
+        )
+
+    if mode_key == 'heavy-excess':
+        return po.run_heavy_optimization, dict(
+            resume=resume,
+            n_trials=int(trials),
+            n_jobs=n_jobs,
+            ga_n_jobs=ga_n_jobs,
+            wf_top_k=20,
+            output_path=output_path,
+            objective='benchmark_beating',
+        )
+
+    if mode_key == 'light-excess':
+        # light：单阶段 Optuna 快速搜索（excess）
+        return po.run_light_optimization, dict(
+            n_trials=int(trials),
+            n_jobs=n_jobs,
+            output_path=output_path,
+            verbose=True,
+            objective='benchmark_beating',
         )
 
     # light：单阶段 Optuna 快速搜索

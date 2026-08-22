@@ -79,7 +79,16 @@ def _prepare_data_cache(df, regenerate=False):
     子进程通过 `_load_data_cache()` 直接反序列化，比 JSON 快 10 倍以上。
     """
     if os.path.exists(_data_cache_path()) and not regenerate:
-        return
+        try:
+            with open(_data_cache_path(), 'rb') as f:
+                _old = pickle.load(f)
+            # V7.0 P6.7: 数据新鲜度校验——缓存与当前数据不一致时强制重建，
+            # 避免旧缓存（行数/日期变化）被当成新数据喂给优化器
+            if (str(df.index[0].date()) == _old.get('start_date')
+                    and len(df) == len(_old.get('index_str', []))):
+                return
+        except Exception:
+            pass
     df_with = calculate_indicators(df.copy())
     cache = {
         'columns': df_with.columns.tolist(),
@@ -120,8 +129,14 @@ try:
     try:
         from optuna.storages.journal import JournalStorage, JournalFileBackend
     except ImportError:
-        # optuna 3.x: 直接从 optuna.storages 导入
-        from optuna.storages import JournalStorage, JournalFileBackend
+        # optuna 3.x: 部分版本需要从 optuna.storages 导入
+        try:
+            from optuna.storages import JournalStorage, JournalFileBackend
+        except ImportError:
+            JournalStorage = None
+            JournalFileBackend = None
+    # V7.0 P6.6: Windows 下 JournalFileBackend 锁机制不稳定，统一使用 SQLite (RDBStorage)
+    from optuna.storages import RDBStorage
 except ImportError:
     HAS_OPTUNA = False
 
@@ -141,6 +156,28 @@ except Exception as _adaptive_imp_err:
 ADAPTIVE_ENABLED = False
 GOVERNOR = None
 DASHBOARD_STATE = None
+
+
+def _create_optuna_storage(journal_path=None):
+    """V7.0 P6.6: 创建 Optuna storage。
+
+    Windows 上 JournalFileBackend 的 symlink lock 机制极易死锁/报错，
+    因此统一使用 SQLite (RDBStorage)。journal_path 作为 sqlite 文件根名。
+    """
+    if journal_path is None:
+        return optuna.storages.InMemoryStorage()
+    sqlite_path = journal_path + '.sqlite'
+    # busy timeout=30s：多进程并发写时等待锁而非立即报错（database is locked）
+    return RDBStorage(f"sqlite:///{sqlite_path}",
+                      engine_kwargs={'connect_args': {'timeout': 30}})
+
+
+def _ensure_optuna_schema(journal_path, study_name):
+    """V7.0 P6.6: 主进程预建 sqlite schema，避免多进程并发建表竞争。"""
+    _storage = _create_optuna_storage(journal_path)
+    optuna.create_study(study_name=study_name, storage=_storage,
+                        load_if_exists=True, direction='maximize')
+
 
 # ===== 信号文件控制（暂停/停止/紧急停止） =====
 PAUSE_FILE = os.path.join(os.getcwd(), '.optimizer_pause.flag')
@@ -506,6 +543,7 @@ class TrialResult:
     profit_factor: float = 0.0
     avg_hold_days: float = 0.0
     volatility: float = 0.0
+    benchmark_max_drawdown: float = 0.0  # V7.0 P6.6: 基准（buy&hold）最大回撤
     objective: float = 0.0  # 复合目标函数值
     eval_time: float = 0.0   # 评估耗时（秒）
 
@@ -526,6 +564,7 @@ class TrialResult:
             profit_factor=results.get('profit_factor', 0),
             avg_hold_days=results.get('avg_hold_days', 0),
             volatility=results.get('volatility', 0),
+            benchmark_max_drawdown=results.get('benchmark_max_drawdown', 0),
             eval_time=eval_time,
         )
 
@@ -600,6 +639,7 @@ def composite_objective(
     excess_return: float = 0,
     profit_factor: float = 0,
     volatility: float = 0,
+    benchmark_max_drawdown: float = 0,  # V7.0 P6.6: 仅为 WF 传参兼容（本目标不使用）
 ) -> float:
     """
     多目标复合评分函数
@@ -689,6 +729,8 @@ def _single_eval_worker(args_tuple):
     params, start_date = args_tuple
 
     try:
+        # V7.0 P6.7: 子进程恢复标的激活状态（env 由 run_*_optimization 入口设置）
+        _activate_profile_from_env()
         for param_name, value in params.items():
             if hasattr(config, param_name):
                 setattr(config, param_name, value)
@@ -711,19 +753,8 @@ def _single_eval_worker(args_tuple):
             return None
 
         result = TrialResult.from_backtest(params, bt_results, -1.0)
-        result.objective = composite_objective(**{
-            'strategy_return': result.strategy_return,
-            'sharpe_ratio': result.sharpe_ratio,
-            'max_drawdown': result.max_drawdown,
-            'calmar_ratio': result.calmar_ratio,
-            'sortino_ratio': result.sortino_ratio,
-            'win_rate': result.win_rate,
-            'total_trades': result.total_trades,
-            'annualized_return': result.annualized_return,
-            'excess_return': result.excess_return,
-            'profit_factor': result.profit_factor,
-            'volatility': result.volatility,
-        })
+        # V7.0 P6.6: excess 模式（env 注入 benchmark_beating）优先于默认 composite
+        _apply_objective(result, composite_objective)
         return result
 
     except Exception:
@@ -1119,6 +1150,10 @@ class _OptunaEvaluator:
         trial.set_user_attr('calmar_ratio', result.calmar_ratio)
         trial.set_user_attr('total_trades', result.total_trades)
         trial.set_user_attr('win_rate', result.win_rate)
+        # V7.0 P6.6: 完整快照（benchmark_beating 目标 & 结果展示需要）
+        trial.set_user_attr('excess_return', result.excess_return)
+        trial.set_user_attr('annualized_return', result.annualized_return)
+        trial.set_user_attr('benchmark_max_drawdown', result.benchmark_max_drawdown)
 
         return result.objective
 
@@ -1179,16 +1214,16 @@ class BayesianOptimizer(BaseOptimizer):
 
         # ─── 存储后端选择 ───
         # InMemoryStorage: 零 I/O，但不支持多进程和断点续算
-        # JournalStorage: 支持多进程 + 断点续算，有文件 I/O 开销
+        # SQLite (RDBStorage): 支持多进程 + 断点续算，有文件 I/O 开销
         _journal_path = _runs_path('.optuna_journal.log')
-        _use_in_memory = (n_jobs == 1) and (not self.resume or not os.path.exists(_journal_path))
+        _use_in_memory = (n_jobs == 1) and (not self.resume or not os.path.exists(_journal_path + '.sqlite'))
 
         if _use_in_memory:
             storage = optuna.storages.InMemoryStorage()
             print(f"  存储: InMemoryStorage（n_jobs=1, 零 I/O）")
         else:
-            storage = JournalStorage(JournalFileBackend(_journal_path))
-            print(f"  存储: JournalStorage（{n_jobs}进程并行 + 断点续算）")
+            storage = _create_optuna_storage(_journal_path)
+            print(f"  存储: SQLite RDBStorage（{n_jobs}进程并行 + 断点续算）")
 
         sampler = optuna.samplers.TPESampler(
             seed=42,
@@ -1216,9 +1251,9 @@ class BayesianOptimizer(BaseOptimizer):
             print(f"\n  断点续算: {existing_complete}/{n_trials} trials 已完成, 剩余 {remaining}")
         elif existing_complete > 0 and not self.resume:
             # 强制全新
-            if not _use_in_memory and os.path.exists(_journal_path):
-                os.remove(_journal_path)
-                storage = JournalStorage(JournalFileBackend(_journal_path))
+            if not _use_in_memory and os.path.exists(_journal_path + '.sqlite'):
+                os.remove(_journal_path + '.sqlite')
+                storage = _create_optuna_storage(_journal_path)
             study = optuna.create_study(
                 study_name='bayesian_search',
                 storage=storage,
@@ -2033,6 +2068,62 @@ HEAVY_SEARCH_SPACE = {
 }
 
 
+# ============================================================
+# H1.1：搜索空间 v2 —— 三层架构（excess 模式专用，见设计方案 §3.2）
+# ============================================================
+# 克制原则：两标的数据仅 358/454 天，共 31 维（新 11 + 保留旧 20）≤ 32。
+#  新增 11 个：CENTER_*×3 / TARGET_VOL / OVERHEAT_CENTER_MULT /
+#              BOTTOMFISHING_BOOST / STOP_LOSS_*×2 / TAKE_PROFIT_*×2 / TRAIL_EXIT_DRAWDOWN
+#  移除出空间：MAX_POSITION(固定0.95) / INITIAL_POSITION(由center推导) /
+#              BULL_SELL_DIV / RANGE_BUY_MULT / RANGE_SELL_DIV / BEAR_SELL_DIV
+#              （regime 乘数缩域后敏感度下降，仅保留 BULL_BUY_MULT / BEAR_BUY_MULT）
+
+EXCESS_SEARCH_SPACE = {
+    # ─── A组：评分公式权重（沿用 heavy 范围）────────────────────
+    'SCORE_BEHAVIOR_WEIGHT':    {'type': 'float', 'range': (0.10, 0.45), 'step': None, 'group': 'weights'},
+    'SCORE_CONFIDENCE_WEIGHT':  {'type': 'float', 'range': (0.05, 0.30), 'step': None, 'group': 'weights'},
+    'SCORE_REWARD_WEIGHT':      {'type': 'float', 'range': (0.20, 0.60), 'step': None, 'group': 'weights'},
+    'SCORE_RISK_WEIGHT':        {'type': 'float', 'range': (0.05, 0.30), 'step': None, 'group': 'weights'},
+
+    # ─── B组：市场状态权重（仅保留买入乘数，卖出乘数已由 L1/L3 接管）──
+    'BULL_BUY_MULT':            {'type': 'float', 'range': (1.00, 3.00), 'step': None, 'group': 'regime'},
+    'BEAR_BUY_MULT':            {'type': 'float', 'range': (0.40, 1.40), 'step': None, 'group': 'regime'},
+
+    # ─── C组：交易执行参数 ─────────────────────────────────────
+    'CONFIRMATION_THRESHOLD':   {'type': 'int',   'range': (50, 82),   'step': 1, 'group': 'exec'},
+    'CONFIDENCE_INCREMENT':     {'type': 'int',   'range': (2, 18),    'step': 1, 'group': 'exec'},
+    'OBSERVATION_WINDOW_MAX':   {'type': 'int',   'range': (2, 10),    'step': 1, 'group': 'exec'},
+    'EXPIRY_THRESHOLD':         {'type': 'int',   'range': (8, 40),    'step': 1, 'group': 'exec'},
+    'MIN_HOLD_DAYS':            {'type': 'int',   'range': (2, 15),    'step': 1, 'group': 'exec'},
+    'SCORE_HOLD_ZONE':          {'type': 'int',   'range': (5, 35),    'step': 1, 'group': 'exec'},
+    'TRADE_TARGET_DELTA':       {'type': 'float', 'range': (0.005, 0.10), 'step': 0.002, 'group': 'exec'},
+    'TRADE_ACTUAL_DELTA':       {'type': 'float', 'range': (0.005, 0.10), 'step': 0.002, 'group': 'exec'},
+
+    # ─── D组：行为检测阈值（覆盖面精选 6 个）────────────────────
+    'DOUBLE_BOTTOM_REBOUND_MIN': {'type': 'float', 'range': (0.003, 0.035), 'step': 0.002, 'group': 'behavior'},
+    'MOMO_EXH_RETURN_THRESHOLD': {'type': 'float', 'range': (0.012, 0.045), 'step': 0.002, 'group': 'behavior'},
+    'PULLBACK_MA_DIST':          {'type': 'float', 'range': (0.008, 0.040), 'step': 0.002, 'group': 'behavior'},
+    'PANIC_SELL_DROP_THRESHOLD': {'type': 'float', 'range': (-0.070, -0.015), 'step': 0.002, 'group': 'behavior'},
+    'TREND_FAIL_SCORE':          {'type': 'int',   'range': (30, 70), 'step': 5, 'group': 'behavior'},
+    'RSI_OVERBOUGHT_THRESHOLD':  {'type': 'int',   'range': (58, 80), 'step': 2, 'group': 'behavior'},
+
+    # ─── E组（新）：L1 战略层 —— 仓位中枢与相位通道 ──────────────
+    'CENTER_BULL':             {'type': 'float', 'range': (0.50, 0.90), 'step': None, 'group': 'v7_l1'},
+    'CENTER_RANGE':            {'type': 'float', 'range': (0.30, 0.60), 'step': None, 'group': 'v7_l1'},
+    'CENTER_BEAR':             {'type': 'float', 'range': (0.00, 0.30), 'step': None, 'group': 'v7_l1'},
+    'TARGET_VOL':              {'type': 'float', 'range': (0.15, 0.30), 'step': None, 'group': 'v7_l1'},
+    'OVERHEAT_CENTER_MULT':    {'type': 'float', 'range': (0.30, 0.70), 'step': None, 'group': 'v7_l1'},
+    'BOTTOMFISHING_BOOST':     {'type': 'float', 'range': (0.00, 0.25), 'step': None, 'group': 'v7_l1'},
+
+    # ─── F组（新）：L3 风控层 —— 止损 / 阶梯止盈 / 高位回撤清仓线 ─
+    'STOP_LOSS_PCT':           {'type': 'float', 'range': (-0.12, -0.05), 'step': None, 'group': 'v7_l3'},
+    'STOP_LOSS_HARD':          {'type': 'float', 'range': (-0.18, -0.10), 'step': None, 'group': 'v7_l3'},
+    'TAKE_PROFIT_T1':          {'type': 'float', 'range': (0.10, 0.20),  'step': None, 'group': 'v7_l3'},
+    'TAKE_PROFIT_T2':          {'type': 'float', 'range': (0.18, 0.30),  'step': None, 'group': 'v7_l3'},
+    'TRAIL_EXIT_DRAWDOWN':     {'type': 'float', 'range': (0.03, 0.06),  'step': None, 'group': 'v7_l3'},
+}
+
+
 def _build_position_curves_from_params(params):
     """从扁平参数重建仓位映射曲线"""
     buy_tiers = []
@@ -2135,6 +2226,105 @@ def returns_aggressive_objective(
 
 
 # ============================================================
+# H2.1：Benchmark-Beating 目标函数（V7.0 P6.6 主目标，见设计方案 §3.1）
+# ============================================================
+
+# 超风险目标倍数：DD_TARGET = 基准最大回撤 × DD_TARGET_MULT（默认 50%）
+DD_TARGET_MULT = 0.5
+# 换手软约束：交易数超过 TRADE_CAP 后每笔扣 2 分
+TRADE_CAP = 40
+
+
+def benchmark_beating_objective(
+    strategy_return=0.0, annualized_return=0.0, excess_return=0.0,
+    max_drawdown=0.0, benchmark_max_drawdown=0.0, sharpe_ratio=0.0,
+    total_trades=0, **kwargs
+) -> float:
+    """
+    V7.0 P6.6 主目标函数 —— 跑赢基准（超额收益第一），回撤 ≤ 基准一半硬约束。
+
+    设计（设计方案 §3.1）：
+      score = excess_return * 150                          # 主目标：基准超额
+            + dd_improvement * 80                          # 回撤改善
+            - max(0, |strat_dd| - DD_TARGET) * 200         # 超风险目标重罚
+            + min(sharpe * 8, 15)                          # 质量项
+            - max(0, total_trades - TRADE_CAP) * 2         # 换手软约束
+
+    Returns:
+        得分越高越好（可正可负）
+    """
+    score = 0.0
+
+    # 主目标：策略相对基准的超额收益（唯一收益来源）
+    score += excess_return * 150
+
+    # 回撤改善：dd_improvement = (bench_dd - strat_dd) / |bench_dd|
+    bench_dd = abs(benchmark_max_drawdown)
+    strat_dd = abs(max_drawdown)
+    if bench_dd > 1e-9:
+        dd_improvement = (bench_dd - strat_dd) / bench_dd
+    else:
+        # 基准无回撤的极端情形：策略也无回撤 → 满改善；否则重罚
+        dd_improvement = 1.0 if strat_dd <= 1e-9 else -1.0
+    score += dd_improvement * 80
+
+    # 超风险目标重罚：DD_TARGET = 基准回撤的 50%（用户风险目标）
+    dd_target = bench_dd * DD_TARGET_MULT
+    if dd_target > 1e-9 and strat_dd > dd_target:
+        score -= max(0.0, strat_dd - dd_target) * 200
+
+    # 质量项：夏普比率（有上限，负夏普按负贡献计）
+    score += min(sharpe_ratio * 8, 15)
+
+    # 换手软约束
+    score -= max(0, total_trades - TRADE_CAP) * 2
+
+    return score
+
+
+# ── 目标函数注册表（excess 模式经环境变量注入，spawn 子进程安全）──
+OBJECTIVE_REGISTRY = {
+    'composite': composite_objective,
+    'returns_aggressive': returns_aggressive_objective,
+    'benchmark_beating': benchmark_beating_objective,
+}
+
+# 环境变量键：run_*_optimization 入口设置 → spawn 子进程继承 → worker 解析
+_OBJECTIVE_ENV_KEY = 'V7_OBJECTIVE_KEY'
+# V7.0 P6.7: spawn 子进程不继承 config.activate_profile 状态，经 env 传递标的 code，
+# worker 启动时自行激活（否则数据缓存/运行目录/基线参数全部错落到默认标的）
+_PROFILE_ENV_KEY = 'V7_STOCK_CODE'
+
+
+def _activate_profile_from_env():
+    """spawn 子进程内恢复标的激活状态（无 env 时静默跳过，兼容旧调用）"""
+    _code = os.environ.get(_PROFILE_ENV_KEY)
+    if _code:
+        config.activate_profile(_code)
+
+
+def _resolve_objective_fn():
+    """按环境变量解析目标函数；未设置时返回 None（调用方沿用旧默认）。
+
+    子进程（spawn）不会继承父进程的模块级变量修改，但会继承 os.environ，
+    因此 excess 模式通过环境变量把 objective key 传进 worker。
+    """
+    key = os.environ.get(_OBJECTIVE_ENV_KEY)
+    if not key:
+        return None
+    return OBJECTIVE_REGISTRY.get(key)
+
+
+def _apply_objective(result, default_fn):
+    """将目标函数分值写入 TrialResult；excess 模式（env 注入）优先于默认。"""
+    fn = _resolve_objective_fn()
+    if fn is None:
+        fn = default_fn
+    result.objective = fn(**vars_for_obj(result))
+    return result
+
+
+# ============================================================
 # H3：Walk-Forward 滚动窗口验证
 # ============================================================
 
@@ -2202,6 +2392,8 @@ def run_walk_forward_validation(
                 strategy_return=train_result.strategy_return,
                 excess_return=train_result.excess_return,
                 max_drawdown=train_result.max_drawdown,
+                # V7.0 P6.6: benchmark_beating_objective 需要基准回撤（旧目标函数已兼容）
+                benchmark_max_drawdown=train_result.benchmark_max_drawdown,
                 sharpe_ratio=train_result.sharpe_ratio,
                 calmar_ratio=train_result.calmar_ratio,
                 total_trades=train_result.total_trades,
@@ -2213,6 +2405,7 @@ def run_walk_forward_validation(
                 strategy_return=val_result.strategy_return,
                 excess_return=val_result.excess_return,
                 max_drawdown=val_result.max_drawdown,
+                benchmark_max_drawdown=val_result.benchmark_max_drawdown,
                 sharpe_ratio=val_result.sharpe_ratio,
                 calmar_ratio=val_result.calmar_ratio,
                 total_trades=val_result.total_trades,
@@ -2244,6 +2437,8 @@ def run_walk_forward_validation(
 
 def _wf_worker(args):
     """Walk-Forward worker（模块级别，可 pickle）"""
+    # V7.0 P6.7: 子进程恢复标的激活状态（env 由 run_*_optimization 入口设置）
+    _activate_profile_from_env()
     df, params, objective_fn = args
     return run_walk_forward_validation(df, params, n_splits=3, objective_fn=objective_fn)
 
@@ -2362,7 +2557,8 @@ def _eval_single_plain_on_df(params, df, start_date):
         if not bt_results:
             return None
         result = TrialResult.from_backtest(params, bt_results, -1.0)
-        result.objective = composite_objective(**vars_for_obj(result))
+        # V7.0 P6.6: excess 模式覆盖默认目标函数
+        _apply_objective(result, composite_objective)
         return result
     except:
         return None
@@ -2397,7 +2593,8 @@ def _eval_single_heavy_on_df(params, df, start_date):
         if not bt_results:
             return None
         result = TrialResult.from_backtest(params, bt_results, -1.0)
-        result.objective = returns_aggressive_objective(**vars_for_obj(result))
+        # V7.0 P6.6: excess 模式覆盖默认目标函数
+        _apply_objective(result, returns_aggressive_objective)
         return result
     except:
         return None
@@ -2409,6 +2606,7 @@ def vars_for_obj(result):
         'strategy_return': result.strategy_return,
         'excess_return': result.excess_return,
         'max_drawdown': result.max_drawdown,
+        'benchmark_max_drawdown': result.benchmark_max_drawdown,
         'sharpe_ratio': result.sharpe_ratio,
         'calmar_ratio': result.calmar_ratio,
         'total_trades': result.total_trades,
@@ -2530,6 +2728,9 @@ class HeavyOptimizer:
                         calmar_ratio=t.user_attrs.get('calmar_ratio', 0),
                         total_trades=t.user_attrs.get('total_trades', 0),
                         win_rate=t.user_attrs.get('win_rate', 0),
+                        excess_return=t.user_attrs.get('excess_return', 0),
+                        annualized_return=t.user_attrs.get('annualized_return', 0),
+                        benchmark_max_drawdown=t.user_attrs.get('benchmark_max_drawdown', 0),
                         objective=t.value,
                     )
                     phase1_results.append(r)
@@ -2611,11 +2812,12 @@ class HeavyOptimizer:
 
     def run(self, n_trials=10000, ga_generations=100, ga_population=60,
             n_jobs=14, ga_n_jobs=10, wf_top_k=20, resume=True, verbose=True,
-            output_path=None):
+            output_path=None, objective=None):
         """全量优化管道入口：注册当前实例供紧急停止保存断点，再转 _run_pipeline。
 
-        紧急停止（request_emergency_stop）需要在优化线程被终止前立即保存
-        当前断点 —— 通过模块级 _ACTIVE_HEAVY 定位正在运行的实例。
+        Args:
+            objective: 'benchmark_beating' → EXCESS_SEARCH_SPACE + 新目标函数
+                       （V7.0 P6.6；None 沿用旧行为）
         """
         global _ACTIVE_HEAVY
         _ACTIVE_HEAVY = self
@@ -2624,13 +2826,14 @@ class HeavyOptimizer:
                 n_trials=n_trials, ga_generations=ga_generations,
                 ga_population=ga_population, n_jobs=n_jobs,
                 ga_n_jobs=ga_n_jobs, wf_top_k=wf_top_k,
-                resume=resume, verbose=verbose, output_path=output_path)
+                resume=resume, verbose=verbose, output_path=output_path,
+                objective=objective)
         finally:
             _ACTIVE_HEAVY = None
 
     def _run_pipeline(self, n_trials=10000, ga_generations=100, ga_population=60,
             n_jobs=14, ga_n_jobs=10, wf_top_k=20, resume=True, verbose=True,
-            output_path=None):
+            output_path=None, objective=None):
         """
         启动全量优化管道（支持断点续算）
 
@@ -2644,7 +2847,16 @@ class HeavyOptimizer:
             resume: 是否启用断点续算
             output_path: 结果 JSON 导出路径（None = 脚本目录 heavy_results.json）
         """
-        space = dict(HEAVY_SEARCH_SPACE)
+        # V7.0 P6.6: excess 模式切换搜索空间 v2（31 维）
+        if objective == 'benchmark_beating':
+            space = dict(EXCESS_SEARCH_SPACE)
+            _objective_desc = 'benchmark_beating（超额收益为主 + 回撤 ≤ 基准一半）'
+            # V7.0 P6.8: excess 模式用独立 checkpoint，避免与旧 HEAVY_SEARCH_SPACE 断点混用
+            self._checkpoint_path = _runs_path('.heavy_excess_checkpoint.json')
+        else:
+            space = dict(HEAVY_SEARCH_SPACE)
+            _objective_desc = 'returns_aggressive'
+            self._checkpoint_path = _runs_path('.heavy_checkpoint.json')
         cpu_count = os.cpu_count() or 4
         if n_jobs < 0:
             n_jobs = cpu_count
@@ -2666,7 +2878,7 @@ class HeavyOptimizer:
         print("=" * 70)
         print("  V6.2.3 全量高算力优化管道（HEAVY COMPUTE）")
         print("=" * 70)
-        print(f"  搜索空间: {len(space)} 个参数")
+        print(f"  搜索空间: {len(space)} 个参数 | 目标函数: {_objective_desc}")
         print(f"  管道: Optuna({n_trials}) → GA({ga_generations}代×{ga_population}) → FineGrid → WFV({wf_top_k})")
         if ADAPTIVE_ENABLED and HAS_ADAPTIVE:
             _parallel_desc = f"自适应（受面板 CPU 限制控制，初始上限 {n_jobs}）"
@@ -2711,21 +2923,25 @@ class HeavyOptimizer:
             # InMemoryStorage: 零 I/O，仅 n_jobs=1 时使用
             # JournalStorage: 支持多进程 + 断点续算（多进程模式强制使用）
             _journal_path = _runs_path('.heavy_optuna_journal.log')
-            _use_in_memory = (n_jobs == 1) and (not resume or not os.path.exists(_journal_path))
+            _use_in_memory = (n_jobs == 1) and (not resume or not os.path.exists(_journal_path + '.sqlite'))
             if ADAPTIVE_ENABLED and HAS_ADAPTIVE:
-                # 自适应进程调度需要多进程共享结果 → 强制 JournalStorage
+                # 自适应进程调度需要多进程共享结果 → 强制 SQLite RDBStorage
                 _use_in_memory = False
 
             if _use_in_memory:
                 print(f"  存储: InMemoryStorage（n_jobs=1, 零 I/O）")
             elif ADAPTIVE_ENABLED and HAS_ADAPTIVE:
-                print(f"  存储: JournalStorage（自适应进程 + 断点续算）")
+                print(f"  存储: SQLite RDBStorage（自适应进程 + 断点续算）")
             else:
-                print(f"  存储: JournalStorage（{n_jobs}进程并行 + 断点续算）")
+                print(f"  存储: SQLite RDBStorage（{n_jobs}进程并行 + 断点续算）")
+
+            # 主进程预建 schema，避免多进程并发建表竞争（V7.0 P6.6）
+            if not _use_in_memory:
+                _ensure_optuna_schema(_journal_path, 'heavy_optuna_search')
 
             # ─── 断点续算处理 ───
-            if not _use_in_memory and os.path.exists(_journal_path):
-                _tmp_storage = JournalStorage(JournalFileBackend(_journal_path))
+            if not _use_in_memory and os.path.exists(_journal_path + '.sqlite'):
+                _tmp_storage = _create_optuna_storage(_journal_path)
                 _tmp_study = optuna.create_study(
                     study_name='heavy_optuna_search',
                     storage=_tmp_storage,
@@ -2805,8 +3021,8 @@ class HeavyOptimizer:
                         if _pbar is not None:
                             _pbar.close()
 
-                    # 从 journal 读取所有结果（主进程 study 需要加载 journal）
-                    _result_storage = JournalStorage(JournalFileBackend(_journal_path))
+                    # 从 SQLite 读取所有结果（主进程 study 需要加载 SQLite）
+                    _result_storage = _create_optuna_storage(_journal_path)
                     study = optuna.create_study(
                         study_name='heavy_optuna_search',
                         storage=_result_storage,
@@ -2868,8 +3084,8 @@ class HeavyOptimizer:
                         if _pbar is not None:
                             _pbar.close()
 
-                    # 从 journal 读取所有结果
-                    _result_storage = JournalStorage(JournalFileBackend(_journal_path))
+                    # 从 SQLite 读取所有结果
+                    _result_storage = _create_optuna_storage(_journal_path)
                     study = optuna.create_study(
                         study_name='heavy_optuna_search',
                         storage=_result_storage,
@@ -2880,7 +3096,7 @@ class HeavyOptimizer:
                 else:
                     # 单进程：直接运行
                     storage = optuna.storages.InMemoryStorage() if _use_in_memory \
-                        else JournalStorage(JournalFileBackend(_journal_path))
+                        else _create_optuna_storage(_journal_path)
                     study = optuna.create_study(
                         study_name='heavy_optuna_search',
                         storage=storage,
@@ -2900,8 +3116,8 @@ class HeavyOptimizer:
                                        show_progress_bar=HAS_TQDM and verbose)
             else:
                 # remaining == 0：所有 trials 已完成（断点续算场景），从 journal 加载结果
-                if not _use_in_memory and os.path.exists(_journal_path):
-                    _result_storage = JournalStorage(JournalFileBackend(_journal_path))
+                if not _use_in_memory and os.path.exists(_journal_path + '.sqlite'):
+                    _result_storage = _create_optuna_storage(_journal_path)
                     study = optuna.create_study(
                         study_name='heavy_optuna_search',
                         storage=_result_storage,
@@ -2921,6 +3137,9 @@ class HeavyOptimizer:
                         calmar_ratio=t.user_attrs.get('calmar_ratio', 0),
                         total_trades=t.user_attrs.get('total_trades', 0),
                         win_rate=t.user_attrs.get('win_rate', 0),
+                        excess_return=t.user_attrs.get('excess_return', 0),
+                        annualized_return=t.user_attrs.get('annualized_return', 0),
+                        benchmark_max_drawdown=t.user_attrs.get('benchmark_max_drawdown', 0),
                         objective=t.value,
                     )
                     phase1_results.append(r)
@@ -3149,7 +3368,9 @@ class HeavyOptimizer:
                                  current=done, total=total)
 
             # 并行 Walk-Forward
-            wf_tasks = [(self.df, c.params, returns_aggressive_objective) for c in candidates]
+            # V7.0 P6.6: excess 模式 WF 用新目标函数（env 注入，未设置则旧目标）
+            _wf_obj = _resolve_objective_fn() or returns_aggressive_objective
+            wf_tasks = [(self.df, c.params, _wf_obj) for c in candidates]
             wf_results_raw = _run_wf_parallel(wf_tasks, n_jobs=n_jobs, verbose=verbose,
                                               progress_cb=_p4_cb)
 
@@ -3433,6 +3654,10 @@ class _HeavyOptunaEvaluator:
         trial.set_user_attr('calmar_ratio', result.calmar_ratio)
         trial.set_user_attr('total_trades', result.total_trades)
         trial.set_user_attr('win_rate', result.win_rate)
+        # V7.0 P6.6: 完整快照（benchmark_beating 目标 & 结果展示需要）
+        trial.set_user_attr('excess_return', result.excess_return)
+        trial.set_user_attr('annualized_return', result.annualized_return)
+        trial.set_user_attr('benchmark_max_drawdown', result.benchmark_max_drawdown)
 
         return result.objective
 
@@ -3458,6 +3683,8 @@ def _heavy_eval_worker(args_tuple):
     params, start_date, buy_curve, sell_curve, ev_weights = args_tuple
 
     try:
+        # V7.0 P6.7: 子进程恢复标的激活状态（env 由 run_*_optimization 入口设置）
+        _activate_profile_from_env()
         for param_name, value in params.items():
             if hasattr(config, param_name) and not param_name.startswith(
                     ('BUY_T', 'SELL_T', 'EVIDENCE_WEIGHT_', 'PSYCH_')):
@@ -3495,17 +3722,8 @@ def _heavy_eval_worker(args_tuple):
             return None
 
         result = TrialResult.from_backtest(params, bt_results, -1.0)
-        result.objective = returns_aggressive_objective(
-            annualized_return=result.annualized_return,
-            strategy_return=result.strategy_return,
-            excess_return=result.excess_return,
-            max_drawdown=result.max_drawdown,
-            sharpe_ratio=result.sharpe_ratio,
-            calmar_ratio=result.calmar_ratio,
-            total_trades=result.total_trades,
-            win_rate=result.win_rate,
-            volatility=result.volatility,
-        )
+        # V7.0 P6.6: excess 模式覆盖默认目标函数
+        _apply_objective(result, returns_aggressive_objective)
         return result
 
     except Exception:
@@ -3515,7 +3733,7 @@ def _heavy_eval_worker(args_tuple):
 def _phase1_worker(args):
     """Phase 1 进程级 worker —— 在独立进程中运行一批 Optuna trials。
 
-    每个 worker 进程拥有自己的 study 实例，通过 JournalStorage 共享试验结果。
+    每个 worker 进程拥有自己的 study 实例，通过 SQLite (RDBStorage) 共享试验结果。
     使用 ProcessPoolExecutor 绕过 GIL，实现真正的 CPU 并行。
     """
     (n_trials_for_worker, journal_path, start_date, space, resume, seed) = args[:6]
@@ -3524,18 +3742,17 @@ def _phase1_worker(args):
     # ── 导入（spawn 子进程首次加载时执行，后续复用）──
     import optuna
     optuna.logging.set_verbosity(optuna.logging.WARNING)  # 避免 [I] 日志刷屏
-    try:
-        from optuna.storages.journal import JournalStorage, JournalFileBackend
-    except ImportError:
-        from optuna.storages import JournalStorage, JournalFileBackend
+
+    # V7.0 P6.7: 恢复标的激活状态（env 由 run_*_optimization 入口设置）
+    _activate_profile_from_env()
 
     # ── 存储 ──
     if journal_path:
-        storage = JournalStorage(JournalFileBackend(journal_path))
+        storage = _create_optuna_storage(journal_path)
     else:
         storage = optuna.storages.InMemoryStorage()
 
-    # ── 创建 study（每个进程独立实例，通过 journal 共享结果）──
+    # ── 创建 study（每个进程独立实例，通过 SQLite 共享结果）──
     study = optuna.create_study(
         study_name=study_name,
         storage=storage,
@@ -3568,14 +3785,37 @@ def _phase1_worker(args):
 # H6：Heavy Compute 入口
 # ============================================================
 
-def run_heavy_optimization(resume=True, output_path=None, **kwargs):
+def run_heavy_optimization(resume=True, output_path=None, objective=None, **kwargs):
     """全量高算力优化入口（支持断点续算）
 
     Args:
         resume: 是否启用断点续算
         output_path: 结果 JSON 导出路径（None = 脚本目录 heavy_results.json）
+        objective: 'benchmark_beating' 使用 EXCESS_SEARCH_SPACE + 新目标函数
+                   （V7.0 P6.6；None 沿用旧行为）
         **kwargs: 其余参数透传 HeavyOptimizer.run
     """
+    _prev = os.environ.get(_OBJECTIVE_ENV_KEY)
+    if objective:
+        os.environ[_OBJECTIVE_ENV_KEY] = objective
+    _prev_profile = os.environ.get(_PROFILE_ENV_KEY)
+    os.environ[_PROFILE_ENV_KEY] = config.STOCK_CODE
+    try:
+        return _run_heavy_impl(resume=resume, output_path=output_path,
+                               objective=objective, **kwargs)
+    finally:
+        if _prev is None:
+            os.environ.pop(_OBJECTIVE_ENV_KEY, None)
+        else:
+            os.environ[_OBJECTIVE_ENV_KEY] = _prev
+        if _prev_profile is None:
+            os.environ.pop(_PROFILE_ENV_KEY, None)
+        else:
+            os.environ[_PROFILE_ENV_KEY] = _prev_profile
+
+
+def _run_heavy_impl(resume=True, output_path=None, objective=None, **kwargs):
+    """全量高算力优化的实际实现（env 由入口 wrapper 管理）"""
     df = load_data_from_db()
     if df is None:
         print("无法加载数据")
@@ -3584,12 +3824,40 @@ def run_heavy_optimization(resume=True, output_path=None, **kwargs):
     print(f"数据: {len(df)} 行, {df.index[0].date()} ~ {df.index[-1].date()}")
 
     heavy = HeavyOptimizer(df)
-    heavy.run(resume=resume, output_path=output_path, **kwargs)
+    heavy.run(resume=resume, output_path=output_path,
+              objective=objective, **kwargs)
     return heavy
 
 
 def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
-                           verbose=True):
+                           verbose=True, objective=None):
+    """轻量优化入口（V7.0 P6.6）：支持 objective 注入（'benchmark_beating'）。
+
+    objective 通过环境变量传递到 spawn 子进程（worker 内 _resolve_objective_fn 解析），
+    结束后恢复环境。objective=None 时完全沿用旧行为。
+    """
+    _prev = os.environ.get(_OBJECTIVE_ENV_KEY)
+    if objective:
+        os.environ[_OBJECTIVE_ENV_KEY] = objective
+    _prev_profile = os.environ.get(_PROFILE_ENV_KEY)
+    os.environ[_PROFILE_ENV_KEY] = config.STOCK_CODE
+    try:
+        return _run_light_impl(n_trials=n_trials, n_jobs=n_jobs,
+                               output_path=output_path, verbose=verbose,
+                               objective=objective)
+    finally:
+        if _prev is None:
+            os.environ.pop(_OBJECTIVE_ENV_KEY, None)
+        else:
+            os.environ[_OBJECTIVE_ENV_KEY] = _prev
+        if _prev_profile is None:
+            os.environ.pop(_PROFILE_ENV_KEY, None)
+        else:
+            os.environ[_PROFILE_ENV_KEY] = _prev_profile
+
+
+def _run_light_impl(n_trials=300, n_jobs=14, output_path=None,
+                    verbose=True, objective=None):
     """轻量运算：单阶段 Optuna 快速搜索（自适应并行），结果导出为 JSON。
 
     - 与全量模式（HeavyOptimizer）共用 _phase1_worker 评估器与搜索空间；
@@ -3601,13 +3869,18 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
         n_jobs: 并行参考数（自适应模式仅影响任务分块）
         output_path: 结果 JSON 导出路径（None = 脚本目录 light_results.json）
         verbose: 是否打印进度
+        objective: 'benchmark_beating' 使用 EXCESS_SEARCH_SPACE + 新目标函数；
+                   None 沿用 HEAVY_SEARCH_SPACE + returns_aggressive
     """
     df = load_data_from_db()
     if df is None:
         print("无法加载数据")
         return None
     start_date = str(df.index[0].date())
-    space = dict(HEAVY_SEARCH_SPACE)
+    if objective == 'benchmark_beating':
+        space = dict(EXCESS_SEARCH_SPACE)
+    else:
+        space = dict(HEAVY_SEARCH_SPACE)
 
     print("=" * 60)
     print("  轻量运算（单阶段 Optuna 快速搜索）")
@@ -3623,14 +3896,17 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
 
     _prepare_data_cache(df)
 
-    # 轻量模式每次全新运行：清理旧 journal，保证结果可复现
+    # 轻量模式每次全新运行：清理旧 sqlite，保证结果可复现
     _journal_path = _runs_path('.light_optuna_journal.log')
-    for _f in (_journal_path, _journal_path + '.lock'):
+    for _f in (_journal_path + '.sqlite', _journal_path + '.lock'):
         try:
             if os.path.exists(_f):
                 os.remove(_f)
         except OSError:
             pass
+    # 主进程预建 schema，避免多进程并发建表竞争（V7.0 P6.6）
+    if HAS_OPTUNA:
+        _ensure_optuna_schema(_journal_path, 'light_optuna_search')
 
     results = []
     if HAS_OPTUNA and n_trials > 0:
@@ -3704,8 +3980,8 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
                 _update_progress(phase='轻量运算', label='Optuna 快速搜索',
                                  current=min(_done_acc, n_trials), total=n_trials)
 
-        # 从 journal 收集结果
-        storage = JournalStorage(JournalFileBackend(_journal_path))
+        # 从 SQLite 收集结果
+        storage = _create_optuna_storage(_journal_path)
         study = optuna.create_study(
             study_name='light_optuna_search',
             storage=storage,
@@ -3722,17 +3998,21 @@ def run_light_optimization(n_trials=300, n_jobs=14, output_path=None,
                     calmar_ratio=t.user_attrs.get('calmar_ratio', 0),
                     total_trades=t.user_attrs.get('total_trades', 0),
                     win_rate=t.user_attrs.get('win_rate', 0),
+                    excess_return=t.user_attrs.get('excess_return', 0),
+                    annualized_return=t.user_attrs.get('annualized_return', 0),
+                    benchmark_max_drawdown=t.user_attrs.get('benchmark_max_drawdown', 0),
                     objective=t.value,
                 )
                 results.append(r)
         results.sort(key=lambda x: x.objective, reverse=True)
 
         elapsed = time.time() - t0
-        if verbose and results:
+        if results:
             best = results[0]
-            print(f"  轻量运算完成: {len(results)} 有效, "
-                  f"Best Obj={best.objective:.2f}, "
-                  f"Return={best.strategy_return*100:.2f}%, 耗时 {elapsed:.0f}s")
+            if verbose:
+                print(f"  轻量运算完成: {len(results)} 有效, "
+                      f"Best Obj={best.objective:.2f}, "
+                      f"Return={best.strategy_return*100:.2f}%, 耗时 {elapsed:.0f}s")
         else:
             print(f"  轻量运算完成: 0 有效结果（请检查数据与配置），耗时 {elapsed:.0f}s")
         _report_progress('轻量运算完成')

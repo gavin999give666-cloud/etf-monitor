@@ -13,6 +13,7 @@ V7.0 GUI Bridge —— pywebview js_api 薄封装层
 """
 import os
 import sys
+import json
 import traceback
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -535,6 +536,220 @@ class ApiBridge:
             return {'task_id': task_id}
         return self._safe(_do)
 
+    # ============================================================
+    # 5. 参数优化
+    # ============================================================
+
+    def list_optimize_modes(self):
+        """列出所有优化模式（来自 optimizer_modes 注册表）
+        Returns: {ok, data: [{key, label, desc, default_trials, default_file}]}
+        """
+        def _do():
+            from optimizer_modes import MODES
+            return [{
+                'key': m.key,
+                'label': m.label,
+                'desc': m.desc,
+                'default_trials': m.default_trials,
+                'default_file': m.default_file,
+            } for m in MODES]
+        return self._safe(_do)
+
+    def start_optimization(self, code=None, mode_key='light-excess', trials=300, cpu_limit=100):
+        """启动参数优化（异步，返回 task_id）。
+
+        复用 param_optimizer 的自适应控制 + 进度面板 + 控制信号机制：
+        - enable_adaptive_control(cpu_limit) 初始化 DASHBOARD_STATE（幂等）
+        - install_stdout_tee() 把 print/tqdm 逐行转发到日志面板
+        - build_run(mode_key, trials, output_path) 构建计算入口
+        结果落盘 runs\{code}\{default_file}.json。
+        """
+        def _do():
+            import config
+            self._ensure_profile(code)
+            target_code = config.CURRENT_PROFILE_CODE
+            from optimizer_modes import get_mode, build_run
+            mode = get_mode(mode_key)
+            if mode is None:
+                raise ValueError(f'未知优化模式: {mode_key}')
+            task_id = self._new_task_id()
+            self._tasks[task_id] = {'status': 'running', 'progress': 0, 'result': None, 'error': None}
+
+            def _worker():
+                try:
+                    with self._lock:
+                        import config as cfg
+                        cfg.activate_profile(target_code)
+                    import param_optimizer as po
+                    if not po.ADAPTIVE_ENABLED:
+                        po.enable_adaptive_control(cpu_limit=float(cpu_limit))
+                    else:
+                        po.GOVERNOR.set_limit(float(cpu_limit))
+                    po.clear_control_flags()
+                    po.install_stdout_tee()
+                    output_path = config.runs_path(f'{mode.default_file}.json')
+                    n_jobs = max(1, int(os.cpu_count() or 4) * int(cpu_limit) // 100)
+                    ga_n_jobs = max(1, n_jobs - 4)
+                    run_fn, kwargs = build_run(
+                        mode_key, int(trials), output_path,
+                        n_jobs=n_jobs, ga_n_jobs=ga_n_jobs,
+                    )
+                    run_fn(**kwargs)
+                    self._tasks[task_id]['status'] = 'done'
+                    self._tasks[task_id]['result'] = {
+                        'output_path': output_path,
+                        'mode': mode_key,
+                        'trials': int(trials),
+                    }
+                except Exception as e:
+                    traceback.print_exc()
+                    self._tasks[task_id]['status'] = 'error'
+                    self._tasks[task_id]['error'] = str(e)
+
+            threading.Thread(target=_worker, name='gui_optimize', daemon=True).start()
+            return {'task_id': task_id}
+        return self._safe(_do)
+
+    def get_optimization_status(self, task_id):
+        """查询优化任务状态 + 进度面板快照
+        Returns: {ok, data: {status, result, error, dashboard}}
+        dashboard = DASHBOARD_STATE.snapshot()（progress/events/log_lines/log_seq/workers/cpu）
+        """
+        def _do():
+            task = self._tasks.get(task_id)
+            if not task:
+                raise ValueError(f'任务不存在: {task_id}')
+            import param_optimizer as po
+            dashboard = None
+            if po.DASHBOARD_STATE is not None:
+                dashboard = po.DASHBOARD_STATE.snapshot()
+            return {
+                'status': task['status'],
+                'result': task['result'],
+                'error': task['error'],
+                'dashboard': dashboard,
+            }
+        return self._safe(_do)
+
+    def pause_optimization(self):
+        """请求暂停（当前计算完成后暂停）"""
+        def _do():
+            import param_optimizer as po
+            po.request_pause()
+            return True
+        return self._safe(_do)
+
+    def resume_optimization(self):
+        """请求继续"""
+        def _do():
+            import param_optimizer as po
+            po.request_resume()
+            return True
+        return self._safe(_do)
+
+    def stop_optimization(self):
+        """请求优雅停止（等待当前计算完成）"""
+        def _do():
+            import param_optimizer as po
+            po.request_stop()
+            return True
+        return self._safe(_do)
+
+    def set_cpu_limit(self, cpu_limit):
+        """运行中动态调整 CPU 上限"""
+        def _do():
+            import param_optimizer as po
+            if po.ADAPTIVE_ENABLED and po.GOVERNOR is not None:
+                po.GOVERNOR.set_limit(float(cpu_limit))
+            return True
+        return self._safe(_do)
+
+    def get_optimization_results(self, code=None):
+        """读取当前标的所有优化结果文件
+        Returns: {ok, data: {filename: {meta, phase_summary, top20, walk_forward}, acceptance}}
+        """
+        def _do():
+            import config
+            self._ensure_profile(code)
+            results = {}
+            for fname in ('heavy_excess_results.json', 'light_excess_results.json',
+                          'heavy_results.json', 'light_results.json'):
+                path = config.runs_path(fname)
+                if os.path.exists(path):
+                    with open(path, encoding='utf-8') as f:
+                        data = json.load(f)
+                    results[fname] = {
+                        'meta': data.get('meta', {}),
+                        'phase_summary': data.get('phase_summary', {}),
+                        'top20': data.get('top20', []),
+                        'walk_forward': data.get('walk_forward', []),
+                    }
+            # 附带验收状态（供结果卡徽章展示）
+            acceptance = None
+            acc_path = config.runs_path('acceptance_report.json')
+            if os.path.exists(acc_path):
+                with open(acc_path, encoding='utf-8') as f:
+                    acc = json.load(f)
+                acceptance = {
+                    'accepted': bool(acc.get('accepted', False)),
+                    'generated_at': acc.get('meta', {}).get('generated_at', ''),
+                    'checks': acc.get('checks', []),
+                }
+            results['acceptance'] = acceptance
+            return results
+        return self._safe(_do)
+
+    def apply_optimized_params(self, code=None, results_json=None):
+        """一键应用参数：调 gen_profiles.apply_optimized_auto 写回 profile。
+        成功后重载 profile + 失效缓存。
+        Returns: {ok, data: {applied, code, acceptance}}
+        """
+        def _do():
+            import config
+            self._ensure_profile(code)
+            target_code = config.CURRENT_PROFILE_CODE
+            if not results_json:
+                results_json = config.runs_path('light_excess_results.json')
+            tools_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tools')
+            if tools_dir not in sys.path:
+                sys.path.insert(0, tools_dir)
+            import gen_profiles
+            ok = gen_profiles.apply_optimized_auto(target_code, results_json)
+            # 重载 profile + 失效缓存
+            config.activate_profile(target_code)
+            self._strategy_cache = None
+            self._data_cache = None
+            self._cached_profile = target_code
+            # 验收状态
+            acceptance = None
+            acc_path = config.runs_path('acceptance_report.json')
+            if os.path.exists(acc_path):
+                with open(acc_path, encoding='utf-8') as f:
+                    acc = json.load(f)
+                acceptance = {
+                    'accepted': bool(acc.get('accepted', False)),
+                    'generated_at': acc.get('meta', {}).get('generated_at', ''),
+                    'checks': acc.get('checks', []),
+                }
+            return {'applied': ok, 'code': target_code, 'acceptance': acceptance}
+        return self._safe(_do)
+
+    def get_diagnostics(self, code=None):
+        """优化前诊断：仓位分布 / 策略-基准相关性 / 超额来源分解"""
+        def _do():
+            import config
+            self._ensure_profile(code)
+            return _build_diagnostics()
+        return self._safe(_do)
+
+    def get_param_versions(self, code=None):
+        """V6 vs V7 参数版本对比"""
+        def _do():
+            import config
+            self._ensure_profile(code)
+            return _build_param_versions()
+        return self._safe(_do)
+
 
 def _sanitize(value):
     """递归把 numpy 标量转换为原生 Python 类型（保证 JSON 可序列化）"""
@@ -704,4 +919,148 @@ def _build_backtest_payload():
         'buy_markers': buy_markers,
         'sell_markers': sell_markers,
         'trades': trades,
+    }
+
+
+def _build_diagnostics():
+    """优化前诊断数据：仓位分布直方图 / 策略-基准日收益相关性 / 超额来源分解。
+
+    计算路径与 CLI --eval 同源（strategy.run -> bt.run）。
+    超额分解恒等式：excess = position + timing + residual（残差吸收成本与近似误差）：
+      - position_pp = (mean(pos_held) - 1) * Σ r_t         平均仓位效应
+      - timing_pp   = Σ (pos_held - mean(pos_held)) * r_t  择时协方差效应
+      - residual_pp = excess - position - timing
+    """
+    import config
+    from data_updater import load_data_from_db
+    from strategy import V6Strategy
+    from backtest import V6Backtest
+    import numpy as np
+
+    df = load_data_from_db()
+    if df is None or len(df) == 0:
+        return {'available': False, 'reason': '无法加载数据，请先更新数据'}
+
+    strategy = V6Strategy(use_ml=True, emotion_method='weighted')
+    signals = strategy.run(df)
+    bt = V6Backtest(df, strategy=strategy)
+    results = bt.run(signals)
+    if not results:
+        return {'available': False, 'reason': '回测失败，未生成结果'}
+
+    # ---- 仓位分布（10 等分桶）----
+    positions = [s.get('current_position', 0) for s in bt.daily_signals]
+    pos_dist = []
+    n = len(positions)
+    if n:
+        for i in range(10):
+            lo, hi = i / 10, (i + 1) / 10
+            cnt = sum(1 for p in positions if lo <= p < hi)
+            pos_dist.append({
+                'bin': f'{lo:.1f}-{hi:.1f}',
+                'count': cnt,
+                'pct': round(cnt / n * 100, 1),
+            })
+        pos_stats = {
+            'min': round(min(positions), 4),
+            'max': round(max(positions), 4),
+            'mean': round(sum(positions) / n, 4),
+            'pct_ge_90': round(sum(1 for p in positions if p >= 0.90) / n * 100, 1),
+            'pct_lt_30': round(sum(1 for p in positions if p < 0.30) / n * 100, 1),
+            'pct_lt_70': round(sum(1 for p in positions if p < 0.70) / n * 100, 1),
+        }
+    else:
+        pos_stats = {}
+
+    # ---- 策略/基准日收益 + 相关性 + 超额分解 ----
+    closes = bt.df['close'].astype(float).values
+    r_bench = np.diff(closes) / closes[:-1]
+    pos_arr = np.array(positions[:len(r_bench)], dtype=float)
+    pos_held = np.concatenate([[pos_arr[0]], pos_arr[:-1]]) if len(pos_arr) else pos_arr
+    eq = np.array([e['equity'] for e in bt.daily_equity], dtype=float)
+    r_strat = np.diff(eq) / eq[:-1]
+
+    m = min(len(r_strat), len(r_bench))
+    corr = float(np.corrcoef(r_strat[:m], r_bench[:m])[0, 1]) if m > 1 else 0.0
+
+    excess = float(np.sum((pos_held - 1.0) * r_bench))
+    position_eff = float((np.mean(pos_held) - 1.0) * np.sum(r_bench))
+    timing_eff = float(np.sum((pos_held - np.mean(pos_held)) * r_bench))
+    residual = excess - position_eff - timing_eff
+
+    return {
+        'available': True,
+        'meta': {
+            'code': config.CURRENT_PROFILE_CODE or config.STOCK_CODE,
+            'data_start': str(df.index[0])[:10],
+            'data_end': str(df.index[-1])[:10],
+            'trading_days': int(len(df)),
+        },
+        'position_dist': pos_dist,
+        'position_stats': pos_stats,
+        'correlation': {
+            'pearson_r': round(corr, 4),
+            'n': m,
+            'strategy_vol_pct': round(float(np.std(r_strat) * np.sqrt(252) * 100), 2) if len(r_strat) > 1 else 0,
+            'benchmark_vol_pct': round(float(np.std(r_bench) * np.sqrt(252) * 100), 2) if len(r_bench) > 1 else 0,
+        },
+        'excess_decomp': {
+            'excess_pp': round(excess * 100, 2),
+            'position_pp': round(position_eff * 100, 2),
+            'timing_pp': round(timing_eff * 100, 2),
+            'residual_pp': round(residual * 100, 2),
+            'avg_position': round(float(np.mean(pos_held)), 4) if len(pos_held) else 0,
+            'benchmark_total_pct': round(float(np.sum(r_bench) * 100), 2),
+        },
+        'performance': {
+            'strategy_return_pct': round(results.get('strategy_return', 0) * 100, 2),
+            'benchmark_return_pct': round(results.get('benchmark_return', 0) * 100, 2),
+            'excess_return_pct': round(results.get('excess_return', 0) * 100, 2),
+            'max_drawdown_pct': round(results.get('max_drawdown', 0) * 100, 2),
+            'total_trades': int(results.get('total_trades', 0)),
+        },
+    }
+
+
+def _build_param_versions():
+    """V6 vs V7 参数版本对比：V6 值取自 V6.2.3 旧 config，V7 值取自当前 profile"""
+    import config
+    tools_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tools')
+    if tools_dir not in sys.path:
+        sys.path.insert(0, tools_dir)
+    import gen_profiles
+    code = config.CURRENT_PROFILE_CODE or config.STOCK_CODE
+    old_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '..', 'V6.2.3')
+    old_name = '科创' if code == '589800' else 'A500'
+    old_path = os.path.join(old_dir, old_name, 'config.py')
+    if not os.path.exists(old_path):
+        return {'available': False, 'reason': f'旧版 config 不存在: {old_path}'}
+    old = gen_profiles.load_module('old_config', old_path)
+    profile = config.load_profile(code)
+
+    rows = []
+    for k in gen_profiles.STRATEGY_KEYS:
+        v6 = getattr(old, k, None)
+        v7 = profile.get(k)
+        if v6 is None and v7 is None:
+            continue
+        is_new = v6 is None
+        changed = (not is_new) and (v6 != v7)
+        rows.append({
+            'key': k,
+            'v6': _sanitize(v6),
+            'v7': _sanitize(v7),
+            'changed': bool(changed),
+            'is_new': bool(is_new),
+        })
+    rows.sort(key=lambda r: (r['is_new'], r['key']))
+    return {
+        'available': True,
+        'code': code,
+        'rows': rows,
+        'summary': {
+            'total': len(rows),
+            'changed': sum(1 for r in rows if r['changed']),
+            'new': sum(1 for r in rows if r['is_new']),
+        },
     }

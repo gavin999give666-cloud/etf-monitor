@@ -115,13 +115,23 @@ check("浮盈 +10%（未达 +15%）→ 不触发", cap is None and not acts, f"c
 
 g = RiskGuard()
 g.on_entry(100.0, '2026-01-01')
-cap, acts = g.evaluate(96.0, 0.9, 10000, high_60d=100.0, date='2026-01-10')  # 距高点4%
-check("距60日高点回撤 4% → 清仓锁利", cap == 0.0 and has_type(acts, 'trail_exit'), f"cap={cap}")
+cap, acts = g.evaluate(96.0, 0.9, 10000, high_60d=100.0, date='2026-01-10')  # 距高点4% 但浮亏-4%
+check("距60日高点回撤 4% 但浮亏 → 不触发锁利（P6.7 修复）", cap is None and not acts, f"cap={cap}")
 
 g = RiskGuard()
 g.on_entry(100.0, '2026-01-01')
-cap, acts = g.evaluate(95.0, 0.9, 10000, high_60d=100.0, date='2026-01-10')  # 距高点5%
-check("距60日高点回撤 5% → 清仓锁利", cap == 0.0 and has_type(acts, 'trail_exit'), f"cap={cap}")
+cap, acts = g.evaluate(95.0, 0.9, 10000, high_60d=100.0, date='2026-01-10')  # 距高点5% 但浮亏-5%
+check("距60日高点回撤 5% 但浮亏 → 不触发锁利（P6.7 修复）", cap is None and not acts, f"cap={cap}")
+
+g = RiskGuard()
+g.on_entry(90.0, '2026-01-01')
+cap, acts = g.evaluate(96.0, 0.9, 10000, high_60d=100.0, date='2026-01-10')  # 浮盈+6.7% 且距高点4%
+check("浮盈 +6.7% 且距60日高点 4% → 清仓锁利", cap == 0.0 and has_type(acts, 'trail_exit'), f"cap={cap}")
+
+g = RiskGuard()
+g.on_entry(85.0, '2026-01-01')
+cap, acts = g.evaluate(95.0, 0.9, 10000, high_60d=100.0, date='2026-01-10')  # 浮盈+11.8% 且距高点5%
+check("浮盈 +11.8% 且距60日高点 5% → 清仓锁利", cap == 0.0 and has_type(acts, 'trail_exit'), f"cap={cap}")
 
 g = RiskGuard()
 g.on_entry(100.0, '2026-01-01')

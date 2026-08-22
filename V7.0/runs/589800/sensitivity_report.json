@@ -1,0 +1,732 @@
+{
+  "meta": {
+    "code": "589800",
+    "generated_at": "2026-08-22 10:25:40",
+    "source": "light_excess_results.json",
+    "cliff_threshold": 0.3,
+    "top_n": 1
+  },
+  "base": {
+    "equity": 1.5498132509457605,
+    "strategy_return": 0.5498132509457606,
+    "excess_return": -0.17184666808257953,
+    "max_drawdown": -0.10761817530738604,
+    "total_trades": 40
+  },
+  "cliff_params": [],
+  "params": {
+    "BEAR_BUY_MULT": {
+      "base": 1.2115016055454875,
+      "plus": {
+        "value": 1.3326517661000363,
+        "equity": 1.4523230766272848,
+        "strategy_return": 0.4523230766272849,
+        "excess_return": -0.26933684240105527,
+        "max_drawdown": -0.1217409227146673,
+        "total_trades": 42,
+        "equity_change_pct": 6.29
+      },
+      "minus": {
+        "value": 1.0903514449909388,
+        "equity": 1.4785302388193662,
+        "strategy_return": 0.47853023881936624,
+        "excess_return": -0.2431296802089739,
+        "max_drawdown": -0.10915373956175266,
+        "total_trades": 37,
+        "equity_change_pct": 4.6
+      },
+      "max_change_pct": 6.29,
+      "is_cliff": false
+    },
+    "BOTTOMFISHING_BOOST": {
+      "base": 0.12065259677457107,
+      "plus": {
+        "value": 0.1327178564520282,
+        "equity": 1.5545077868692974,
+        "strategy_return": 0.5545077868692975,
+        "excess_return": -0.16715213215904268,
+        "max_drawdown": -0.10808847013054383,
+        "total_trades": 40,
+        "equity_change_pct": 0.3
+      },
+      "minus": {
+        "value": 0.10858733709711398,
+        "equity": 1.5451303303097945,
+        "strategy_return": 0.5451303303097944,
+        "excess_return": -0.17652958871854574,
+        "max_drawdown": -0.10714788048422823,
+        "total_trades": 40,
+        "equity_change_pct": 0.3
+      },
+      "max_change_pct": 0.3,
+      "is_cliff": false
+    },
+    "BULL_BUY_MULT": {
+      "base": 2.924809614467398,
+      "plus": {
+        "value": 3.0,
+        "equity": 1.5502128465880012,
+        "strategy_return": 0.5502128465880011,
+        "excess_return": -0.17144707244033908,
+        "max_drawdown": -0.10648960818160008,
+        "total_trades": 40,
+        "equity_change_pct": 0.03
+      },
+      "minus": {
+        "value": 2.632328653020658,
+        "equity": 1.5675859063105575,
+        "strategy_return": 0.5675859063105576,
+        "excess_return": -0.15407401271778254,
+        "max_drawdown": -0.11321769110798632,
+        "total_trades": 39,
+        "equity_change_pct": 1.15
+      },
+      "max_change_pct": 1.15,
+      "is_cliff": false
+    },
+    "CENTER_BEAR": {
+      "base": 0.1003377786483392,
+      "plus": {
+        "value": 0.11037155651317314,
+        "equity": 1.552289445046555,
+        "strategy_return": 0.552289445046555,
+        "excess_return": -0.16937047398178517,
+        "max_drawdown": -0.10860914170002597,
+        "total_trades": 40,
+        "equity_change_pct": 0.16
+      },
+      "minus": {
+        "value": 0.09030400078350528,
+        "equity": 1.547337298764751,
+        "strategy_return": 0.5473372987647508,
+        "excess_return": -0.17432262026358936,
+        "max_drawdown": -0.10662667345878987,
+        "total_trades": 40,
+        "equity_change_pct": 0.16
+      },
+      "max_change_pct": 0.16,
+      "is_cliff": false
+    },
+    "CENTER_BULL": {
+      "base": 0.8978105134173464,
+      "plus": {
+        "value": 0.9,
+        "equity": 1.5503912079399864,
+        "strategy_return": 0.5503912079399864,
+        "excess_return": -0.17126871108835373,
+        "max_drawdown": -0.10762981177192055,
+        "total_trades": 40,
+        "equity_change_pct": 0.04
+      },
+      "minus": {
+        "value": 0.8080294620756118,
+        "equity": 1.5193290745017145,
+        "strategy_return": 0.5193290745017144,
+        "excess_return": -0.20233084452662575,
+        "max_drawdown": -0.10677507665748728,
+        "total_trades": 40,
+        "equity_change_pct": 1.97
+      },
+      "max_change_pct": 1.97,
+      "is_cliff": false
+    },
+    "CENTER_RANGE": {
+      "base": 0.5085274840397213,
+      "plus": {
+        "value": 0.5593802324436934,
+        "equity": 1.5566890673560938,
+        "strategy_return": 0.5566890673560938,
+        "excess_return": -0.16497085167224634,
+        "max_drawdown": -0.1074302647694111,
+        "total_trades": 40,
+        "equity_change_pct": 0.44
+      },
+      "minus": {
+        "value": 0.4576747356357491,
+        "equity": 1.5429554045305771,
+        "strategy_return": 0.5429554045305771,
+        "excess_return": -0.17870451449776303,
+        "max_drawdown": -0.10780608584536129,
+        "total_trades": 40,
+        "equity_change_pct": 0.44
+      },
+      "max_change_pct": 0.44,
+      "is_cliff": false
+    },
+    "CONFIDENCE_INCREMENT": {
+      "base": 4,
+      "plus": {
+        "value": 4,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 4,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "CONFIRMATION_THRESHOLD": {
+      "base": 67,
+      "plus": {
+        "value": 74,
+        "equity": 1.552707544581127,
+        "strategy_return": 0.5527075445811269,
+        "excess_return": -0.16895237444721323,
+        "max_drawdown": -0.10648960818159998,
+        "total_trades": 40,
+        "equity_change_pct": 0.19
+      },
+      "minus": {
+        "value": 60,
+        "equity": 1.5420368796966424,
+        "strategy_return": 0.5420368796966424,
+        "excess_return": -0.17962303933169776,
+        "max_drawdown": -0.1072704620571218,
+        "total_trades": 40,
+        "equity_change_pct": 0.5
+      },
+      "max_change_pct": 0.5,
+      "is_cliff": false
+    },
+    "DOUBLE_BOTTOM_REBOUND_MIN": {
+      "base": 0.033,
+      "plus": {
+        "value": 0.035,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.0297,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "EXPIRY_THRESHOLD": {
+      "base": 39,
+      "plus": {
+        "value": 40,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 35,
+        "equity": 1.5584557161013786,
+        "strategy_return": 0.5584557161013787,
+        "excess_return": -0.16320420292696147,
+        "max_drawdown": -0.10761817530738635,
+        "total_trades": 40,
+        "equity_change_pct": 0.56
+      },
+      "max_change_pct": 0.56,
+      "is_cliff": false
+    },
+    "MIN_HOLD_DAYS": {
+      "base": 12,
+      "plus": {
+        "value": 13,
+        "equity": 1.5320540669372495,
+        "strategy_return": 0.5320540669372494,
+        "excess_return": -0.1896058520910907,
+        "max_drawdown": -0.11840026476100067,
+        "total_trades": 41,
+        "equity_change_pct": 1.15
+      },
+      "minus": {
+        "value": 11,
+        "equity": 1.4974901314745415,
+        "strategy_return": 0.49749013147454135,
+        "excess_return": -0.2241697875537988,
+        "max_drawdown": -0.11066362983445702,
+        "total_trades": 40,
+        "equity_change_pct": 3.38
+      },
+      "max_change_pct": 3.38,
+      "is_cliff": false
+    },
+    "MOMO_EXH_RETURN_THRESHOLD": {
+      "base": 0.044,
+      "plus": {
+        "value": 0.045,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.039599999999999996,
+        "equity": 1.541764721251755,
+        "strategy_return": 0.5417647212517548,
+        "excess_return": -0.17989519777658536,
+        "max_drawdown": -0.10727046205712193,
+        "total_trades": 41,
+        "equity_change_pct": 0.52
+      },
+      "max_change_pct": 0.52,
+      "is_cliff": false
+    },
+    "OBSERVATION_WINDOW_MAX": {
+      "base": 7,
+      "plus": {
+        "value": 8,
+        "equity": 1.5484667262925573,
+        "strategy_return": 0.5484667262925573,
+        "excess_return": -0.17319319273578282,
+        "max_drawdown": -0.10761817530738615,
+        "total_trades": 40,
+        "equity_change_pct": 0.09
+      },
+      "minus": {
+        "value": 6,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.09,
+      "is_cliff": false
+    },
+    "OVERHEAT_CENTER_MULT": {
+      "base": 0.6643290454241003,
+      "plus": {
+        "value": 0.7,
+        "equity": 1.5624063039149736,
+        "strategy_return": 0.5624063039149736,
+        "excess_return": -0.15925361511336655,
+        "max_drawdown": -0.10787438450545245,
+        "total_trades": 40,
+        "equity_change_pct": 0.81
+      },
+      "minus": {
+        "value": 0.5978961408816903,
+        "equity": 1.5264726586050203,
+        "strategy_return": 0.5264726586050203,
+        "excess_return": -0.1951872604233198,
+        "max_drawdown": -0.1071410154591179,
+        "total_trades": 40,
+        "equity_change_pct": 1.51
+      },
+      "max_change_pct": 1.51,
+      "is_cliff": false
+    },
+    "PANIC_SELL_DROP_THRESHOLD": {
+      "base": -0.04200000000000001,
+      "plus": {
+        "value": -0.04620000000000001,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": -0.03780000000000001,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "PULLBACK_MA_DIST": {
+      "base": 0.038,
+      "plus": {
+        "value": 0.04,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.0342,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "RSI_OVERBOUGHT_THRESHOLD": {
+      "base": 58,
+      "plus": {
+        "value": 64,
+        "equity": 1.5584557161013786,
+        "strategy_return": 0.5584557161013787,
+        "excess_return": -0.16320420292696147,
+        "max_drawdown": -0.10761817530738635,
+        "total_trades": 40,
+        "equity_change_pct": 0.56
+      },
+      "minus": {
+        "value": 58,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.56,
+      "is_cliff": false
+    },
+    "SCORE_BEHAVIOR_WEIGHT": {
+      "base": 0.3077721862748382,
+      "plus": {
+        "value": 0.33854940490232205,
+        "equity": 1.5635944018512815,
+        "strategy_return": 0.5635944018512815,
+        "excess_return": -0.15806551717705863,
+        "max_drawdown": -0.10801848734845648,
+        "total_trades": 40,
+        "equity_change_pct": 0.89
+      },
+      "minus": {
+        "value": 0.2769949676473544,
+        "equity": 1.5722578558072122,
+        "strategy_return": 0.5722578558072122,
+        "excess_return": -0.14940206322112792,
+        "max_drawdown": -0.11321769110798634,
+        "total_trades": 39,
+        "equity_change_pct": 1.45
+      },
+      "max_change_pct": 1.45,
+      "is_cliff": false
+    },
+    "SCORE_CONFIDENCE_WEIGHT": {
+      "base": 0.28475995630318784,
+      "plus": {
+        "value": 0.3,
+        "equity": 1.5515004360521605,
+        "strategy_return": 0.5515004360521605,
+        "excess_return": -0.17015948297617967,
+        "max_drawdown": -0.10761817530738595,
+        "total_trades": 40,
+        "equity_change_pct": 0.11
+      },
+      "minus": {
+        "value": 0.25628396067286907,
+        "equity": 1.5541485407435673,
+        "strategy_return": 0.5541485407435673,
+        "excess_return": -0.1675113782847728,
+        "max_drawdown": -0.10761817530738585,
+        "total_trades": 39,
+        "equity_change_pct": 0.28
+      },
+      "max_change_pct": 0.28,
+      "is_cliff": false
+    },
+    "SCORE_HOLD_ZONE": {
+      "base": 14,
+      "plus": {
+        "value": 15,
+        "equity": 1.5504171298996758,
+        "strategy_return": 0.5504171298996758,
+        "excess_return": -0.1712427891286643,
+        "max_drawdown": -0.10727046205712218,
+        "total_trades": 41,
+        "equity_change_pct": 0.04
+      },
+      "minus": {
+        "value": 13,
+        "equity": 1.5237373864780646,
+        "strategy_return": 0.5237373864780646,
+        "excess_return": -0.1979225325502756,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 39,
+        "equity_change_pct": 1.68
+      },
+      "max_change_pct": 1.68,
+      "is_cliff": false
+    },
+    "SCORE_REWARD_WEIGHT": {
+      "base": 0.2207259520132419,
+      "plus": {
+        "value": 0.24279854721456612,
+        "equity": 1.4568537419795833,
+        "strategy_return": 0.45685374197958317,
+        "excess_return": -0.264806177048757,
+        "max_drawdown": -0.12174092271466734,
+        "total_trades": 39,
+        "equity_change_pct": 6.0
+      },
+      "minus": {
+        "value": 0.2,
+        "equity": 1.485530192273713,
+        "strategy_return": 0.48553019227371297,
+        "excess_return": -0.23612972675462718,
+        "max_drawdown": -0.10915373956175269,
+        "total_trades": 39,
+        "equity_change_pct": 4.15
+      },
+      "max_change_pct": 6.0,
+      "is_cliff": false
+    },
+    "SCORE_RISK_WEIGHT": {
+      "base": 0.19946648670755052,
+      "plus": {
+        "value": 0.2194131353783056,
+        "equity": 1.4937539961158217,
+        "strategy_return": 0.4937539961158216,
+        "excess_return": -0.22790592291251854,
+        "max_drawdown": -0.10915373956175266,
+        "total_trades": 38,
+        "equity_change_pct": 3.62
+      },
+      "minus": {
+        "value": 0.17951983803679547,
+        "equity": 1.3678980059147354,
+        "strategy_return": 0.3678980059147354,
+        "excess_return": -0.3537619131136047,
+        "max_drawdown": -0.1359197922316759,
+        "total_trades": 41,
+        "equity_change_pct": 11.74
+      },
+      "max_change_pct": 11.74,
+      "is_cliff": false
+    },
+    "STOP_LOSS_HARD": {
+      "base": -0.1269962639048231,
+      "plus": {
+        "value": -0.13969589029530544,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": -0.1142966375143408,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "STOP_LOSS_PCT": {
+      "base": -0.11566775744687786,
+      "plus": {
+        "value": -0.12,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": -0.10410098170219008,
+        "equity": 1.5452511849929242,
+        "strategy_return": 0.5452511849929242,
+        "excess_return": -0.1764087340354159,
+        "max_drawdown": -0.10774217029700932,
+        "total_trades": 44,
+        "equity_change_pct": 0.29
+      },
+      "max_change_pct": 0.29,
+      "is_cliff": false
+    },
+    "TAKE_PROFIT_T1": {
+      "base": 0.11815261870292253,
+      "plus": {
+        "value": 0.1299678805732148,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.10633735683263028,
+        "equity": 1.521610126883758,
+        "strategy_return": 0.521610126883758,
+        "excess_return": -0.20004979214458218,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 1.82
+      },
+      "max_change_pct": 1.82,
+      "is_cliff": false
+    },
+    "TAKE_PROFIT_T2": {
+      "base": 0.2840354561995726,
+      "plus": {
+        "value": 0.3,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.2556319105796154,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "TARGET_VOL": {
+      "base": 0.16776661738418394,
+      "plus": {
+        "value": 0.18454327912260235,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.15098995564576556,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "TRADE_ACTUAL_DELTA": {
+      "base": 0.065,
+      "plus": {
+        "value": 0.07150000000000001,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.0585,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "TRADE_TARGET_DELTA": {
+      "base": 0.023000000000000003,
+      "plus": {
+        "value": 0.025300000000000007,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.020700000000000003,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    },
+    "TRAIL_EXIT_DRAWDOWN": {
+      "base": 0.05206903894084351,
+      "plus": {
+        "value": 0.057275942834927866,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 0.046862135046759165,
+        "equity": 1.5630792773004845,
+        "strategy_return": 0.5630792773004845,
+        "excess_return": -0.1585806417278557,
+        "max_drawdown": -0.10761817530738611,
+        "total_trades": 41,
+        "equity_change_pct": 0.86
+      },
+      "max_change_pct": 0.86,
+      "is_cliff": false
+    },
+    "TREND_FAIL_SCORE": {
+      "base": 45,
+      "plus": {
+        "value": 50,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "minus": {
+        "value": 40,
+        "equity": 1.5498132509457605,
+        "strategy_return": 0.5498132509457606,
+        "excess_return": -0.17184666808257953,
+        "max_drawdown": -0.10761817530738604,
+        "total_trades": 40,
+        "equity_change_pct": 0.0
+      },
+      "max_change_pct": 0.0,
+      "is_cliff": false
+    }
+  }
+}

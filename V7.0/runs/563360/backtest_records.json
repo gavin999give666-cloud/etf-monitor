@@ -1,32 +1,32 @@
 {
   "meta": {
     "version": "V6.2.3",
-    "generated_at": "2026-08-21 12:17:14",
+    "generated_at": "2026-08-21 19:52:58",
     "backtest_start": "2024-10-15 00:00:00",
-    "backtest_end": "2026-08-20 00:00:00",
-    "trading_days": 453
+    "backtest_end": "2026-08-21 00:00:00",
+    "trading_days": 454
   },
   "performance": {
-    "benchmark_return_pct": 29.83,
-    "strategy_return_pct": 34.23,
-    "excess_return_pct": 4.4,
+    "benchmark_return_pct": 30.54,
+    "strategy_return_pct": 34.69,
+    "excess_return_pct": 4.16,
     "max_drawdown_pct": -13.09,
-    "annualized_return_pct": 17.79,
-    "volatility_pct": 16.25,
-    "sharpe_ratio": 1.092,
-    "sortino_ratio": 1.291,
-    "calmar_ratio": 1.359,
-    "profit_factor": Infinity,
-    "win_rate_pct": 100.0,
-    "kelly": 1.0,
-    "expectancy_pct": 4.2,
-    "total_trades": 11,
+    "annualized_return_pct": 17.98,
+    "volatility_pct": 16.23,
+    "sharpe_ratio": 1.102,
+    "sortino_ratio": 1.306,
+    "calmar_ratio": 1.373,
+    "profit_factor": 461.9,
+    "win_rate_pct": 91.7,
+    "kelly": 0.915,
+    "expectancy_pct": 3.84,
+    "total_trades": 12,
     "winning_trades": 11,
-    "losing_trades": 0,
-    "avg_hold_days": 24.9,
-    "final_equity": 13422.9,
+    "losing_trades": 1,
+    "avg_hold_days": 22.8,
+    "final_equity": 13469.11,
     "max_consecutive_wins": 11,
-    "max_consecutive_losses": 0
+    "max_consecutive_losses": 1
   },
   "trades": [
     {
@@ -1024,6 +1024,63 @@
           "ml": 0.087,
           "emotion": 0.1
         }
+      }
+    },
+    {
+      "trade_id": 12,
+      "entry_date": "2026-08-21 00:00:00",
+      "exit_date": "2026-08-21 00:00:00",
+      "entry_price": 1.2923,
+      "exit_price": 1.291,
+      "pnl_pct": -0.1,
+      "pnl_label": "LOSS",
+      "entry_behavior": [],
+      "entry_regime": "Bear",
+      "entry_psychology": "Hope",
+      "entry_emotion_score": 46.8,
+      "entry_emotion_improving": false,
+      "entry_score": 80.9,
+      "entry_reward": 21.0,
+      "entry_risk": 9.0,
+      "entry_factors": {
+        "rule_confidence": {
+          "label": "人工规则置信度",
+          "raw": 66.4,
+          "weight": 0.3,
+          "contribution": 19.9
+        },
+        "replay_confidence": {
+          "label": "Replay Learning 历史成功率修正",
+          "multiplier": 0.93,
+          "adjusted_confidence": 61.5,
+          "weight": 0.25,
+          "contribution": 15.4
+        },
+        "pre_decay": 35.3,
+        "time_decay_multiplier": 0.7,
+        "final_confidence": 24.7,
+        "score_components": {
+          "behavior_score": 100,
+          "confidence": 31.6,
+          "reward_score": 21.0,
+          "regime_multiplier": 0.9,
+          "final_score": 80.9
+        },
+        "evidence_weights": {
+          "rule": 0.475,
+          "replay": 0.338,
+          "ml": 0.087,
+          "emotion": 0.1
+        }
+      },
+      "exit_behavior": [
+        "EndOfBacktest"
+      ],
+      "exit_psychology": "End",
+      "exit_score": 0,
+      "exit_risk": 0,
+      "exit_factors": {
+        "reason": "回测结束强制平仓"
       }
     }
   ],
@@ -9600,6 +9657,24 @@
       "action": "",
       "executed_price": null,
       "trade_value": 0
+    },
+    {
+      "date": "2026-08-21 00:00:00",
+      "buy_score": 80.9,
+      "sell_score": 32.7,
+      "net_score": 48.2,
+      "regime": "Bear",
+      "psychology": "Hope",
+      "reward_score": 21.0,
+      "risk_score": 9.0,
+      "target_position": 0.95,
+      "current_position": 0.6938,
+      "buy_behaviors": [],
+      "sell_behaviors": [],
+      "executed": true,
+      "action": "BUY",
+      "executed_price": 1.2922909999999999,
+      "trade_value": 3451.2625778701586
     }
   ],
   "daily_equity": [
@@ -11414,6 +11489,10 @@
     {
       "date": "2026-08-20 00:00:00",
       "equity": 13422.899595438485
+    },
+    {
+      "date": "2026-08-21 00:00:00",
+      "equity": 13469.106201617493
     }
   ],
   "score_history": [
@@ -15936,6 +16015,16 @@
       "emotion_score": 42.16187385377563,
       "reward": 17.5,
       "risk": 11.4
+    },
+    {
+      "date": "2026-08-21 00:00:00",
+      "buy_score": 80.9,
+      "sell_score": 32.7,
+      "regime": "Bear",
+      "psychology": "Hope",
+      "emotion_score": 46.833772689954564,
+      "reward": 21.0,
+      "risk": 9.0
     }
   ],
   "config_snapshot": {

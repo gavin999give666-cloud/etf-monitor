@@ -89,6 +89,18 @@ const api = (function () {
     get_recent_prices: (code, days) => _call('get_recent_prices', code, days),
     // 回测
     run_backtest: (code) => _call('run_backtest', code),
+    // 优化
+    list_optimize_modes: () => _call('list_optimize_modes'),
+    start_optimization: (code, mode_key, trials, cpu_limit) => _call('start_optimization', code, mode_key, trials, cpu_limit),
+    get_optimization_status: (taskId) => _call('get_optimization_status', taskId),
+    pause_optimization: () => _call('pause_optimization'),
+    resume_optimization: () => _call('resume_optimization'),
+    stop_optimization: () => _call('stop_optimization'),
+    set_cpu_limit: (cpu_limit) => _call('set_cpu_limit', cpu_limit),
+    get_optimization_results: (code) => _call('get_optimization_results', code),
+    apply_optimized_params: (code, results_json) => _call('apply_optimized_params', code, results_json),
+    get_diagnostics: (code) => _call('get_diagnostics', code),
+    get_param_versions: (code) => _call('get_param_versions', code),
   };
 })();
 
@@ -173,6 +185,33 @@ createApp({
     const btTrades = ref([]);
     let btCharts = {}; // 已初始化的 ECharts 实例缓存
 
+    // 优化页状态
+    const optModes = ref([]);
+    const optModeKey = ref('');
+    const optTrials = ref(300);
+    const optCpuLimit = ref(100);
+    const optRunning = ref(false);
+    const optTaskId = ref('');
+    const optError = ref('');
+    const optProgress = reactive({ phase: '', current: 0, total: 0, pct: 0, workers: 0, cpu: 0 });
+    const optLogLines = ref([]);
+    const optLogSeq = ref(0);
+    const optDiagLoading = ref(false);
+    const optParamLoading = ref(false);
+    const optDiagnostics = reactive({ available: false, reason: '', meta: {}, position_dist: [], position_stats: {}, correlation: {}, excess_decomp: {}, performance: {} });
+    const optParamVersions = reactive({ available: false, reason: '', rows: [], summary: {} });
+    const optResults = ref({});
+    const optTop20 = ref([]);
+    const optResultFile = ref('');
+    const optResultMeta = reactive({});
+    const optAcceptance = ref(null);
+    const optApplyMsg = ref('');
+    const optApplyOk = ref(false);
+    const optLogRef = ref(null);
+    let optCharts = {}; // 诊断图 ECharts 实例缓存
+    let optPollTimer = null;
+    let optLoadedOnce = false; // 优化页是否已加载过一次（避免重复请求）
+
     // 绩效指标卡片配置
     const btMetricDefs = [
       { key: 'strategy_return_pct', label: '策略收益率', fmt: v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%', size: 22, color: v => v >= 0 ? 'buy' : 'sell', sub: p => `超额 ${fmtSigned(p.excess_return_pct)}%` },
@@ -205,6 +244,12 @@ createApp({
           dim: raw === undefined || raw === null,
         };
       });
+    });
+
+    // 优化页：当前模式描述
+    const optModeDesc = computed(() => {
+      const m = optModes.value.find(x => x.key === optModeKey.value);
+      return m ? m.desc : '';
     });
 
     // 导航
@@ -486,6 +531,279 @@ createApp({
       }
     }
 
+    // ------------------------------------------------------------
+    // 优化页
+    // ------------------------------------------------------------
+    function fmtNum(v) {
+      if (v === null || v === undefined || isNaN(v)) return '—';
+      return Number(v).toFixed(4);
+    }
+    function fmtPct(v) {
+      if (v === null || v === undefined || isNaN(v)) return '—';
+      return (v >= 0 ? '+' : '') + Number(v).toFixed(2) + '%';
+    }
+
+    // 加载优化模式列表
+    async function loadOptimizeModes() {
+      const res = await api.list_optimize_modes();
+      if (res.ok) {
+        optModes.value = res.data;
+        if (optModes.value.length && !optModeKey.value) {
+          optModeKey.value = optModes.value[0].key;
+          const m = optModes.value[0];
+          optTrials.value = m.default_trials;
+        }
+      } else {
+        optError.value = res.error || '加载优化模式失败';
+      }
+    }
+
+    // 优化前诊断
+    async function loadDiagnostics() {
+      optDiagLoading.value = true;
+      const res = await api.get_diagnostics();
+      optDiagLoading.value = false;
+      if (res.ok) {
+        Object.assign(optDiagnostics, res.data);
+        if (optDiagnostics.available) {
+          nextTick(() => renderDiagCharts());
+        }
+      } else {
+        optDiagnostics.available = false;
+        optDiagnostics.reason = res.error || '诊断计算失败';
+      }
+    }
+
+    // 诊断图：仓位分布直方图 + 超额来源分解堆叠条
+    function renderDiagCharts() {
+      const elPos = document.getElementById('diagChartPos');
+      if (elPos) {
+        if (optCharts.pos && optCharts.pos.getDom() !== elPos) {
+          optCharts.pos.dispose();
+          optCharts.pos = null;
+        }
+        if (!optCharts.pos) optCharts.pos = echarts.init(elPos, null, { renderer: 'canvas' });
+        const dist = optDiagnostics.position_dist || [];
+        optCharts.pos.setOption({
+          backgroundColor: 'transparent',
+          textStyle: { color: BT_CHART_TEXT, fontFamily: 'Consolas, monospace' },
+          grid: { top: 20, left: 40, right: 10, bottom: 30 },
+          xAxis: { type: 'category', data: dist.map(d => d.bin), axisLine: { lineStyle: { color: BT_CHART_AXIS } }, axisLabel: { color: BT_CHART_TEXT, fontSize: 10, rotate: 30 } },
+          yAxis: { type: 'value', axisLabel: { color: BT_CHART_TEXT }, splitLine: { lineStyle: { color: '#1e293b' } } },
+          tooltip: { trigger: 'axis', backgroundColor: '#0f172a', borderColor: BT_CHART_AXIS, textStyle: { color: '#e2e8f0', fontSize: 12 }, formatter: p => `${p[0].name}<br/>天数 ${p[0].value}<br/>占比 ${dist[p[0].dataIndex].pct}%` },
+          series: [{
+            type: 'bar', data: dist.map(d => d.count), barWidth: '60%',
+            itemStyle: { color: '#3b82f6', borderRadius: [2, 2, 0, 0] },
+          }],
+        }, true);
+        optCharts.pos.resize();
+        requestAnimationFrame(() => optCharts.pos.resize());
+      }
+
+      const elEx = document.getElementById('diagChartExcess');
+      if (elEx) {
+        if (optCharts.excess && optCharts.excess.getDom() !== elEx) {
+          optCharts.excess.dispose();
+          optCharts.excess = null;
+        }
+        if (!optCharts.excess) optCharts.excess = echarts.init(elEx, null, { renderer: 'canvas' });
+        const d = optDiagnostics.excess_decomp || {};
+        optCharts.excess.setOption({
+          backgroundColor: 'transparent',
+          textStyle: { color: BT_CHART_TEXT, fontFamily: 'Consolas, monospace' },
+          grid: { top: 20, left: 10, right: 10, bottom: 20 },
+          xAxis: { type: 'value', show: false },
+          yAxis: { type: 'category', data: ['超额'], axisLabel: { show: false }, axisLine: { show: false }, axisTick: { show: false } },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: '#0f172a', borderColor: BT_CHART_AXIS, textStyle: { color: '#e2e8f0', fontSize: 12 } },
+          series: [{
+            type: 'bar', stack: 'total', barWidth: 22, data: [{ value: d.position_pp, itemStyle: { color: '#3b82f6' } }],
+          }, {
+            type: 'bar', stack: 'total', barWidth: 22, data: [{ value: d.timing_pp, itemStyle: { color: '#8b5cf6' } }],
+          }, {
+            type: 'bar', stack: 'total', barWidth: 22, data: [{ value: d.residual_pp, itemStyle: { color: '#64748b' } }],
+          }],
+        }, true);
+        optCharts.excess.resize();
+        requestAnimationFrame(() => optCharts.excess.resize());
+      }
+    }
+
+    // 参数版本对比
+    async function loadParamVersions() {
+      optParamLoading.value = true;
+      const res = await api.get_param_versions();
+      optParamLoading.value = false;
+      if (res.ok) {
+        Object.assign(optParamVersions, res.data);
+      } else {
+        optParamVersions.available = false;
+        optParamVersions.reason = res.error || '参数对比加载失败';
+      }
+    }
+
+    // 开始优化
+    async function doStartOptimization() {
+      if (optRunning.value) return;
+      optError.value = '';
+      optApplyMsg.value = '';
+      const res = await api.start_optimization(undefined, optModeKey.value, optTrials.value, optCpuLimit.value);
+      if (res.ok) {
+        optTaskId.value = res.data.task_id;
+        optRunning.value = true;
+        optLogLines.value = [];
+        optLogSeq.value = 0;
+        optProgress.phase = '';
+        optProgress.pct = 0;
+        pollOptimization();
+      } else {
+        optError.value = res.error || '启动优化失败';
+      }
+    }
+
+    // 优化任务轮询（进度 + 日志增量）
+    function pollOptimization() {
+      if (optPollTimer) clearTimeout(optPollTimer);
+      const poll = async () => {
+        if (!optRunning.value) return;
+        const res = await api.get_optimization_status(optTaskId.value);
+        if (!res.ok) {
+          optError.value = res.error;
+          optRunning.value = false;
+          return;
+        }
+        const d = res.data;
+        // 进度面板快照
+        if (d.dashboard) {
+          const p = d.dashboard.progress || {};
+          optProgress.phase = p.phase || '';
+          optProgress.current = p.current || 0;
+          optProgress.total = p.total || 0;
+          optProgress.pct = p.pct || 0;
+          optProgress.workers = d.dashboard.workers || 0;
+          optProgress.cpu = d.dashboard.cpu || 0;
+          // 日志增量追加
+          const logs = d.dashboard.log_lines || [];
+          const seq = d.dashboard.log_seq || 0;
+          if (seq > optLogSeq.value) {
+            const start = Math.max(0, optLogLines.value.length - (optLogSeq.value ? 0 : 0));
+            const newLines = logs.slice(optLogLines.value.length);
+            optLogLines.value.push(...newLines);
+            optLogSeq.value = seq;
+            // 自动滚动到底
+            nextTick(() => {
+              if (optLogRef.value) optLogRef.value.scrollTop = optLogRef.value.scrollHeight;
+            });
+          }
+        }
+        if (d.status === 'done') {
+          optRunning.value = false;
+          loadOptimizationResults();
+          loadDiagnostics();
+          refreshSignal();
+          return;
+        }
+        if (d.status === 'error') {
+          optRunning.value = false;
+          optError.value = d.error || '优化任务失败';
+          return;
+        }
+        optPollTimer = setTimeout(poll, 1200);
+      };
+      optPollTimer = setTimeout(poll, 800);
+    }
+
+    // 暂停 / 继续 / 停止
+    async function doPause() {
+      const res = await api.pause_optimization();
+      if (!res.ok) optError.value = res.error || '暂停失败';
+    }
+    async function doResume() {
+      const res = await api.resume_optimization();
+      if (!res.ok) optError.value = res.error || '继续失败';
+    }
+    async function doStop() {
+      const res = await api.stop_optimization();
+      if (!res.ok) optError.value = res.error || '停止失败';
+    }
+
+    // CPU 上限动态调整
+    async function onCpuLimitChange() {
+      if (!optRunning.value) return;
+      const res = await api.set_cpu_limit(optCpuLimit.value);
+      if (!res.ok) optError.value = res.error || '调整 CPU 上限失败';
+    }
+
+    // 加载优化结果（4 个结果文件 + 验收状态）
+    async function loadOptimizationResults() {
+      const res = await api.get_optimization_results();
+      if (!res.ok) {
+        optError.value = res.error || '加载优化结果失败';
+        return;
+      }
+      optResults.value = res.data;
+      // 验收状态（bridge 在返回中附带）
+      optAcceptance.value = res.data.acceptance || null;
+      // 优先展示 excess 结果文件
+      const files = Object.keys(res.data);
+      const pick = ['light_excess_results.json', 'heavy_excess_results.json', 'light_results.json', 'heavy_results.json']
+        .find(f => files.includes(f));
+      if (pick) {
+        const data = res.data[pick];
+        optResultFile.value = pick;
+        Object.keys(data.meta || {}).forEach(k => { optResultMeta[k] = data.meta[k]; });
+        optTop20.value = data.top20 || [];
+      } else {
+        optResultFile.value = '';
+        optTop20.value = [];
+      }
+    }
+
+    // 应用 Top1 参数
+    async function doApplyParams() {
+      if (!optTop20.value.length) return;
+      optApplyMsg.value = '';
+      optApplyOk.value = false;
+      const res = await api.apply_optimized_params(undefined, undefined);
+      if (res.ok) {
+        optApplyOk.value = true;
+        const acc = res.data.acceptance;
+        optAcceptance.value = acc;
+        let msg = `参数已写入 profile（${res.data.code}）。`;
+        if (acc) {
+          msg += acc.accepted ? ' 验收状态：通过。' : ' 验收状态：未通过，请谨慎使用。';
+        }
+        optApplyMsg.value = msg;
+        // 应用后刷新信号与参数对比
+        refreshSignal();
+        loadParamVersions();
+      } else {
+        optApplyOk.value = false;
+        optApplyMsg.value = res.error || '应用参数失败';
+      }
+    }
+
+    // 清空优化页状态（切换标的时调用）
+    function clearOptimize() {
+      if (optPollTimer) { clearTimeout(optPollTimer); optPollTimer = null; }
+      optRunning.value = false;
+      optTaskId.value = '';
+      optError.value = '';
+      optProgress.phase = '';
+      optProgress.pct = 0;
+      optLogLines.value = [];
+      optLogSeq.value = 0;
+      optTop20.value = [];
+      optResultFile.value = '';
+      Object.keys(optResultMeta).forEach(k => delete optResultMeta[k]);
+      optAcceptance.value = null;
+      optApplyMsg.value = '';
+      optDiagnostics.available = false;
+      optParamVersions.available = false;
+      optLoadedOnce = false;
+      if (optCharts.pos) { optCharts.pos.dispose(); delete optCharts.pos; }
+      if (optCharts.excess) { optCharts.excess.dispose(); delete optCharts.excess; }
+    }
+
     // ECharts 通用主题
     const BT_CHART_TEXT = '#94a3b8';
     const BT_CHART_AXIS = '#334155';
@@ -640,6 +958,18 @@ createApp({
             renderBtPriceChart();
           });
         }
+      } else if (page === 'optimize') {
+        // 首次进入：加载模式列表 + 诊断 + 参数对比 + 结果
+        if (!optLoadedOnce) {
+          optLoadedOnce = true;
+          loadOptimizeModes();
+          loadDiagnostics();
+          loadParamVersions();
+          loadOptimizationResults();
+        } else if (optDiagnostics.available) {
+          // 已有数据：重绘图表（处理 v-if 导致的 DOM 重建）
+          nextTick(() => renderDiagCharts());
+        }
       }
     });
 
@@ -666,6 +996,7 @@ createApp({
       refreshSignal();
       loadRuntimeContext();
       clearBacktest();
+      clearOptimize();
     }
 
     // ------------------------------------------------------------
@@ -742,6 +1073,39 @@ createApp({
       btTrades,
       doBacktest,
       refreshBacktest,
+
+      // 优化页
+      optModes,
+      optModeKey,
+      optModeDesc,
+      optTrials,
+      optCpuLimit,
+      optRunning,
+      optError,
+      optProgress,
+      optLogLines,
+      optLogRef,
+      optDiagLoading,
+      optParamLoading,
+      optDiagnostics,
+      optParamVersions,
+      optTop20,
+      optResultFile,
+      optResultMeta,
+      optAcceptance,
+      optApplyMsg,
+      optApplyOk,
+      fmtNum,
+      fmtPct,
+      loadDiagnostics,
+      loadParamVersions,
+      doStartOptimization,
+      doPause,
+      doResume,
+      doStop,
+      onCpuLimitChange,
+      loadOptimizationResults,
+      doApplyParams,
 
       // 方法
       onProfileChange,

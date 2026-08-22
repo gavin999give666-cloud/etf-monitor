@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "code": "563360",
+    "generated_at": "2026-08-22 10:36:58",
+    "params_source": "F:\\windows10桌面\\量化\\V7.0\\runs\\563360\\light_excess_results.json"
+  },
+  "params": {
+    "SCORE_BEHAVIOR_WEIGHT": 0.13692061890903548,
+    "SCORE_CONFIDENCE_WEIGHT": 0.20479926419687736,
+    "SCORE_REWARD_WEIGHT": 0.5416388435365762,
+    "SCORE_RISK_WEIGHT": 0.05851612093510831,
+    "BULL_BUY_MULT": 2.7358669326451697,
+    "BEAR_BUY_MULT": 0.6344146856824492,
+    "CONFIRMATION_THRESHOLD": 51,
+    "CONFIDENCE_INCREMENT": 6,
+    "OBSERVATION_WINDOW_MAX": 8,
+    "EXPIRY_THRESHOLD": 26,
+    "MIN_HOLD_DAYS": 14,
+    "SCORE_HOLD_ZONE": 8,
+    "TRADE_TARGET_DELTA": 0.07300000000000001,
+    "TRADE_ACTUAL_DELTA": 0.063,
+    "DOUBLE_BOTTOM_REBOUND_MIN": 0.015,
+    "MOMO_EXH_RETURN_THRESHOLD": 0.044,
+    "PULLBACK_MA_DIST": 0.038,
+    "PANIC_SELL_DROP_THRESHOLD": -0.066,
+    "TREND_FAIL_SCORE": 40,
+    "RSI_OVERBOUGHT_THRESHOLD": 66,
+    "CENTER_BULL": 0.7383116748267469,
+    "CENTER_RANGE": 0.5578862142955651,
+    "CENTER_BEAR": 0.10996291459903162,
+    "TARGET_VOL": 0.2044170969194573,
+    "OVERHEAT_CENTER_MULT": 0.3950103791989692,
+    "BOTTOMFISHING_BOOST": 0.22486073682322907,
+    "STOP_LOSS_PCT": -0.1141575597698018,
+    "STOP_LOSS_HARD": -0.16410023448748318,
+    "TAKE_PROFIT_T1": 0.18154873615420813,
+    "TAKE_PROFIT_T2": 0.19455063963586988,
+    "TRAIL_EXIT_DRAWDOWN": 0.0586081525978501
+  },
+  "metrics": {
+    "strategy_return_pct": 25.7,
+    "benchmark_return_pct": 30.54,
+    "excess_pp": -4.84,
+    "max_drawdown_pct": -5.18,
+    "benchmark_max_drawdown_pct": -15.81,
+    "total_trades": 30,
+    "bull_low_pos_pct": 42.79,
+    "wf_oos_excess_pp": -0.4,
+    "wf_is_excess_pp": -15.33,
+    "wf_decay_pct": null,
+    "wf_robustness": 0.864,
+    "wf_n_val_segments": 3
+  },
+  "checks": [
+    {
+      "name": "全段超额",
+      "success_line": "≥+5pp",
+      "actual": "-4.84pp",
+      "pass": false
+    },
+    {
+      "name": "最大回撤",
+      "success_line": "≤-8%",
+      "actual": "-5.18%",
+      "pass": true
+    },
+    {
+      "name": "交易次数",
+      "success_line": "10~30",
+      "actual": "30",
+      "pass": true
+    },
+    {
+      "name": "WF OOS 超额",
+      "success_line": ">0pp",
+      "actual": "-0.40pp",
+      "pass": false
+    },
+    {
+      "name": "IS→OOS 衰减",
+      "success_line": "≤60%",
+      "actual": "N/A",
+      "pass": false
+    },
+    {
+      "name": "Bull 低仓占比",
+      "success_line": "<30%",
+      "actual": "42.79%",
+      "pass": false
+    }
+  ],
+  "accepted": false
+}

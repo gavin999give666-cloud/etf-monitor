@@ -1,31 +1,31 @@
 {
   "meta": {
     "version": "V6.2.3",
-    "generated_at": "2026-08-21 12:17:04",
+    "generated_at": "2026-08-21 21:01:42",
     "backtest_start": "2025-03-04 00:00:00",
     "backtest_end": "2026-08-18 00:00:00",
     "trading_days": 358
   },
   "performance": {
     "benchmark_return_pct": 72.17,
-    "strategy_return_pct": 65.88,
-    "excess_return_pct": -6.28,
-    "max_drawdown_pct": -28.4,
-    "annualized_return_pct": 42.8,
-    "volatility_pct": 31.18,
-    "sharpe_ratio": 1.304,
-    "sortino_ratio": 1.666,
-    "calmar_ratio": 1.507,
-    "profit_factor": 4.75,
-    "win_rate_pct": 66.7,
-    "kelly": 0.526,
-    "expectancy_pct": 8.77,
+    "strategy_return_pct": 50.06,
+    "excess_return_pct": -22.1,
+    "max_drawdown_pct": -25.02,
+    "annualized_return_pct": 33.07,
+    "volatility_pct": 28.36,
+    "sharpe_ratio": 1.154,
+    "sortino_ratio": 1.362,
+    "calmar_ratio": 1.322,
+    "profit_factor": 13.42,
+    "win_rate_pct": 83.3,
+    "kelly": 0.771,
+    "expectancy_pct": 7.6,
     "total_trades": 6,
-    "winning_trades": 4,
-    "losing_trades": 2,
-    "avg_hold_days": 43.3,
-    "final_equity": 16588.46,
-    "max_consecutive_wins": 3,
+    "winning_trades": 5,
+    "losing_trades": 1,
+    "avg_hold_days": 32.8,
+    "final_equity": 15006.25,
+    "max_consecutive_wins": 4,
     "max_consecutive_losses": 1
   },
   "trades": [
@@ -42,7 +42,7 @@
       "entry_psychology": "Optimism",
       "entry_emotion_score": 60.1,
       "entry_emotion_improving": false,
-      "entry_score": 69.6,
+      "entry_score": 65.5,
       "entry_reward": 7.7,
       "entry_risk": 14.4,
       "entry_factors": {
@@ -67,7 +67,7 @@
           "confidence": 27.9,
           "reward_score": 7.7,
           "regime_multiplier": 1.8,
-          "final_score": 69.6
+          "final_score": 65.5
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -133,7 +133,7 @@
       "entry_psychology": "Optimism",
       "entry_emotion_score": 55.7,
       "entry_emotion_improving": true,
-      "entry_score": 94.1,
+      "entry_score": 91.0,
       "entry_reward": 15.0,
       "entry_risk": 11.2,
       "entry_factors": {
@@ -164,7 +164,7 @@
           "confidence": 28.4,
           "reward_score": 15.0,
           "regime_multiplier": 1.8,
-          "final_score": 94.1
+          "final_score": 91.0
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -230,7 +230,7 @@
       "entry_psychology": "Euphoria",
       "entry_emotion_score": 79.9,
       "entry_emotion_improving": true,
-      "entry_score": 66.0,
+      "entry_score": 65.9,
       "entry_reward": 12.3,
       "entry_risk": 0.4,
       "entry_factors": {
@@ -261,7 +261,7 @@
           "confidence": 27.3,
           "reward_score": 12.3,
           "regime_multiplier": 1.8,
-          "final_score": 66.0
+          "final_score": 65.9
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -317,17 +317,17 @@
     {
       "trade_id": 4,
       "entry_date": "2026-03-23 00:00:00",
-      "exit_date": "2026-05-14 00:00:00",
+      "exit_date": "2026-04-16 00:00:00",
       "entry_price": 1.2783,
-      "exit_price": 1.6773,
-      "pnl_pct": 31.22,
+      "exit_price": 1.4605,
+      "pnl_pct": 14.26,
       "pnl_label": "WIN",
       "entry_behavior": [],
       "entry_regime": "Bear",
       "entry_psychology": "Panic",
       "entry_emotion_score": 11.0,
       "entry_emotion_improving": false,
-      "entry_score": 92.0,
+      "entry_score": 87.9,
       "entry_reward": 48.8,
       "entry_risk": 27.3,
       "entry_factors": {
@@ -358,7 +358,7 @@
           "confidence": 28.9,
           "reward_score": 48.8,
           "regime_multiplier": 0.9,
-          "final_score": 92.0
+          "final_score": 87.9
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -368,11 +368,11 @@
         }
       },
       "exit_behavior": [
-        "RSI_Overbought"
+        "MomentumExhaustion"
       ],
       "exit_psychology": "Exhaustion",
-      "exit_score": 8.9,
-      "exit_risk": 14.6,
+      "exit_score": 5.0,
+      "exit_risk": 7.8,
       "exit_factors": {
         "rule_confidence": {
           "label": "人工规则置信度",
@@ -401,7 +401,7 @@
           "confidence": 30.1,
           "reward_score": 0,
           "regime_multiplier": 0.12,
-          "final_score": 8.9
+          "final_score": 5.0
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -413,20 +413,20 @@
     },
     {
       "trade_id": 5,
-      "entry_date": "2026-06-03 00:00:00",
-      "exit_date": "2026-07-09 00:00:00",
-      "entry_price": 1.6516,
-      "exit_price": 1.98,
-      "pnl_pct": 19.88,
+      "entry_date": "2026-06-08 00:00:00",
+      "exit_date": "2026-07-13 00:00:00",
+      "entry_price": 1.5676,
+      "exit_price": 1.7962,
+      "pnl_pct": 14.59,
       "pnl_label": "WIN",
       "entry_behavior": [],
       "entry_regime": "Bear",
       "entry_psychology": "Fear",
-      "entry_emotion_score": 37.9,
+      "entry_emotion_score": 18.8,
       "entry_emotion_improving": false,
-      "entry_score": 82.5,
-      "entry_reward": 22.4,
-      "entry_risk": 19.8,
+      "entry_score": 63.2,
+      "entry_reward": 33.3,
+      "entry_risk": 27.0,
       "entry_factors": {
         "rule_confidence": {
           "label": "人工规则置信度",
@@ -453,9 +453,9 @@
         "score_components": {
           "behavior_score": 100,
           "confidence": 28.5,
-          "reward_score": 22.4,
+          "reward_score": 33.3,
           "regime_multiplier": 0.9,
-          "final_score": 82.5
+          "final_score": 63.2
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -468,8 +468,8 @@
         "NoSellSignal"
       ],
       "exit_psychology": "Optimism",
-      "exit_score": 6.7,
-      "exit_risk": 12.0,
+      "exit_score": 73.1,
+      "exit_risk": 26.1,
       "exit_factors": {
         "rule_confidence": {
           "label": "人工规则置信度",
@@ -484,21 +484,15 @@
           "weight": 0.25,
           "contribution": 18.0
         },
-        "emotion_bonus": {
-          "label": "情绪修正（价格+情绪双确认）",
-          "bonus": 5.3,
-          "weight": 0.1,
-          "contribution": 0.5
-        },
-        "pre_decay": 42.0,
+        "pre_decay": 41.4,
         "time_decay_multiplier": 0.7,
-        "final_confidence": 29.4,
+        "final_confidence": 29.0,
         "score_components": {
           "behavior_score": 100,
-          "confidence": 29.4,
+          "confidence": 29.0,
           "reward_score": 0,
-          "regime_multiplier": 0.12,
-          "final_score": 6.7
+          "regime_multiplier": 1.05,
+          "final_score": 73.1
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -510,20 +504,20 @@
     },
     {
       "trade_id": 6,
-      "entry_date": "2026-07-10 00:00:00",
+      "entry_date": "2026-08-13 00:00:00",
       "exit_date": "2026-08-18 00:00:00",
-      "entry_price": 1.8959,
-      "exit_price": 1.6993,
-      "pnl_pct": -10.37,
-      "pnl_label": "LOSS",
+      "entry_price": 1.6226,
+      "exit_price": 1.701,
+      "pnl_pct": 4.83,
+      "pnl_label": "WIN",
       "entry_behavior": [],
       "entry_regime": "Bull",
       "entry_psychology": "Optimism",
-      "entry_emotion_score": 62.3,
-      "entry_emotion_improving": false,
-      "entry_score": 134.4,
-      "entry_reward": 13.0,
-      "entry_risk": 13.8,
+      "entry_emotion_score": 62.4,
+      "entry_emotion_improving": true,
+      "entry_score": 92.2,
+      "entry_reward": 15.5,
+      "entry_risk": 10.8,
       "entry_factors": {
         "rule_confidence": {
           "label": "人工规则置信度",
@@ -538,15 +532,21 @@
           "weight": 0.25,
           "contribution": 16.2
         },
-        "pre_decay": 37.2,
+        "emotion_bonus": {
+          "label": "情绪修正（价格+情绪双确认）",
+          "bonus": 3.3,
+          "weight": 0.1,
+          "contribution": 0.3
+        },
+        "pre_decay": 37.5,
         "time_decay_multiplier": 0.7,
-        "final_confidence": 26.0,
+        "final_confidence": 26.3,
         "score_components": {
           "behavior_score": 100,
-          "confidence": 27.9,
-          "reward_score": 13.0,
+          "confidence": 28.1,
+          "reward_score": 15.5,
           "regime_multiplier": 1.8,
-          "final_score": 134.4
+          "final_score": 92.2
         },
         "evidence_weights": {
           "rule": 0.475,
@@ -556,47 +556,13 @@
         }
       },
       "exit_behavior": [
-        "NoSellSignal"
+        "EndOfBacktest"
       ],
-      "exit_psychology": "Euphoria",
-      "exit_score": 6.2,
-      "exit_risk": 6.2,
+      "exit_psychology": "End",
+      "exit_score": 0,
+      "exit_risk": 0,
       "exit_factors": {
-        "rule_confidence": {
-          "label": "人工规则置信度",
-          "raw": 78.0,
-          "weight": 0.3,
-          "contribution": 23.4
-        },
-        "replay_confidence": {
-          "label": "Replay Learning 历史成功率修正",
-          "multiplier": 0.93,
-          "adjusted_confidence": 72.2,
-          "weight": 0.25,
-          "contribution": 18.0
-        },
-        "emotion_bonus": {
-          "label": "情绪修正（价格+情绪双确认）",
-          "bonus": "15",
-          "weight": 0.1,
-          "contribution": 1.5
-        },
-        "pre_decay": 42.9,
-        "time_decay_multiplier": 0.7,
-        "final_confidence": 30.1,
-        "score_components": {
-          "behavior_score": 100,
-          "confidence": 30.1,
-          "reward_score": 0,
-          "regime_multiplier": 0.12,
-          "final_score": 6.2
-        },
-        "evidence_weights": {
-          "rule": 0.475,
-          "replay": 0.338,
-          "ml": 0.087,
-          "emotion": 0.1
-        }
+        "reason": "回测结束强制平仓"
       }
     }
   ],
@@ -1683,9 +1649,9 @@
     },
     {
       "date": "2025-06-03 00:00:00",
-      "buy_score": 18.9,
+      "buy_score": 16.7,
       "sell_score": 23.4,
-      "net_score": -4.5,
+      "net_score": -6.7,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -1703,9 +1669,9 @@
     },
     {
       "date": "2025-06-04 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 10.4,
       "sell_score": 15.8,
-      "net_score": -4.2,
+      "net_score": -5.4,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -1723,9 +1689,9 @@
     },
     {
       "date": "2025-06-05 00:00:00",
-      "buy_score": 8.3,
+      "buy_score": 7.4,
       "sell_score": 11.2,
-      "net_score": -2.9,
+      "net_score": -3.8,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 12.5,
@@ -1741,9 +1707,9 @@
     },
     {
       "date": "2025-06-06 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 4.8,
-      "net_score": -1.9,
+      "net_score": -2.0,
       "regime": "Range",
       "psychology": "Euphoria",
       "reward_score": 8.8,
@@ -1777,9 +1743,9 @@
     },
     {
       "date": "2025-06-10 00:00:00",
-      "buy_score": 25.2,
+      "buy_score": 24.8,
       "sell_score": 0.5,
-      "net_score": 24.7,
+      "net_score": 24.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 9.8,
@@ -1795,9 +1761,9 @@
     },
     {
       "date": "2025-06-11 00:00:00",
-      "buy_score": 25.1,
+      "buy_score": 24.1,
       "sell_score": 1.5,
-      "net_score": 23.6,
+      "net_score": 22.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 9.8,
@@ -1813,9 +1779,9 @@
     },
     {
       "date": "2025-06-12 00:00:00",
-      "buy_score": 59.5,
+      "buy_score": 57.4,
       "sell_score": 1.3,
-      "net_score": 58.2,
+      "net_score": 56.1,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 14.0,
@@ -1831,9 +1797,9 @@
     },
     {
       "date": "2025-06-13 00:00:00",
-      "buy_score": 20.4,
+      "buy_score": 19.8,
       "sell_score": 8.6,
-      "net_score": 11.8,
+      "net_score": 11.2,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 17.5,
@@ -1849,9 +1815,9 @@
     },
     {
       "date": "2025-06-16 00:00:00",
-      "buy_score": 19.4,
+      "buy_score": 19.2,
       "sell_score": 3.4,
-      "net_score": 16.0,
+      "net_score": 15.8,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 16.0,
@@ -1871,9 +1837,9 @@
     },
     {
       "date": "2025-06-17 00:00:00",
-      "buy_score": 34.9,
+      "buy_score": 33.7,
       "sell_score": 12.8,
-      "net_score": 22.1,
+      "net_score": 20.9,
       "regime": "Bear",
       "psychology": "Optimism",
       "reward_score": 19.0,
@@ -1889,9 +1855,9 @@
     },
     {
       "date": "2025-06-18 00:00:00",
-      "buy_score": 20.3,
+      "buy_score": 20.1,
       "sell_score": 3.4,
-      "net_score": 16.9,
+      "net_score": 16.7,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -1907,9 +1873,9 @@
     },
     {
       "date": "2025-06-19 00:00:00",
-      "buy_score": 34.8,
+      "buy_score": 33.6,
       "sell_score": 12.8,
-      "net_score": 22.0,
+      "net_score": 20.8,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 19.0,
@@ -1925,9 +1891,9 @@
     },
     {
       "date": "2025-06-20 00:00:00",
-      "buy_score": 39.6,
+      "buy_score": 37.3,
       "sell_score": 24.2,
-      "net_score": 15.4,
+      "net_score": 13.1,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 23.5,
@@ -1943,9 +1909,9 @@
     },
     {
       "date": "2025-06-23 00:00:00",
-      "buy_score": 20.4,
+      "buy_score": 18.8,
       "sell_score": 25.7,
-      "net_score": -5.3,
+      "net_score": -6.9,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 13.8,
@@ -1961,9 +1927,9 @@
     },
     {
       "date": "2025-06-24 00:00:00",
-      "buy_score": 23.7,
+      "buy_score": 23.3,
       "sell_score": 0.5,
-      "net_score": 23.2,
+      "net_score": 22.8,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 8.8,
@@ -1979,9 +1945,9 @@
     },
     {
       "date": "2025-06-25 00:00:00",
-      "buy_score": 20.8,
+      "buy_score": 20.7,
       "sell_score": 0.2,
-      "net_score": 20.6,
+      "net_score": 20.5,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 6.2,
@@ -1999,9 +1965,9 @@
     },
     {
       "date": "2025-06-26 00:00:00",
-      "buy_score": 20.8,
+      "buy_score": 20.1,
       "sell_score": 0.8,
-      "net_score": 20.0,
+      "net_score": 19.3,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 6.2,
@@ -2021,9 +1987,9 @@
     },
     {
       "date": "2025-06-27 00:00:00",
-      "buy_score": 1.9,
+      "buy_score": 1.8,
       "sell_score": 0.7,
-      "net_score": 1.2,
+      "net_score": 1.1,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.4,
@@ -2059,9 +2025,9 @@
     },
     {
       "date": "2025-07-01 00:00:00",
-      "buy_score": 9.6,
+      "buy_score": 9.5,
       "sell_score": 3.1,
-      "net_score": 6.5,
+      "net_score": 6.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2077,9 +2043,9 @@
     },
     {
       "date": "2025-07-02 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.8,
       "sell_score": 3.3,
-      "net_score": 6.6,
+      "net_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.2,
@@ -2095,9 +2061,9 @@
     },
     {
       "date": "2025-07-03 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.8,
       "sell_score": 3.3,
-      "net_score": 6.6,
+      "net_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.2,
@@ -2115,9 +2081,9 @@
     },
     {
       "date": "2025-07-04 00:00:00",
-      "buy_score": 9.8,
+      "buy_score": 9.7,
       "sell_score": 3.5,
-      "net_score": 6.3,
+      "net_score": 6.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.2,
@@ -2135,9 +2101,9 @@
     },
     {
       "date": "2025-07-07 00:00:00",
-      "buy_score": 32.9,
+      "buy_score": 32.3,
       "sell_score": 4.2,
-      "net_score": 28.7,
+      "net_score": 28.1,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 6.2,
@@ -2155,9 +2121,9 @@
     },
     {
       "date": "2025-07-08 00:00:00",
-      "buy_score": 36.1,
+      "buy_score": 35.8,
       "sell_score": 3.8,
-      "net_score": 32.3,
+      "net_score": 32.0,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 9.2,
@@ -2175,9 +2141,9 @@
     },
     {
       "date": "2025-07-09 00:00:00",
-      "buy_score": 36.0,
+      "buy_score": 35.4,
       "sell_score": 4.2,
-      "net_score": 31.8,
+      "net_score": 31.2,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 9.2,
@@ -2195,9 +2161,9 @@
     },
     {
       "date": "2025-07-10 00:00:00",
-      "buy_score": 36.0,
+      "buy_score": 35.2,
       "sell_score": 4.5,
-      "net_score": 31.5,
+      "net_score": 30.7,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 9.2,
@@ -2213,9 +2179,9 @@
     },
     {
       "date": "2025-07-11 00:00:00",
-      "buy_score": 35.9,
+      "buy_score": 35.4,
       "sell_score": 4.0,
-      "net_score": 31.9,
+      "net_score": 31.4,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 9.2,
@@ -2231,9 +2197,9 @@
     },
     {
       "date": "2025-07-14 00:00:00",
-      "buy_score": 3.3,
+      "buy_score": 3.2,
       "sell_score": 4.8,
-      "net_score": -1.5,
+      "net_score": -1.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 6.5,
@@ -2285,9 +2251,9 @@
     },
     {
       "date": "2025-07-17 00:00:00",
-      "buy_score": 4.8,
+      "buy_score": 4.7,
       "sell_score": 3.1,
-      "net_score": 1.7,
+      "net_score": 1.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.8,
@@ -2305,9 +2271,9 @@
     },
     {
       "date": "2025-07-18 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.8,
       "sell_score": 3.3,
-      "net_score": 6.6,
+      "net_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2325,9 +2291,9 @@
     },
     {
       "date": "2025-07-21 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.7,
       "sell_score": 3.3,
-      "net_score": 6.6,
+      "net_score": 6.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2345,9 +2311,9 @@
     },
     {
       "date": "2025-07-22 00:00:00",
-      "buy_score": 6.6,
+      "buy_score": 6.5,
       "sell_score": 6.4,
-      "net_score": 0.2,
+      "net_score": 0.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2365,9 +2331,9 @@
     },
     {
       "date": "2025-07-23 00:00:00",
-      "buy_score": 6.6,
+      "buy_score": 6.5,
       "sell_score": 6.1,
-      "net_score": 0.5,
+      "net_score": 0.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2405,9 +2371,9 @@
     },
     {
       "date": "2025-07-25 00:00:00",
-      "buy_score": 6.5,
+      "buy_score": 6.4,
       "sell_score": 6.5,
-      "net_score": 0.0,
+      "net_score": -0.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2425,9 +2391,9 @@
     },
     {
       "date": "2025-07-28 00:00:00",
-      "buy_score": 6.2,
+      "buy_score": 6.1,
       "sell_score": 6.3,
-      "net_score": -0.1,
+      "net_score": -0.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2445,9 +2411,9 @@
     },
     {
       "date": "2025-07-29 00:00:00",
-      "buy_score": 5.9,
+      "buy_score": 5.8,
       "sell_score": 6.4,
-      "net_score": -0.5,
+      "net_score": -0.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.0,
@@ -2465,9 +2431,9 @@
     },
     {
       "date": "2025-07-30 00:00:00",
-      "buy_score": 6.2,
+      "buy_score": 5.9,
       "sell_score": 7.5,
-      "net_score": -1.3,
+      "net_score": -1.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2485,9 +2451,9 @@
     },
     {
       "date": "2025-07-31 00:00:00",
-      "buy_score": 6.7,
+      "buy_score": 6.5,
       "sell_score": 7.4,
-      "net_score": -0.7,
+      "net_score": -0.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 7.7,
@@ -2505,9 +2471,9 @@
     },
     {
       "date": "2025-08-01 00:00:00",
-      "buy_score": 3.1,
+      "buy_score": 3.0,
       "sell_score": 7.1,
-      "net_score": -4.0,
+      "net_score": -4.1,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.4,
@@ -2585,9 +2551,9 @@
     },
     {
       "date": "2025-08-07 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.4,
-      "net_score": -3.5,
+      "net_score": -3.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.7,
@@ -2605,9 +2571,9 @@
     },
     {
       "date": "2025-08-08 00:00:00",
-      "buy_score": 3.1,
+      "buy_score": 3.0,
       "sell_score": 7.0,
-      "net_score": -3.9,
+      "net_score": -4.0,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 6.1,
@@ -2625,9 +2591,9 @@
     },
     {
       "date": "2025-08-11 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.1,
-      "net_score": -3.2,
+      "net_score": -3.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.7,
@@ -2645,9 +2611,9 @@
     },
     {
       "date": "2025-08-12 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.0,
-      "net_score": -3.1,
+      "net_score": -3.2,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.7,
@@ -2665,9 +2631,9 @@
     },
     {
       "date": "2025-08-13 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.3,
-      "net_score": -3.4,
+      "net_score": -3.5,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.7,
@@ -2685,9 +2651,9 @@
     },
     {
       "date": "2025-08-14 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.8,
       "sell_score": 7.9,
-      "net_score": -1.8,
+      "net_score": -2.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2705,9 +2671,9 @@
     },
     {
       "date": "2025-08-15 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.9,
       "sell_score": 6.5,
-      "net_score": -0.4,
+      "net_score": -0.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2725,9 +2691,9 @@
     },
     {
       "date": "2025-08-18 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.9,
       "sell_score": 6.5,
-      "net_score": -0.4,
+      "net_score": -0.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2745,9 +2711,9 @@
     },
     {
       "date": "2025-08-19 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.8,
       "sell_score": 8.1,
-      "net_score": -2.0,
+      "net_score": -2.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2765,9 +2731,9 @@
     },
     {
       "date": "2025-08-20 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.9,
       "sell_score": 6.9,
-      "net_score": -0.8,
+      "net_score": -1.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 5.2,
@@ -2785,9 +2751,9 @@
     },
     {
       "date": "2025-08-21 00:00:00",
-      "buy_score": 6.6,
+      "buy_score": 6.3,
       "sell_score": 8.1,
-      "net_score": -1.5,
+      "net_score": -1.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 7.7,
@@ -2805,9 +2771,9 @@
     },
     {
       "date": "2025-08-22 00:00:00",
-      "buy_score": 5.8,
+      "buy_score": 5.5,
       "sell_score": 7.7,
-      "net_score": -1.9,
+      "net_score": -2.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.0,
@@ -2825,9 +2791,9 @@
     },
     {
       "date": "2025-08-25 00:00:00",
-      "buy_score": 5.8,
+      "buy_score": 5.5,
       "sell_score": 8.2,
-      "net_score": -2.4,
+      "net_score": -2.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
@@ -2845,9 +2811,9 @@
     },
     {
       "date": "2025-08-26 00:00:00",
-      "buy_score": 6.4,
+      "buy_score": 6.0,
       "sell_score": 8.8,
-      "net_score": -2.4,
+      "net_score": -2.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2865,9 +2831,9 @@
     },
     {
       "date": "2025-08-27 00:00:00",
-      "buy_score": 22.4,
+      "buy_score": 20.5,
       "sell_score": 10.0,
-      "net_score": 12.4,
+      "net_score": 10.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2885,9 +2851,9 @@
     },
     {
       "date": "2025-08-28 00:00:00",
-      "buy_score": 5.8,
+      "buy_score": 5.5,
       "sell_score": 8.0,
-      "net_score": -2.2,
+      "net_score": -2.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
@@ -2905,9 +2871,9 @@
     },
     {
       "date": "2025-08-29 00:00:00",
-      "buy_score": 8.8,
+      "buy_score": 8.2,
       "sell_score": 5.9,
-      "net_score": 2.9,
+      "net_score": 2.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
@@ -2925,9 +2891,9 @@
     },
     {
       "date": "2025-09-01 00:00:00",
-      "buy_score": 8.8,
+      "buy_score": 8.4,
       "sell_score": 5.1,
-      "net_score": 3.7,
+      "net_score": 3.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
@@ -2945,9 +2911,9 @@
     },
     {
       "date": "2025-09-02 00:00:00",
-      "buy_score": 33.6,
+      "buy_score": 31.2,
       "sell_score": 6.2,
-      "net_score": 27.4,
+      "net_score": 25.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -2965,9 +2931,9 @@
     },
     {
       "date": "2025-09-03 00:00:00",
-      "buy_score": 15.6,
+      "buy_score": 14.7,
       "sell_score": 5.4,
-      "net_score": 10.2,
+      "net_score": 9.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
@@ -2985,9 +2951,9 @@
     },
     {
       "date": "2025-09-04 00:00:00",
-      "buy_score": 29.5,
-      "sell_score": 58.6,
-      "net_score": -29.1,
+      "buy_score": 17.9,
+      "sell_score": 87.9,
+      "net_score": -70.0,
       "regime": "Bear",
       "psychology": "Euphoria",
       "reward_score": 13.6,
@@ -3005,9 +2971,9 @@
     },
     {
       "date": "2025-09-05 00:00:00",
-      "buy_score": 17.5,
+      "buy_score": 16.2,
       "sell_score": 6.1,
-      "net_score": 11.4,
+      "net_score": 10.1,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 8.0,
@@ -3023,9 +2989,9 @@
     },
     {
       "date": "2025-09-08 00:00:00",
-      "buy_score": 69.6,
+      "buy_score": 65.5,
       "sell_score": 4.6,
-      "net_score": 65.0,
+      "net_score": 60.9,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 7.7,
@@ -3041,9 +3007,9 @@
     },
     {
       "date": "2025-09-09 00:00:00",
-      "buy_score": 123.1,
+      "buy_score": 115.7,
       "sell_score": 4.6,
-      "net_score": 118.5,
+      "net_score": 111.1,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 15.0,
@@ -3059,9 +3025,9 @@
     },
     {
       "date": "2025-09-10 00:00:00",
-      "buy_score": 123.1,
+      "buy_score": 115.9,
       "sell_score": 4.6,
-      "net_score": 118.5,
+      "net_score": 111.3,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 15.0,
@@ -3077,9 +3043,9 @@
     },
     {
       "date": "2025-09-11 00:00:00",
-      "buy_score": 32.2,
+      "buy_score": 30.5,
       "sell_score": 6.5,
-      "net_score": 25.7,
+      "net_score": 24.0,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 6.8,
@@ -3095,9 +3061,9 @@
     },
     {
       "date": "2025-09-12 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 3.9,
       "sell_score": 5.2,
-      "net_score": -1.0,
+      "net_score": -1.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3113,9 +3079,9 @@
     },
     {
       "date": "2025-09-15 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 3.9,
       "sell_score": 5.3,
-      "net_score": -1.1,
+      "net_score": -1.4,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3133,9 +3099,9 @@
     },
     {
       "date": "2025-09-16 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 4.0,
       "sell_score": 4.9,
-      "net_score": -0.7,
+      "net_score": -0.9,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3153,9 +3119,9 @@
     },
     {
       "date": "2025-09-17 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 4.0,
       "sell_score": 4.9,
-      "net_score": -0.7,
+      "net_score": -0.9,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3173,9 +3139,9 @@
     },
     {
       "date": "2025-09-18 00:00:00",
-      "buy_score": 19.2,
+      "buy_score": 18.1,
       "sell_score": 5.7,
-      "net_score": 13.5,
+      "net_score": 12.4,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
@@ -3193,9 +3159,9 @@
     },
     {
       "date": "2025-09-19 00:00:00",
-      "buy_score": 19.6,
+      "buy_score": 18.7,
       "sell_score": 5.2,
-      "net_score": 14.4,
+      "net_score": 13.5,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.4,
@@ -3213,9 +3179,9 @@
     },
     {
       "date": "2025-09-22 00:00:00",
-      "buy_score": 3.6,
+      "buy_score": 3.5,
       "sell_score": 7.3,
-      "net_score": -3.7,
+      "net_score": -3.8,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
@@ -3233,9 +3199,9 @@
     },
     {
       "date": "2025-09-23 00:00:00",
-      "buy_score": 19.1,
+      "buy_score": 18.2,
       "sell_score": 5.4,
-      "net_score": 13.7,
+      "net_score": 12.8,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
@@ -3253,9 +3219,9 @@
     },
     {
       "date": "2025-09-24 00:00:00",
-      "buy_score": 5.2,
+      "buy_score": 5.0,
       "sell_score": 4.7,
-      "net_score": 0.5,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3275,9 +3241,9 @@
     },
     {
       "date": "2025-09-25 00:00:00",
-      "buy_score": 10.8,
+      "buy_score": 10.4,
       "sell_score": 4.9,
-      "net_score": 5.9,
+      "net_score": 5.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
@@ -3295,9 +3261,9 @@
     },
     {
       "date": "2025-09-26 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.2,
       "sell_score": 5.1,
-      "net_score": 6.5,
+      "net_score": 6.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
@@ -3315,9 +3281,9 @@
     },
     {
       "date": "2025-09-29 00:00:00",
-      "buy_score": 5.2,
+      "buy_score": 4.9,
       "sell_score": 5.1,
-      "net_score": 0.1,
+      "net_score": -0.2,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3333,9 +3299,9 @@
     },
     {
       "date": "2025-09-30 00:00:00",
-      "buy_score": 5.2,
+      "buy_score": 5.0,
       "sell_score": 4.4,
-      "net_score": 0.8,
+      "net_score": 0.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3353,9 +3319,9 @@
     },
     {
       "date": "2025-10-09 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.7,
-      "net_score": 0.4,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
@@ -3373,9 +3339,9 @@
     },
     {
       "date": "2025-10-10 00:00:00",
-      "buy_score": 40.9,
+      "buy_score": 39.1,
       "sell_score": 7.4,
-      "net_score": 33.5,
+      "net_score": 31.7,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 9.1,
@@ -3393,9 +3359,9 @@
     },
     {
       "date": "2025-10-13 00:00:00",
-      "buy_score": 63.3,
+      "buy_score": 61.1,
       "sell_score": 6.5,
-      "net_score": 56.8,
+      "net_score": 54.6,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 13.0,
@@ -3413,9 +3379,9 @@
     },
     {
       "date": "2025-10-14 00:00:00",
-      "buy_score": 31.9,
+      "buy_score": 30.7,
       "sell_score": 44.8,
-      "net_score": -12.9,
+      "net_score": -14.1,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 19.5,
@@ -3431,9 +3397,9 @@
     },
     {
       "date": "2025-10-15 00:00:00",
-      "buy_score": 47.3,
+      "buy_score": 45.0,
       "sell_score": 58.7,
-      "net_score": -11.4,
+      "net_score": -13.7,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 15.0,
@@ -3451,9 +3417,9 @@
     },
     {
       "date": "2025-10-16 00:00:00",
-      "buy_score": 52.1,
+      "buy_score": 49.7,
       "sell_score": 59.5,
-      "net_score": -7.4,
+      "net_score": -9.8,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 19.5,
@@ -3469,9 +3435,9 @@
     },
     {
       "date": "2025-10-17 00:00:00",
-      "buy_score": 60.7,
+      "buy_score": 57.4,
       "sell_score": 69.7,
-      "net_score": -9.0,
+      "net_score": -12.3,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 27.5,
@@ -3487,9 +3453,9 @@
     },
     {
       "date": "2025-10-20 00:00:00",
-      "buy_score": 73.6,
+      "buy_score": 70.2,
       "sell_score": 67.0,
-      "net_score": 6.6,
+      "net_score": 3.2,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 33.1,
@@ -3505,9 +3471,9 @@
     },
     {
       "date": "2025-10-21 00:00:00",
-      "buy_score": 64.4,
+      "buy_score": 61.8,
       "sell_score": 59.3,
-      "net_score": 5.1,
+      "net_score": 2.5,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 25.4,
@@ -3523,9 +3489,9 @@
     },
     {
       "date": "2025-10-22 00:00:00",
-      "buy_score": 64.3,
+      "buy_score": 61.7,
       "sell_score": 59.3,
-      "net_score": 5.0,
+      "net_score": 2.4,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 25.4,
@@ -3541,9 +3507,9 @@
     },
     {
       "date": "2025-10-23 00:00:00",
-      "buy_score": 55.1,
+      "buy_score": 52.7,
       "sell_score": 59.5,
-      "net_score": -4.4,
+      "net_score": -6.8,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 22.4,
@@ -3561,9 +3527,9 @@
     },
     {
       "date": "2025-10-24 00:00:00",
-      "buy_score": 49.4,
+      "buy_score": 47.2,
       "sell_score": 58.7,
-      "net_score": -9.3,
+      "net_score": -11.5,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 17.2,
@@ -3579,9 +3545,9 @@
     },
     {
       "date": "2025-10-27 00:00:00",
-      "buy_score": 60.6,
+      "buy_score": 58.4,
       "sell_score": 6.4,
-      "net_score": 54.2,
+      "net_score": 52.0,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 11.5,
@@ -3597,9 +3563,9 @@
     },
     {
       "date": "2025-10-28 00:00:00",
-      "buy_score": 62.9,
+      "buy_score": 60.7,
       "sell_score": 6.7,
-      "net_score": 56.2,
+      "net_score": 54.0,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 13.0,
@@ -3617,9 +3583,9 @@
     },
     {
       "date": "2025-10-29 00:00:00",
-      "buy_score": 54.8,
+      "buy_score": 53.3,
       "sell_score": 6.1,
-      "net_score": 48.7,
+      "net_score": 47.2,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 7.7,
@@ -3635,9 +3601,9 @@
     },
     {
       "date": "2025-10-30 00:00:00",
-      "buy_score": 94.1,
+      "buy_score": 91.0,
       "sell_score": 6.0,
-      "net_score": 88.1,
+      "net_score": 85.0,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 15.0,
@@ -3653,9 +3619,9 @@
     },
     {
       "date": "2025-10-31 00:00:00",
-      "buy_score": 47.0,
+      "buy_score": 44.8,
       "sell_score": 60.6,
-      "net_score": -13.6,
+      "net_score": -15.8,
       "regime": "Bear",
       "psychology": "Optimism",
       "reward_score": 15.0,
@@ -3671,9 +3637,9 @@
     },
     {
       "date": "2025-11-03 00:00:00",
-      "buy_score": 47.0,
+      "buy_score": 44.7,
       "sell_score": 60.6,
-      "net_score": -13.6,
+      "net_score": -15.9,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 15.0,
@@ -3689,9 +3655,9 @@
     },
     {
       "date": "2025-11-04 00:00:00",
-      "buy_score": 51.8,
+      "buy_score": 49.5,
       "sell_score": 61.4,
-      "net_score": -9.6,
+      "net_score": -11.9,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 19.5,
@@ -3707,9 +3673,9 @@
     },
     {
       "date": "2025-11-05 00:00:00",
-      "buy_score": 55.0,
+      "buy_score": 52.7,
       "sell_score": 61.4,
-      "net_score": -6.4,
+      "net_score": -8.7,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 22.4,
@@ -3728,9 +3694,9 @@
     },
     {
       "date": "2025-11-06 00:00:00",
-      "buy_score": 27.6,
+      "buy_score": 26.7,
       "sell_score": 41.2,
-      "net_score": -13.6,
+      "net_score": -14.5,
       "regime": "Range",
       "psychology": "Fear",
       "reward_score": 13.2,
@@ -3748,9 +3714,9 @@
     },
     {
       "date": "2025-11-07 00:00:00",
-      "buy_score": 29.1,
+      "buy_score": 28.5,
       "sell_score": 38.2,
-      "net_score": -9.1,
+      "net_score": -9.7,
       "regime": "Range",
       "psychology": "Fear",
       "reward_score": 15.5,
@@ -3768,9 +3734,9 @@
     },
     {
       "date": "2025-11-10 00:00:00",
-      "buy_score": 28.7,
+      "buy_score": 28.1,
       "sell_score": 38.1,
-      "net_score": -9.4,
+      "net_score": -10.0,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 15.0,
@@ -3788,9 +3754,9 @@
     },
     {
       "date": "2025-11-11 00:00:00",
-      "buy_score": 48.6,
+      "buy_score": 47.4,
       "sell_score": 49.2,
-      "net_score": -0.6,
+      "net_score": -1.8,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 16.5,
@@ -3810,9 +3776,9 @@
     },
     {
       "date": "2025-11-12 00:00:00",
-      "buy_score": 51.9,
+      "buy_score": 50.6,
       "sell_score": 50.0,
-      "net_score": 1.9,
+      "net_score": 0.6,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 19.5,
@@ -3832,9 +3798,9 @@
     },
     {
       "date": "2025-11-13 00:00:00",
-      "buy_score": 47.0,
+      "buy_score": 45.8,
       "sell_score": 49.1,
-      "net_score": -2.1,
+      "net_score": -3.3,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 15.0,
@@ -3854,14 +3820,14 @@
     },
     {
       "date": "2025-11-14 00:00:00",
-      "buy_score": 53.5,
+      "buy_score": 50.4,
       "sell_score": 68.2,
-      "net_score": -14.7,
+      "net_score": -17.8,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 21.0,
       "risk_score": 22.5,
-      "target_position": 0.9793,
+      "target_position": 0.8128,
       "current_position": 0.9793,
       "buy_behaviors": [],
       "sell_behaviors": [],
@@ -3872,9 +3838,9 @@
     },
     {
       "date": "2025-11-17 00:00:00",
-      "buy_score": 60.6,
+      "buy_score": 58.6,
       "sell_score": 57.5,
-      "net_score": 3.1,
+      "net_score": 1.1,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 27.6,
@@ -3890,9 +3856,9 @@
     },
     {
       "date": "2025-11-18 00:00:00",
-      "buy_score": 63.8,
+      "buy_score": 61.8,
       "sell_score": 57.5,
-      "net_score": 6.3,
+      "net_score": 4.3,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 30.5,
@@ -3908,9 +3874,9 @@
     },
     {
       "date": "2025-11-19 00:00:00",
-      "buy_score": 66.3,
+      "buy_score": 63.9,
       "sell_score": 61.2,
-      "net_score": 5.1,
+      "net_score": 2.7,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 32.8,
@@ -3926,9 +3892,9 @@
     },
     {
       "date": "2025-11-20 00:00:00",
-      "buy_score": 80.3,
+      "buy_score": 77.8,
       "sell_score": 59.7,
-      "net_score": 20.6,
+      "net_score": 18.1,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 39.0,
@@ -3946,9 +3912,9 @@
     },
     {
       "date": "2025-11-21 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 86.2,
       "sell_score": 68.7,
-      "net_score": 20.9,
+      "net_score": 17.5,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 46.8,
@@ -3966,9 +3932,9 @@
     },
     {
       "date": "2025-11-24 00:00:00",
-      "buy_score": 85.8,
+      "buy_score": 83.0,
       "sell_score": 62.2,
-      "net_score": 23.6,
+      "net_score": 20.8,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 43.6,
@@ -3986,14 +3952,14 @@
     },
     {
       "date": "2025-11-25 00:00:00",
-      "buy_score": 79.5,
+      "buy_score": 76.9,
       "sell_score": 61.0,
-      "net_score": 18.5,
+      "net_score": 15.9,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 38.3,
       "risk_score": 17.7,
-      "target_position": 0.98,
+      "target_position": 0.9786,
       "current_position": 0.9786,
       "buy_behaviors": [],
       "sell_behaviors": [
@@ -4006,14 +3972,14 @@
     },
     {
       "date": "2025-11-26 00:00:00",
-      "buy_score": 76.5,
+      "buy_score": 74.2,
       "sell_score": 58.4,
-      "net_score": 18.1,
+      "net_score": 15.8,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 35.8,
       "risk_score": 15.9,
-      "target_position": 0.98,
+      "target_position": 0.9788,
       "current_position": 0.9788,
       "buy_behaviors": [],
       "sell_behaviors": [
@@ -4026,9 +3992,9 @@
     },
     {
       "date": "2025-11-27 00:00:00",
-      "buy_score": 63.2,
+      "buy_score": 61.1,
       "sell_score": 57.3,
-      "net_score": 5.9,
+      "net_score": 3.8,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 29.9,
@@ -4046,9 +4012,9 @@
     },
     {
       "date": "2025-11-28 00:00:00",
-      "buy_score": 57.5,
+      "buy_score": 56.2,
       "sell_score": 50.1,
-      "net_score": 7.4,
+      "net_score": 6.1,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 24.7,
@@ -4067,9 +4033,9 @@
     },
     {
       "date": "2025-12-01 00:00:00",
-      "buy_score": 54.0,
+      "buy_score": 52.8,
       "sell_score": 48.8,
-      "net_score": 5.2,
+      "net_score": 4.0,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 21.5,
@@ -4085,9 +4051,9 @@
     },
     {
       "date": "2025-12-02 00:00:00",
-      "buy_score": 58.9,
+      "buy_score": 56.9,
       "sell_score": 57.3,
-      "net_score": 1.6,
+      "net_score": -0.4,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 26.0,
@@ -4103,9 +4069,9 @@
     },
     {
       "date": "2025-12-03 00:00:00",
-      "buy_score": 58.9,
+      "buy_score": 56.9,
       "sell_score": 57.3,
-      "net_score": 1.6,
+      "net_score": -0.4,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 26.0,
@@ -4121,9 +4087,9 @@
     },
     {
       "date": "2025-12-04 00:00:00",
-      "buy_score": 56.7,
+      "buy_score": 54.7,
       "sell_score": 57.8,
-      "net_score": -1.1,
+      "net_score": -3.1,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 24.0,
@@ -4139,9 +4105,9 @@
     },
     {
       "date": "2025-12-05 00:00:00",
-      "buy_score": 33.7,
+      "buy_score": 33.1,
       "sell_score": 37.8,
-      "net_score": -4.1,
+      "net_score": -4.7,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 22.5,
@@ -4157,9 +4123,9 @@
     },
     {
       "date": "2025-12-08 00:00:00",
-      "buy_score": 30.4,
+      "buy_score": 30.1,
       "sell_score": 33.2,
-      "net_score": -2.8,
+      "net_score": -3.1,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -4175,9 +4141,9 @@
     },
     {
       "date": "2025-12-09 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.6,
       "sell_score": 4.6,
-      "net_score": 94.7,
+      "net_score": 94.0,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -4193,9 +4159,9 @@
     },
     {
       "date": "2025-12-10 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.6,
       "sell_score": 4.6,
-      "net_score": 94.7,
+      "net_score": 94.0,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -4211,9 +4177,9 @@
     },
     {
       "date": "2025-12-11 00:00:00",
-      "buy_score": 112.3,
+      "buy_score": 111.6,
       "sell_score": 4.5,
-      "net_score": 107.8,
+      "net_score": 107.1,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 23.5,
@@ -4231,9 +4197,9 @@
     },
     {
       "date": "2025-12-12 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.7,
       "sell_score": 4.5,
-      "net_score": 94.8,
+      "net_score": 94.2,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -4249,9 +4215,9 @@
     },
     {
       "date": "2025-12-15 00:00:00",
-      "buy_score": 112.3,
+      "buy_score": 111.6,
       "sell_score": 4.5,
-      "net_score": 107.8,
+      "net_score": 107.1,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 23.5,
@@ -4267,9 +4233,9 @@
     },
     {
       "date": "2025-12-16 00:00:00",
-      "buy_score": 62.6,
+      "buy_score": 61.3,
       "sell_score": 49.7,
-      "net_score": 12.9,
+      "net_score": 11.6,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 29.5,
@@ -4285,9 +4251,9 @@
     },
     {
       "date": "2025-12-17 00:00:00",
-      "buy_score": 32.0,
+      "buy_score": 31.5,
       "sell_score": 35.5,
-      "net_score": -3.5,
+      "net_score": -4.0,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 20.0,
@@ -4305,9 +4271,9 @@
     },
     {
       "date": "2025-12-18 00:00:00",
-      "buy_score": 115.5,
+      "buy_score": 114.5,
       "sell_score": 4.8,
-      "net_score": 110.7,
+      "net_score": 109.7,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 25.0,
@@ -4325,9 +4291,9 @@
     },
     {
       "date": "2025-12-19 00:00:00",
-      "buy_score": 115.5,
+      "buy_score": 114.9,
       "sell_score": 4.5,
-      "net_score": 111.0,
+      "net_score": 110.4,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 25.0,
@@ -4343,9 +4309,9 @@
     },
     {
       "date": "2025-12-22 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.6,
       "sell_score": 4.6,
-      "net_score": 94.7,
+      "net_score": 94.0,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -4361,9 +4327,9 @@
     },
     {
       "date": "2025-12-23 00:00:00",
-      "buy_score": 44.0,
+      "buy_score": 43.9,
       "sell_score": 5.0,
-      "net_score": 39.0,
+      "net_score": 38.9,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 12.3,
@@ -4381,9 +4347,9 @@
     },
     {
       "date": "2025-12-24 00:00:00",
-      "buy_score": 66.0,
+      "buy_score": 65.9,
       "sell_score": 3.4,
-      "net_score": 62.6,
+      "net_score": 62.5,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 12.3,
@@ -4399,9 +4365,9 @@
     },
     {
       "date": "2025-12-25 00:00:00",
-      "buy_score": 64.7,
+      "buy_score": 64.3,
       "sell_score": 3.6,
-      "net_score": 61.1,
+      "net_score": 60.7,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 11.5,
@@ -4417,9 +4383,9 @@
     },
     {
       "date": "2025-12-26 00:00:00",
-      "buy_score": 66.0,
+      "buy_score": 65.9,
       "sell_score": 3.5,
-      "net_score": 62.5,
+      "net_score": 62.4,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 12.3,
@@ -4435,9 +4401,9 @@
     },
     {
       "date": "2025-12-29 00:00:00",
-      "buy_score": 64.7,
+      "buy_score": 64.3,
       "sell_score": 3.6,
-      "net_score": 61.1,
+      "net_score": 60.7,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 11.5,
@@ -4453,9 +4419,9 @@
     },
     {
       "date": "2025-12-30 00:00:00",
-      "buy_score": 64.1,
+      "buy_score": 64.0,
       "sell_score": 3.4,
-      "net_score": 60.7,
+      "net_score": 60.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 11.2,
@@ -4471,9 +4437,9 @@
     },
     {
       "date": "2025-12-31 00:00:00",
-      "buy_score": 43.9,
+      "buy_score": 43.5,
       "sell_score": 5.6,
-      "net_score": 38.3,
+      "net_score": 37.9,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 12.3,
@@ -4491,9 +4457,9 @@
     },
     {
       "date": "2026-01-05 00:00:00",
-      "buy_score": 19.5,
+      "buy_score": 19.3,
       "sell_score": 4.1,
-      "net_score": 15.4,
+      "net_score": 15.2,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 6.1,
@@ -4511,9 +4477,9 @@
     },
     {
       "date": "2026-01-06 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.3,
       "sell_score": 4.8,
-      "net_score": 6.8,
+      "net_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 7.3,
@@ -4531,9 +4497,9 @@
     },
     {
       "date": "2026-01-07 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.4,
       "sell_score": 4.6,
-      "net_score": 7.0,
+      "net_score": 6.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 7.3,
@@ -4551,9 +4517,9 @@
     },
     {
       "date": "2026-01-08 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.3,
       "sell_score": 4.8,
-      "net_score": 6.8,
+      "net_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 7.3,
@@ -4572,9 +4538,9 @@
     },
     {
       "date": "2026-01-09 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.3,
       "sell_score": 4.7,
-      "net_score": 6.9,
+      "net_score": 6.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 7.3,
@@ -4592,9 +4558,9 @@
     },
     {
       "date": "2026-01-12 00:00:00",
-      "buy_score": 11.1,
+      "buy_score": 10.9,
       "sell_score": 4.7,
-      "net_score": 6.4,
+      "net_score": 6.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.0,
@@ -4612,9 +4578,9 @@
     },
     {
       "date": "2026-01-13 00:00:00",
-      "buy_score": 28.8,
+      "buy_score": 27.3,
       "sell_score": 9.5,
-      "net_score": 19.3,
+      "net_score": 17.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 9.8,
@@ -4632,9 +4598,9 @@
     },
     {
       "date": "2026-01-14 00:00:00",
-      "buy_score": 8.2,
+      "buy_score": 8.0,
       "sell_score": 7.7,
-      "net_score": 0.5,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 9.8,
@@ -4652,9 +4618,9 @@
     },
     {
       "date": "2026-01-15 00:00:00",
-      "buy_score": 12.4,
+      "buy_score": 11.9,
       "sell_score": 5.5,
-      "net_score": 6.9,
+      "net_score": 6.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 9.8,
@@ -4672,9 +4638,9 @@
     },
     {
       "date": "2026-01-16 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.3,
       "sell_score": 4.8,
-      "net_score": 0.6,
+      "net_score": 0.5,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.1,
@@ -4692,9 +4658,9 @@
     },
     {
       "date": "2026-01-19 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 5.1,
-      "net_score": 0.3,
+      "net_score": 0.1,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.1,
@@ -4712,9 +4678,9 @@
     },
     {
       "date": "2026-01-20 00:00:00",
-      "buy_score": 5.7,
+      "buy_score": 5.5,
       "sell_score": 5.1,
-      "net_score": 0.6,
+      "net_score": 0.4,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 6.8,
@@ -4730,9 +4696,9 @@
     },
     {
       "date": "2026-01-21 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.3,
       "sell_score": 4.3,
-      "net_score": 1.1,
+      "net_score": 1.0,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.1,
@@ -4750,9 +4716,9 @@
     },
     {
       "date": "2026-01-22 00:00:00",
-      "buy_score": 3.6,
+      "buy_score": 3.5,
       "sell_score": 7.7,
-      "net_score": -4.1,
+      "net_score": -4.2,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 5.1,
@@ -4790,9 +4756,9 @@
     },
     {
       "date": "2026-01-26 00:00:00",
-      "buy_score": 3.8,
+      "buy_score": 3.7,
       "sell_score": 7.1,
-      "net_score": -3.3,
+      "net_score": -3.4,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 6.8,
@@ -4826,9 +4792,9 @@
     },
     {
       "date": "2026-01-28 00:00:00",
-      "buy_score": 3.5,
+      "buy_score": 3.4,
       "sell_score": 7.0,
-      "net_score": -3.5,
+      "net_score": -3.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.4,
@@ -4844,9 +4810,9 @@
     },
     {
       "date": "2026-01-29 00:00:00",
-      "buy_score": 13.8,
+      "buy_score": 13.4,
       "sell_score": 7.4,
-      "net_score": 6.4,
+      "net_score": 6.0,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 8.2,
@@ -4862,9 +4828,9 @@
     },
     {
       "date": "2026-01-30 00:00:00",
-      "buy_score": 13.8,
+      "buy_score": 13.4,
       "sell_score": 7.4,
-      "net_score": 6.4,
+      "net_score": 6.0,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 8.2,
@@ -4954,9 +4920,9 @@
     },
     {
       "date": "2026-02-06 00:00:00",
-      "buy_score": 24.9,
+      "buy_score": 23.5,
       "sell_score": 80.2,
-      "net_score": -55.3,
+      "net_score": -56.7,
       "regime": "Bear",
       "psychology": "Euphoria",
       "reward_score": 17.8,
@@ -4972,9 +4938,9 @@
     },
     {
       "date": "2026-02-09 00:00:00",
-      "buy_score": 8.1,
+      "buy_score": 7.4,
       "sell_score": 98.9,
-      "net_score": -90.8,
+      "net_score": -91.5,
       "regime": "Bear",
       "psychology": "Euphoria",
       "reward_score": 14.4,
@@ -4990,9 +4956,9 @@
     },
     {
       "date": "2026-02-10 00:00:00",
-      "buy_score": 37.0,
+      "buy_score": 34.7,
       "sell_score": 79.0,
-      "net_score": -42.0,
+      "net_score": -44.3,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 20.5,
@@ -5010,9 +4976,9 @@
     },
     {
       "date": "2026-02-11 00:00:00",
-      "buy_score": 54.5,
+      "buy_score": 52.2,
       "sell_score": 60.8,
-      "net_score": -6.3,
+      "net_score": -8.6,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 22.0,
@@ -5030,9 +4996,9 @@
     },
     {
       "date": "2026-02-12 00:00:00",
-      "buy_score": 30.8,
+      "buy_score": 29.5,
       "sell_score": 61.3,
-      "net_score": -30.5,
+      "net_score": -31.8,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 12.2,
@@ -5048,9 +5014,9 @@
     },
     {
       "date": "2026-02-13 00:00:00",
-      "buy_score": 34.8,
+      "buy_score": 33.2,
       "sell_score": 65.9,
-      "net_score": -31.1,
+      "net_score": -32.7,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 17.5,
@@ -5066,9 +5032,9 @@
     },
     {
       "date": "2026-02-24 00:00:00",
-      "buy_score": 37.0,
+      "buy_score": 35.2,
       "sell_score": 70.6,
-      "net_score": -33.6,
+      "net_score": -35.4,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 20.5,
@@ -5086,9 +5052,9 @@
     },
     {
       "date": "2026-02-25 00:00:00",
-      "buy_score": 19.3,
+      "buy_score": 18.6,
       "sell_score": 46.6,
-      "net_score": -27.3,
+      "net_score": -28.0,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 13.3,
@@ -5104,9 +5070,9 @@
     },
     {
       "date": "2026-02-26 00:00:00",
-      "buy_score": 17.7,
+      "buy_score": 17.0,
       "sell_score": 47.3,
-      "net_score": -29.6,
+      "net_score": -30.3,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 9.8,
@@ -5124,9 +5090,9 @@
     },
     {
       "date": "2026-02-27 00:00:00",
-      "buy_score": 17.7,
+      "buy_score": 17.0,
       "sell_score": 47.3,
-      "net_score": -29.6,
+      "net_score": -30.3,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 9.8,
@@ -5144,9 +5110,9 @@
     },
     {
       "date": "2026-03-02 00:00:00",
-      "buy_score": 63.2,
+      "buy_score": 61.8,
       "sell_score": 5.9,
-      "net_score": 57.3,
+      "net_score": 55.9,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 13.3,
@@ -5164,9 +5130,9 @@
     },
     {
       "date": "2026-03-03 00:00:00",
-      "buy_score": 58.9,
+      "buy_score": 55.6,
       "sell_score": 70.5,
-      "net_score": -11.6,
+      "net_score": -14.9,
       "regime": "Bear",
       "psychology": "Optimism",
       "reward_score": 26.0,
@@ -5182,9 +5148,9 @@
     },
     {
       "date": "2026-03-04 00:00:00",
-      "buy_score": 74.2,
+      "buy_score": 71.3,
       "sell_score": 63.1,
-      "net_score": 11.1,
+      "net_score": 8.2,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 33.8,
@@ -5203,9 +5169,9 @@
     },
     {
       "date": "2026-03-05 00:00:00",
-      "buy_score": 68.7,
+      "buy_score": 65.7,
       "sell_score": 64.0,
-      "net_score": 4.7,
+      "net_score": 1.7,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 29.2,
@@ -5223,9 +5189,9 @@
     },
     {
       "date": "2026-03-06 00:00:00",
-      "buy_score": 55.0,
+      "buy_score": 53.4,
       "sell_score": 53.1,
-      "net_score": 1.9,
+      "net_score": 0.3,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 22.4,
@@ -5243,9 +5209,9 @@
     },
     {
       "date": "2026-03-09 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.0,
       "sell_score": 65.5,
-      "net_score": -6.7,
+      "net_score": -9.5,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 25.9,
@@ -5263,9 +5229,9 @@
     },
     {
       "date": "2026-03-10 00:00:00",
-      "buy_score": 49.4,
+      "buy_score": 47.9,
       "sell_score": 52.3,
-      "net_score": -2.9,
+      "net_score": -4.4,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 17.2,
@@ -5281,9 +5247,9 @@
     },
     {
       "date": "2026-03-11 00:00:00",
-      "buy_score": 49.4,
+      "buy_score": 47.9,
       "sell_score": 52.2,
-      "net_score": -2.8,
+      "net_score": -4.3,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 17.2,
@@ -5301,9 +5267,9 @@
     },
     {
       "date": "2026-03-12 00:00:00",
-      "buy_score": 56.9,
+      "buy_score": 54.6,
       "sell_score": 60.7,
-      "net_score": -3.8,
+      "net_score": -6.1,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 24.1,
@@ -5321,9 +5287,9 @@
     },
     {
       "date": "2026-03-13 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.5,
       "sell_score": 60.7,
-      "net_score": -1.9,
+      "net_score": -4.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 25.9,
@@ -5339,9 +5305,9 @@
     },
     {
       "date": "2026-03-16 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.5,
       "sell_score": 60.7,
-      "net_score": -1.9,
+      "net_score": -4.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 25.9,
@@ -5357,9 +5323,9 @@
     },
     {
       "date": "2026-03-17 00:00:00",
-      "buy_score": 66.3,
+      "buy_score": 63.7,
       "sell_score": 63.3,
-      "net_score": 3.0,
+      "net_score": 0.4,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 32.8,
@@ -5378,9 +5344,9 @@
     },
     {
       "date": "2026-03-18 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.5,
       "sell_score": 60.7,
-      "net_score": -1.9,
+      "net_score": -4.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 25.9,
@@ -5398,9 +5364,9 @@
     },
     {
       "date": "2026-03-19 00:00:00",
-      "buy_score": 66.3,
+      "buy_score": 63.6,
       "sell_score": 64.6,
-      "net_score": 1.7,
+      "net_score": -1.0,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 32.8,
@@ -5418,9 +5384,9 @@
     },
     {
       "date": "2026-03-20 00:00:00",
-      "buy_score": 83.4,
+      "buy_score": 80.2,
       "sell_score": 66.9,
-      "net_score": 16.5,
+      "net_score": 13.3,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 41.6,
@@ -5438,14 +5404,14 @@
     },
     {
       "date": "2026-03-23 00:00:00",
-      "buy_score": 92.0,
+      "buy_score": 87.9,
       "sell_score": 74.6,
-      "net_score": 17.4,
+      "net_score": 13.3,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 48.8,
       "risk_score": 27.3,
-      "target_position": 0.98,
+      "target_position": 0.7,
       "current_position": 0.6746,
       "buy_behaviors": [],
       "sell_behaviors": [
@@ -5454,19 +5420,19 @@
       "executed": true,
       "action": "BUY",
       "executed_price": 1.2782769999999997,
-      "trade_value": 3762.882189862852
+      "trade_value": 312.533726429996
     },
     {
       "date": "2026-03-24 00:00:00",
-      "buy_score": 83.4,
+      "buy_score": 79.3,
       "sell_score": 75.4,
-      "net_score": 8.0,
+      "net_score": 3.9,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 41.6,
       "risk_score": 27.9,
-      "target_position": 0.98,
-      "current_position": 0.9805,
+      "target_position": 0.7049,
+      "current_position": 0.7049,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5478,15 +5444,15 @@
     },
     {
       "date": "2026-03-25 00:00:00",
-      "buy_score": 78.0,
+      "buy_score": 74.7,
       "sell_score": 66.5,
-      "net_score": 11.5,
+      "net_score": 8.2,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 37.0,
       "risk_score": 21.6,
-      "target_position": 0.98,
-      "current_position": 0.9809,
+      "target_position": 0.7088,
+      "current_position": 0.7088,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5498,15 +5464,15 @@
     },
     {
       "date": "2026-03-26 00:00:00",
-      "buy_score": 80.3,
+      "buy_score": 76.6,
       "sell_score": 71.6,
-      "net_score": 8.7,
+      "net_score": 5.0,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 39.0,
       "risk_score": 25.2,
-      "target_position": 0.98,
-      "current_position": 0.9805,
+      "target_position": 0.705,
+      "current_position": 0.705,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5518,15 +5484,15 @@
     },
     {
       "date": "2026-03-27 00:00:00",
-      "buy_score": 80.3,
+      "buy_score": 76.6,
       "sell_score": 71.6,
-      "net_score": 8.7,
+      "net_score": 5.0,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 39.0,
       "risk_score": 25.2,
-      "target_position": 0.98,
-      "current_position": 0.9808,
+      "target_position": 0.7082,
+      "current_position": 0.7082,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5538,15 +5504,15 @@
     },
     {
       "date": "2026-03-30 00:00:00",
-      "buy_score": 65.6,
+      "buy_score": 63.0,
       "sell_score": 64.1,
-      "net_score": 1.5,
+      "net_score": -1.1,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 32.2,
       "risk_score": 19.8,
-      "target_position": 0.98,
-      "current_position": 0.9808,
+      "target_position": 0.7077,
+      "current_position": 0.7077,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5558,15 +5524,15 @@
     },
     {
       "date": "2026-03-31 00:00:00",
-      "buy_score": 71.8,
+      "buy_score": 68.7,
       "sell_score": 68.4,
-      "net_score": 3.4,
+      "net_score": 0.3,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 37.9,
       "risk_score": 22.8,
-      "target_position": 0.98,
-      "current_position": 0.9804,
+      "target_position": 0.7029,
+      "current_position": 0.7029,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5578,15 +5544,15 @@
     },
     {
       "date": "2026-04-01 00:00:00",
-      "buy_score": 61.9,
+      "buy_score": 59.5,
       "sell_score": 60.7,
-      "net_score": 1.2,
+      "net_score": -1.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 28.7,
       "risk_score": 17.4,
-      "target_position": 0.98,
-      "current_position": 0.9809,
+      "target_position": 0.7094,
+      "current_position": 0.7094,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -5598,15 +5564,15 @@
     },
     {
       "date": "2026-04-02 00:00:00",
-      "buy_score": 68.1,
+      "buy_score": 65.5,
       "sell_score": 63.3,
-      "net_score": 4.8,
+      "net_score": 2.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 34.5,
       "risk_score": 19.2,
-      "target_position": 0.98,
-      "current_position": 0.9805,
+      "target_position": 0.7045,
+      "current_position": 0.7045,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5616,15 +5582,15 @@
     },
     {
       "date": "2026-04-03 00:00:00",
-      "buy_score": 68.1,
+      "buy_score": 65.5,
       "sell_score": 63.3,
-      "net_score": 4.8,
+      "net_score": 2.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 34.5,
       "risk_score": 19.2,
-      "target_position": 0.98,
-      "current_position": 0.9805,
+      "target_position": 0.7044,
+      "current_position": 0.7044,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5634,15 +5600,15 @@
     },
     {
       "date": "2026-04-07 00:00:00",
-      "buy_score": 65.6,
+      "buy_score": 63.3,
       "sell_score": 60.7,
-      "net_score": 4.9,
+      "net_score": 2.6,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 32.2,
       "risk_score": 17.4,
-      "target_position": 0.98,
-      "current_position": 0.9806,
+      "target_position": 0.7056,
+      "current_position": 0.7056,
       "buy_behaviors": [
         "TrendPullback"
       ],
@@ -5657,15 +5623,15 @@
     },
     {
       "date": "2026-04-08 00:00:00",
-      "buy_score": 28.0,
+      "buy_score": 26.8,
       "sell_score": 45.5,
-      "net_score": -17.5,
+      "net_score": -18.7,
       "regime": "Range",
       "psychology": "Fear",
       "reward_score": 13.8,
       "risk_score": 14.2,
-      "target_position": 0.98,
-      "current_position": 0.9816,
+      "target_position": 0.7172,
+      "current_position": 0.7172,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5675,15 +5641,15 @@
     },
     {
       "date": "2026-04-09 00:00:00",
-      "buy_score": 12.8,
+      "buy_score": 12.3,
       "sell_score": 51.7,
-      "net_score": -38.9,
+      "net_score": -39.4,
       "regime": "Range",
       "psychology": "Euphoria",
       "reward_score": 10.2,
       "risk_score": 12.0,
-      "target_position": 0.98,
-      "current_position": 0.9815,
+      "target_position": 0.7157,
+      "current_position": 0.7157,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5693,15 +5659,15 @@
     },
     {
       "date": "2026-04-10 00:00:00",
-      "buy_score": 12.2,
+      "buy_score": 11.8,
       "sell_score": 47.6,
-      "net_score": -35.4,
+      "net_score": -35.8,
       "regime": "Range",
       "psychology": "Euphoria",
       "reward_score": 8.4,
       "risk_score": 9.0,
-      "target_position": 0.98,
-      "current_position": 0.9817,
+      "target_position": 0.7179,
+      "current_position": 0.7179,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5711,15 +5677,15 @@
     },
     {
       "date": "2026-04-13 00:00:00",
-      "buy_score": 39.8,
+      "buy_score": 39.1,
       "sell_score": 5.9,
-      "net_score": 33.9,
+      "net_score": 33.2,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 8.4,
       "risk_score": 4.8,
       "target_position": 0.7,
-      "current_position": 0.9818,
+      "current_position": 0.7191,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5729,15 +5695,15 @@
     },
     {
       "date": "2026-04-14 00:00:00",
-      "buy_score": 13.9,
+      "buy_score": 13.6,
       "sell_score": 6.7,
-      "net_score": 7.2,
+      "net_score": 6.9,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 8.4,
       "risk_score": 6.0,
-      "target_position": 0.98,
-      "current_position": 0.9822,
+      "target_position": 0.7235,
+      "current_position": 0.7235,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5747,15 +5713,15 @@
     },
     {
       "date": "2026-04-15 00:00:00",
-      "buy_score": 45.9,
+      "buy_score": 44.7,
       "sell_score": 5.0,
-      "net_score": 40.9,
+      "net_score": 39.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 12.0,
       "risk_score": 8.4,
       "target_position": 0.7,
-      "current_position": 0.9823,
+      "current_position": 0.7243,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5765,35 +5731,35 @@
     },
     {
       "date": "2026-04-16 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.8,
       "sell_score": 5.0,
-      "net_score": 34.9,
+      "net_score": 33.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 7.8,
       "target_position": 0.7,
-      "current_position": 0.9826,
+      "current_position": 0.7276,
       "buy_behaviors": [],
       "sell_behaviors": [
         "MomentumExhaustion"
       ],
-      "executed": false,
-      "action": "",
-      "executed_price": null,
-      "trade_value": 0
+      "executed": true,
+      "action": "SELL",
+      "executed_price": 1.460538,
+      "trade_value": 374.849429223701
     },
     {
       "date": "2026-04-17 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.9,
       "sell_score": 4.9,
-      "net_score": 35.0,
+      "net_score": 34.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 7.2,
       "target_position": 0.7,
-      "current_position": 0.9827,
+      "current_position": 0.7014,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5803,15 +5769,15 @@
     },
     {
       "date": "2026-04-20 00:00:00",
-      "buy_score": 11.4,
+      "buy_score": 11.1,
       "sell_score": 4.9,
-      "net_score": 6.5,
+      "net_score": 6.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 7.2,
-      "target_position": 0.98,
-      "current_position": 0.9828,
+      "target_position": 0.7028,
+      "current_position": 0.7028,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5821,15 +5787,15 @@
     },
     {
       "date": "2026-04-21 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.7,
       "sell_score": 5.1,
-      "net_score": 34.8,
+      "net_score": 33.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 8.6,
       "target_position": 0.7,
-      "current_position": 0.9827,
+      "current_position": 0.7017,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5839,15 +5805,15 @@
     },
     {
       "date": "2026-04-22 00:00:00",
-      "buy_score": 10.5,
+      "buy_score": 10.3,
       "sell_score": 4.7,
-      "net_score": 5.8,
+      "net_score": 5.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 6.2,
-      "target_position": 0.98,
-      "current_position": 0.983,
+      "target_position": 0.7052,
+      "current_position": 0.7052,
       "buy_behaviors": [],
       "sell_behaviors": [
         "MomentumExhaustion",
@@ -5860,15 +5826,15 @@
     },
     {
       "date": "2026-04-23 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.8,
       "sell_score": 4.9,
-      "net_score": 35.0,
+      "net_score": 33.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 7.4,
       "target_position": 0.7,
-      "current_position": 0.9827,
+      "current_position": 0.7016,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5878,15 +5844,15 @@
     },
     {
       "date": "2026-04-24 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 4.7,
-      "net_score": 0.7,
+      "net_score": 0.5,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
       "risk_score": 7.4,
-      "target_position": 0.98,
-      "current_position": 0.9828,
+      "target_position": 0.7034,
+      "current_position": 0.7034,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5896,15 +5862,15 @@
     },
     {
       "date": "2026-04-27 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.4,
-      "net_score": 0.7,
+      "net_score": 0.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
       "risk_score": 5.6,
-      "target_position": 0.98,
-      "current_position": 0.9833,
+      "target_position": 0.7088,
+      "current_position": 0.7088,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -5916,15 +5882,15 @@
     },
     {
       "date": "2026-04-28 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 4.6,
-      "net_score": 0.8,
+      "net_score": 0.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
       "risk_score": 6.8,
-      "target_position": 0.98,
-      "current_position": 0.983,
+      "target_position": 0.7051,
+      "current_position": 0.7051,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5934,15 +5900,15 @@
     },
     {
       "date": "2026-04-29 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 4.9,
       "sell_score": 4.6,
-      "net_score": 0.5,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
       "risk_score": 6.8,
-      "target_position": 0.98,
-      "current_position": 0.9831,
+      "target_position": 0.7067,
+      "current_position": 0.7067,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -5952,15 +5918,15 @@
     },
     {
       "date": "2026-04-30 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.5,
-      "net_score": 0.6,
+      "net_score": 0.5,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
       "risk_score": 6.2,
-      "target_position": 0.98,
-      "current_position": 0.9837,
+      "target_position": 0.714,
+      "current_position": 0.714,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -5972,15 +5938,15 @@
     },
     {
       "date": "2026-05-06 00:00:00",
-      "buy_score": 11.4,
+      "buy_score": 11.1,
       "sell_score": 4.7,
-      "net_score": 6.7,
+      "net_score": 6.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 6.4,
-      "target_position": 0.98,
-      "current_position": 0.9842,
+      "target_position": 0.7207,
+      "current_position": 0.7207,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -5992,15 +5958,15 @@
     },
     {
       "date": "2026-05-07 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.9,
       "sell_score": 6.6,
-      "net_score": 0.4,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 4.0,
-      "target_position": 0.98,
-      "current_position": 0.9846,
+      "target_position": 0.7254,
+      "current_position": 0.7254,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6012,15 +5978,15 @@
     },
     {
       "date": "2026-05-08 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.7,
       "sell_score": 8.1,
-      "net_score": -1.1,
+      "net_score": -1.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 11.0,
-      "target_position": 0.98,
-      "current_position": 0.9844,
+      "target_position": 0.7228,
+      "current_position": 0.7228,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6032,15 +5998,15 @@
     },
     {
       "date": "2026-05-11 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.9,
       "sell_score": 6.6,
-      "net_score": 0.4,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 4.0,
-      "target_position": 0.98,
-      "current_position": 0.9849,
+      "target_position": 0.7293,
+      "current_position": 0.7293,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6052,15 +6018,15 @@
     },
     {
       "date": "2026-05-12 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.8,
       "sell_score": 7.3,
-      "net_score": -0.3,
+      "net_score": -0.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 7.0,
-      "target_position": 0.98,
-      "current_position": 0.9849,
+      "target_position": 0.7293,
+      "current_position": 0.7293,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6072,15 +6038,15 @@
     },
     {
       "date": "2026-05-13 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.9,
       "sell_score": 6.6,
-      "net_score": 0.4,
+      "net_score": 0.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 4.0,
-      "target_position": 0.98,
-      "current_position": 0.9852,
+      "target_position": 0.7333,
+      "current_position": 0.7333,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6092,35 +6058,35 @@
     },
     {
       "date": "2026-05-14 00:00:00",
-      "buy_score": 26.6,
+      "buy_score": 25.2,
       "sell_score": 8.9,
-      "net_score": 17.7,
+      "net_score": 16.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 14.6,
-      "target_position": 0.7,
-      "current_position": 0.9848,
+      "target_position": 0.7282,
+      "current_position": 0.7282,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
       ],
-      "executed": true,
-      "action": "SELL",
-      "executed_price": 1.677321,
-      "trade_value": 4590.135235745402
+      "executed": false,
+      "action": "",
+      "executed_price": null,
+      "trade_value": 0
     },
     {
       "date": "2026-05-15 00:00:00",
-      "buy_score": 26.6,
+      "buy_score": 25.3,
       "sell_score": 8.7,
-      "net_score": 17.9,
+      "net_score": 16.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 13.4,
-      "target_position": 0.7,
-      "current_position": 0.6976,
+      "target_position": 0.726,
+      "current_position": 0.726,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6130,15 +6096,15 @@
     },
     {
       "date": "2026-05-18 00:00:00",
-      "buy_score": 12.5,
+      "buy_score": 12.0,
       "sell_score": 7.7,
-      "net_score": 4.8,
+      "net_score": 4.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
       "risk_score": 10.4,
-      "target_position": 0.7002,
-      "current_position": 0.7002,
+      "target_position": 0.7285,
+      "current_position": 0.7285,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6150,15 +6116,15 @@
     },
     {
       "date": "2026-05-19 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.4,
-      "net_score": 0.7,
+      "net_score": 0.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
       "risk_score": 5.6,
-      "target_position": 0.7057,
-      "current_position": 0.7057,
+      "target_position": 0.7337,
+      "current_position": 0.7337,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6170,15 +6136,15 @@
     },
     {
       "date": "2026-05-20 00:00:00",
-      "buy_score": 10.5,
+      "buy_score": 10.3,
       "sell_score": 4.6,
-      "net_score": 5.9,
+      "net_score": 5.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 5.6,
-      "target_position": 0.7101,
-      "current_position": 0.7101,
+      "target_position": 0.7378,
+      "current_position": 0.7378,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6190,15 +6156,15 @@
     },
     {
       "date": "2026-05-21 00:00:00",
-      "buy_score": 44.1,
+      "buy_score": 42.2,
       "sell_score": 5.7,
-      "net_score": 38.4,
+      "net_score": 36.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 10.5,
       "risk_score": 12.8,
       "target_position": 0.7,
-      "current_position": 0.7011,
+      "current_position": 0.7293,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6208,35 +6174,35 @@
     },
     {
       "date": "2026-05-22 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.4,
       "sell_score": 5.3,
-      "net_score": 34.6,
+      "net_score": 33.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 10.4,
       "target_position": 0.7,
-      "current_position": 0.7055,
+      "current_position": 0.7334,
       "buy_behaviors": [
         "TrendPullback"
       ],
       "sell_behaviors": [],
-      "executed": false,
-      "action": "",
-      "executed_price": null,
-      "trade_value": 0
+      "executed": true,
+      "action": "SELL",
+      "executed_price": 1.722276,
+      "trade_value": 510.700877468762
     },
     {
       "date": "2026-05-25 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.4,
-      "net_score": 0.7,
+      "net_score": 0.6,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
       "risk_score": 5.6,
-      "target_position": 0.7128,
-      "current_position": 0.7128,
+      "target_position": 0.7074,
+      "current_position": 0.7074,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6248,15 +6214,15 @@
     },
     {
       "date": "2026-05-26 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 4.9,
       "sell_score": 5.0,
-      "net_score": 0.1,
+      "net_score": -0.1,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 3.0,
       "risk_score": 9.8,
-      "target_position": 0.7098,
-      "current_position": 0.7098,
+      "target_position": 0.7043,
+      "current_position": 0.7043,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6266,15 +6232,15 @@
     },
     {
       "date": "2026-05-27 00:00:00",
-      "buy_score": 18.7,
+      "buy_score": 18.1,
       "sell_score": 5.0,
-      "net_score": 13.7,
+      "net_score": 13.1,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
       "risk_score": 9.2,
-      "target_position": 0.7047,
-      "current_position": 0.7047,
+      "target_position": 0.7,
+      "current_position": 0.6991,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6284,15 +6250,15 @@
     },
     {
       "date": "2026-05-28 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 4.4,
-      "net_score": 1.0,
+      "net_score": 0.8,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 4.7,
       "risk_score": 5.6,
-      "target_position": 0.7077,
-      "current_position": 0.7077,
+      "target_position": 0.7022,
+      "current_position": 0.7022,
       "buy_behaviors": [
         "TrendPullback"
       ],
@@ -6304,15 +6270,15 @@
     },
     {
       "date": "2026-05-29 00:00:00",
-      "buy_score": 20.3,
-      "sell_score": 38.6,
-      "net_score": -18.3,
+      "buy_score": 12.8,
+      "sell_score": 57.9,
+      "net_score": -45.1,
       "regime": "Range",
       "psychology": "Euphoria",
       "reward_score": 12.6,
       "risk_score": 16.5,
       "target_position": 0.7,
-      "current_position": 0.6975,
+      "current_position": 0.6919,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6322,15 +6288,15 @@
     },
     {
       "date": "2026-06-01 00:00:00",
-      "buy_score": 38.5,
-      "sell_score": 59.6,
-      "net_score": -21.1,
+      "buy_score": 23.9,
+      "sell_score": 89.4,
+      "net_score": -65.5,
       "regime": "Bear",
       "psychology": "Euphoria",
       "reward_score": 19.2,
       "risk_score": 27.0,
       "target_position": 0.7,
-      "current_position": 0.6894,
+      "current_position": 0.6837,
       "buy_behaviors": [],
       "sell_behaviors": [
         "MA_DeathCross"
@@ -6342,15 +6308,15 @@
     },
     {
       "date": "2026-06-02 00:00:00",
-      "buy_score": 36.0,
-      "sell_score": 53.5,
-      "net_score": -17.5,
+      "buy_score": 22.5,
+      "sell_score": 80.2,
+      "net_score": -57.7,
       "regime": "Bear",
       "psychology": "Euphoria",
       "reward_score": 16.1,
       "risk_score": 21.6,
       "target_position": 0.7,
-      "current_position": 0.6932,
+      "current_position": 0.6876,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6360,33 +6326,33 @@
     },
     {
       "date": "2026-06-03 00:00:00",
-      "buy_score": 82.5,
-      "sell_score": 42.8,
-      "net_score": 39.7,
+      "buy_score": 52.4,
+      "sell_score": 64.2,
+      "net_score": -11.8,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 22.4,
       "risk_score": 19.8,
-      "target_position": 0.98,
-      "current_position": 0.6963,
+      "target_position": 0.7,
+      "current_position": 0.6907,
       "buy_behaviors": [],
       "sell_behaviors": [],
-      "executed": true,
-      "action": "BUY",
-      "executed_price": 1.6516499999999996,
-      "trade_value": 4515.734203033893
+      "executed": false,
+      "action": "",
+      "executed_price": null,
+      "trade_value": 0
     },
     {
       "date": "2026-06-04 00:00:00",
-      "buy_score": 82.5,
-      "sell_score": 42.8,
-      "net_score": 39.7,
+      "buy_score": 52.4,
+      "sell_score": 64.2,
+      "net_score": -11.8,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 22.4,
       "risk_score": 19.8,
-      "target_position": 0.98,
-      "current_position": 0.9802,
+      "target_position": 0.7,
+      "current_position": 0.692,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6396,15 +6362,15 @@
     },
     {
       "date": "2026-06-05 00:00:00",
-      "buy_score": 59.4,
+      "buy_score": 56.4,
       "sell_score": 66.8,
-      "net_score": -7.4,
+      "net_score": -10.4,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 26.4,
       "risk_score": 21.6,
-      "target_position": 0.9798,
-      "current_position": 0.9798,
+      "target_position": 0.7,
+      "current_position": 0.6873,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6414,35 +6380,35 @@
     },
     {
       "date": "2026-06-08 00:00:00",
-      "buy_score": 66.8,
+      "buy_score": 63.2,
       "sell_score": 74.4,
-      "net_score": -7.6,
+      "net_score": -11.2,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 33.3,
       "risk_score": 27.0,
-      "target_position": 0.979,
-      "current_position": 0.979,
+      "target_position": 0.7,
+      "current_position": 0.6794,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
       ],
-      "executed": false,
-      "action": "",
-      "executed_price": null,
-      "trade_value": 0
+      "executed": true,
+      "action": "BUY",
+      "executed_price": 1.5675659999999998,
+      "trade_value": 293.99108048600465
     },
     {
       "date": "2026-06-09 00:00:00",
-      "buy_score": 59.4,
+      "buy_score": 56.4,
       "sell_score": 66.8,
-      "net_score": -7.4,
+      "net_score": -10.4,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 26.4,
       "risk_score": 21.6,
-      "target_position": 0.9797,
-      "current_position": 0.9797,
+      "target_position": 0.7072,
+      "current_position": 0.7072,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -6454,15 +6420,15 @@
     },
     {
       "date": "2026-06-10 00:00:00",
-      "buy_score": 62.5,
+      "buy_score": 59.1,
       "sell_score": 71.8,
-      "net_score": -9.3,
+      "net_score": -12.7,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 29.3,
       "risk_score": 25.2,
-      "target_position": 0.9796,
-      "current_position": 0.9796,
+      "target_position": 0.706,
+      "current_position": 0.706,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -6474,15 +6440,15 @@
     },
     {
       "date": "2026-06-11 00:00:00",
-      "buy_score": 55.0,
+      "buy_score": 52.4,
       "sell_score": 64.1,
-      "net_score": -9.1,
+      "net_score": -11.7,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 22.4,
       "risk_score": 19.8,
-      "target_position": 0.9799,
-      "current_position": 0.9799,
+      "target_position": 0.7088,
+      "current_position": 0.7088,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -6494,15 +6460,15 @@
     },
     {
       "date": "2026-06-12 00:00:00",
-      "buy_score": 51.9,
+      "buy_score": 49.2,
       "sell_score": 64.1,
-      "net_score": -12.2,
+      "net_score": -14.9,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 19.5,
       "risk_score": 19.8,
-      "target_position": 0.9798,
-      "current_position": 0.9798,
+      "target_position": 0.7083,
+      "current_position": 0.7083,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -6514,15 +6480,15 @@
     },
     {
       "date": "2026-06-15 00:00:00",
-      "buy_score": 16.7,
+      "buy_score": 16.0,
       "sell_score": 47.3,
-      "net_score": -30.6,
+      "net_score": -31.3,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 7.7,
       "risk_score": 12.0,
-      "target_position": 0.98,
-      "current_position": 0.9808,
+      "target_position": 0.7185,
+      "current_position": 0.7185,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6532,15 +6498,15 @@
     },
     {
       "date": "2026-06-16 00:00:00",
-      "buy_score": 16.3,
+      "buy_score": 15.5,
       "sell_score": 49.2,
-      "net_score": -32.9,
+      "net_score": -33.7,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 6.8,
       "risk_score": 13.5,
-      "target_position": 0.98,
-      "current_position": 0.9809,
+      "target_position": 0.72,
+      "current_position": 0.72,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6550,15 +6516,15 @@
     },
     {
       "date": "2026-06-17 00:00:00",
-      "buy_score": 35.3,
+      "buy_score": 33.8,
       "sell_score": 6.6,
-      "net_score": 28.7,
+      "net_score": 27.2,
       "regime": "Bull",
       "psychology": "Hope",
       "reward_score": 4.2,
       "risk_score": 11.6,
       "target_position": 0.7,
-      "current_position": 0.9817,
+      "current_position": 0.7283,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6568,15 +6534,15 @@
     },
     {
       "date": "2026-06-18 00:00:00",
-      "buy_score": 7.1,
+      "buy_score": 6.9,
       "sell_score": 7.3,
-      "net_score": -0.2,
+      "net_score": -0.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 7.2,
-      "target_position": 0.98,
-      "current_position": 0.9821,
+      "target_position": 0.7331,
+      "current_position": 0.7331,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6586,15 +6552,15 @@
     },
     {
       "date": "2026-06-22 00:00:00",
-      "buy_score": 10.6,
+      "buy_score": 10.3,
       "sell_score": 5.0,
-      "net_score": 5.6,
+      "net_score": 5.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 7.8,
-      "target_position": 0.98,
-      "current_position": 0.9822,
+      "target_position": 0.7337,
+      "current_position": 0.7337,
       "buy_behaviors": [],
       "sell_behaviors": [
         "MomentumExhaustion",
@@ -6607,15 +6573,15 @@
     },
     {
       "date": "2026-06-23 00:00:00",
-      "buy_score": 11.4,
+      "buy_score": 11.1,
       "sell_score": 5.0,
-      "net_score": 6.4,
+      "net_score": 6.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 8.4,
-      "target_position": 0.98,
-      "current_position": 0.982,
+      "target_position": 0.7312,
+      "current_position": 0.7312,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6625,15 +6591,15 @@
     },
     {
       "date": "2026-06-24 00:00:00",
-      "buy_score": 10.6,
+      "buy_score": 10.3,
       "sell_score": 4.9,
-      "net_score": 5.7,
+      "net_score": 5.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 7.2,
-      "target_position": 0.98,
-      "current_position": 0.9824,
+      "target_position": 0.7366,
+      "current_position": 0.7366,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6652,8 +6618,8 @@
       "psychology": "Exhaustion",
       "reward_score": 0,
       "risk_score": 0,
-      "target_position": 0.98,
-      "current_position": 0.9828,
+      "target_position": 0.7406,
+      "current_position": 0.7406,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6670,8 +6636,8 @@
       "psychology": "Exhaustion",
       "reward_score": 0,
       "risk_score": 0,
-      "target_position": 0.98,
-      "current_position": 0.9825,
+      "target_position": 0.7375,
+      "current_position": 0.7375,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6681,15 +6647,15 @@
     },
     {
       "date": "2026-06-29 00:00:00",
-      "buy_score": 7.1,
+      "buy_score": 6.9,
       "sell_score": 6.9,
-      "net_score": 0.2,
+      "net_score": 0.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 5.6,
-      "target_position": 0.98,
-      "current_position": 0.983,
+      "target_position": 0.7429,
+      "current_position": 0.7429,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6701,15 +6667,15 @@
     },
     {
       "date": "2026-06-30 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.8,
       "sell_score": 7.3,
-      "net_score": -0.3,
+      "net_score": -0.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 4.2,
       "risk_score": 7.4,
-      "target_position": 0.98,
-      "current_position": 0.9837,
+      "target_position": 0.7507,
+      "current_position": 0.7507,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6721,15 +6687,15 @@
     },
     {
       "date": "2026-07-01 00:00:00",
-      "buy_score": 7.6,
+      "buy_score": 7.3,
       "sell_score": 8.1,
-      "net_score": -0.5,
+      "net_score": -0.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 6.8,
       "risk_score": 11.0,
-      "target_position": 0.98,
-      "current_position": 0.9835,
+      "target_position": 0.7491,
+      "current_position": 0.7491,
       "buy_behaviors": [],
       "sell_behaviors": [
         "RSI_Overbought"
@@ -6741,33 +6707,33 @@
     },
     {
       "date": "2026-07-02 00:00:00",
-      "buy_score": 83.9,
+      "buy_score": 79.7,
       "sell_score": 8.3,
-      "net_score": 75.6,
+      "net_score": 71.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
       "reward_score": 10.5,
       "risk_score": 15.6,
       "target_position": 0.98,
-      "current_position": 0.9826,
+      "current_position": 0.7386,
       "buy_behaviors": [],
       "sell_behaviors": [],
-      "executed": false,
-      "action": "",
-      "executed_price": null,
-      "trade_value": 0
+      "executed": true,
+      "action": "BUY",
+      "executed_price": 1.8978959999999998,
+      "trade_value": 3959.8875342437605
     },
     {
       "date": "2026-07-03 00:00:00",
-      "buy_score": 84.2,
+      "buy_score": 80.3,
       "sell_score": 6.5,
-      "net_score": 77.7,
+      "net_score": 73.8,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 10.5,
       "risk_score": 14.4,
       "target_position": 0.98,
-      "current_position": 0.9825,
+      "current_position": 0.9799,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6777,15 +6743,15 @@
     },
     {
       "date": "2026-07-06 00:00:00",
-      "buy_score": 87.5,
+      "buy_score": 83.6,
       "sell_score": 6.5,
-      "net_score": 81.0,
+      "net_score": 77.1,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 12.0,
       "risk_score": 14.4,
       "target_position": 0.98,
-      "current_position": 0.9824,
+      "current_position": 0.9798,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6795,15 +6761,15 @@
     },
     {
       "date": "2026-07-07 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 86.5,
       "sell_score": 6.0,
-      "net_score": 83.6,
+      "net_score": 80.5,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 13.0,
       "risk_score": 11.6,
       "target_position": 0.98,
-      "current_position": 0.9824,
+      "current_position": 0.9798,
       "buy_behaviors": [],
       "sell_behaviors": [
         "MA_DeathCross"
@@ -6815,15 +6781,15 @@
     },
     {
       "date": "2026-07-08 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 86.5,
       "sell_score": 6.0,
-      "net_score": 83.6,
+      "net_score": 80.5,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 13.0,
       "risk_score": 11.6,
       "target_position": 0.98,
-      "current_position": 0.9823,
+      "current_position": 0.9797,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6833,51 +6799,15 @@
     },
     {
       "date": "2026-07-09 00:00:00",
-      "buy_score": 53.4,
+      "buy_score": 51.1,
       "sell_score": 6.7,
-      "net_score": 46.7,
+      "net_score": 44.4,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 6.8,
       "risk_score": 12.0,
       "target_position": 0.71,
-      "current_position": 0.9834,
-      "buy_behaviors": [],
-      "sell_behaviors": [],
-      "executed": true,
-      "action": "SELL",
-      "executed_price": 1.980018,
-      "trade_value": 5207.326317313546
-    },
-    {
-      "date": "2026-07-10 00:00:00",
-      "buy_score": 134.4,
-      "sell_score": 4.2,
-      "net_score": 130.2,
-      "regime": "Bull",
-      "psychology": "Optimism",
-      "reward_score": 13.0,
-      "risk_score": 13.8,
-      "target_position": 0.98,
-      "current_position": 0.7005,
-      "buy_behaviors": [],
-      "sell_behaviors": [],
-      "executed": true,
-      "action": "BUY",
-      "executed_price": 1.8958939999999997,
-      "trade_value": 5153.9113991979575
-    },
-    {
-      "date": "2026-07-13 00:00:00",
-      "buy_score": 82.6,
-      "sell_score": 48.7,
-      "net_score": 33.9,
-      "regime": "Bear",
-      "psychology": "Optimism",
-      "reward_score": 22.5,
-      "risk_score": 26.1,
-      "target_position": 0.98,
-      "current_position": 0.979,
+      "current_position": 0.9809,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6886,16 +6816,52 @@
       "trade_value": 0
     },
     {
+      "date": "2026-07-10 00:00:00",
+      "buy_score": 128.8,
+      "sell_score": 4.2,
+      "net_score": 124.6,
+      "regime": "Bull",
+      "psychology": "Optimism",
+      "reward_score": 13.0,
+      "risk_score": 13.8,
+      "target_position": 0.98,
+      "current_position": 0.98,
+      "buy_behaviors": [],
+      "sell_behaviors": [],
+      "executed": false,
+      "action": "",
+      "executed_price": null,
+      "trade_value": 0
+    },
+    {
+      "date": "2026-07-13 00:00:00",
+      "buy_score": 51.5,
+      "sell_score": 73.1,
+      "net_score": -21.6,
+      "regime": "Bear",
+      "psychology": "Optimism",
+      "reward_score": 22.5,
+      "risk_score": 26.1,
+      "target_position": 0.8126,
+      "current_position": 0.979,
+      "buy_behaviors": [],
+      "sell_behaviors": [],
+      "executed": true,
+      "action": "SELL",
+      "executed_price": 1.796202,
+      "trade_value": 2590.5842188496263
+    },
+    {
       "date": "2026-07-14 00:00:00",
-      "buy_score": 88.2,
-      "sell_score": 47.9,
-      "net_score": 40.3,
+      "buy_score": 55.4,
+      "sell_score": 71.8,
+      "net_score": -16.4,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 25.9,
       "risk_score": 25.2,
-      "target_position": 0.98,
-      "current_position": 0.9793,
+      "target_position": 0.8144,
+      "current_position": 0.8144,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6905,15 +6871,15 @@
     },
     {
       "date": "2026-07-15 00:00:00",
-      "buy_score": 94.7,
-      "sell_score": 49.6,
-      "net_score": 45.1,
+      "buy_score": 59.5,
+      "sell_score": 74.4,
+      "net_score": -14.9,
       "regime": "Bear",
       "psychology": "Fear",
       "reward_score": 29.9,
       "risk_score": 27.0,
-      "target_position": 0.98,
-      "current_position": 0.9785,
+      "target_position": 0.8087,
+      "current_position": 0.8087,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6923,15 +6889,15 @@
     },
     {
       "date": "2026-07-16 00:00:00",
-      "buy_score": 120.5,
-      "sell_score": 51.2,
-      "net_score": 69.3,
+      "buy_score": 76.1,
+      "sell_score": 76.8,
+      "net_score": -0.7,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 39.0,
       "risk_score": 28.8,
-      "target_position": 0.98,
-      "current_position": 0.9777,
+      "target_position": 0.8029,
+      "current_position": 0.8029,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -6941,15 +6907,15 @@
     },
     {
       "date": "2026-07-17 00:00:00",
-      "buy_score": 87.3,
+      "buy_score": 82.9,
       "sell_score": 78.0,
-      "net_score": 9.3,
+      "net_score": 4.9,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 44.9,
       "risk_score": 29.7,
-      "target_position": 0.9758,
-      "current_position": 0.9758,
+      "target_position": 0.7895,
+      "current_position": 0.7895,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -6961,15 +6927,15 @@
     },
     {
       "date": "2026-07-20 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 84.0,
       "sell_score": 89.5,
-      "net_score": 0.1,
+      "net_score": -5.5,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 46.8,
       "risk_score": 37.8,
-      "target_position": 0.9754,
-      "current_position": 0.9754,
+      "target_position": 0.7862,
+      "current_position": 0.7862,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -6981,15 +6947,15 @@
     },
     {
       "date": "2026-07-21 00:00:00",
-      "buy_score": 82.6,
+      "buy_score": 77.8,
       "sell_score": 81.8,
-      "net_score": 0.8,
+      "net_score": -4.0,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 40.9,
       "risk_score": 32.4,
-      "target_position": 0.9773,
-      "current_position": 0.9773,
+      "target_position": 0.7995,
+      "current_position": 0.7995,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7001,15 +6967,15 @@
     },
     {
       "date": "2026-07-22 00:00:00",
-      "buy_score": 82.6,
+      "buy_score": 77.8,
       "sell_score": 81.8,
-      "net_score": 0.8,
+      "net_score": -4.0,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 40.9,
       "risk_score": 32.4,
-      "target_position": 0.9767,
-      "current_position": 0.9767,
+      "target_position": 0.7955,
+      "current_position": 0.7955,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7021,15 +6987,15 @@
     },
     {
       "date": "2026-07-23 00:00:00",
-      "buy_score": 85.0,
+      "buy_score": 80.7,
       "sell_score": 76.7,
-      "net_score": 8.3,
+      "net_score": 4.0,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 42.9,
       "risk_score": 28.8,
-      "target_position": 0.9762,
-      "current_position": 0.9762,
+      "target_position": 0.7917,
+      "current_position": 0.7917,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7041,15 +7007,15 @@
     },
     {
       "date": "2026-07-24 00:00:00",
-      "buy_score": 87.3,
+      "buy_score": 83.1,
       "sell_score": 76.7,
-      "net_score": 10.6,
+      "net_score": 6.4,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 44.9,
       "risk_score": 28.8,
-      "target_position": 0.9759,
-      "current_position": 0.9759,
+      "target_position": 0.7902,
+      "current_position": 0.7902,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7061,15 +7027,15 @@
     },
     {
       "date": "2026-07-27 00:00:00",
-      "buy_score": 82.6,
+      "buy_score": 78.3,
       "sell_score": 76.7,
-      "net_score": 5.9,
+      "net_score": 1.6,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 40.9,
       "risk_score": 28.8,
-      "target_position": 0.9766,
-      "current_position": 0.9766,
+      "target_position": 0.7946,
+      "current_position": 0.7946,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7081,15 +7047,15 @@
     },
     {
       "date": "2026-07-28 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 85.3,
       "sell_score": 76.7,
-      "net_score": 12.9,
+      "net_score": 8.6,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 46.8,
       "risk_score": 28.8,
-      "target_position": 0.9751,
-      "current_position": 0.9751,
+      "target_position": 0.7842,
+      "current_position": 0.7842,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7101,15 +7067,15 @@
     },
     {
       "date": "2026-07-29 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 85.3,
       "sell_score": 76.7,
-      "net_score": 12.9,
+      "net_score": 8.6,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 46.8,
       "risk_score": 28.8,
-      "target_position": 0.9751,
-      "current_position": 0.9751,
+      "target_position": 0.7844,
+      "current_position": 0.7844,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7121,15 +7087,15 @@
     },
     {
       "date": "2026-07-30 00:00:00",
-      "buy_score": 92.0,
+      "buy_score": 87.3,
       "sell_score": 80.5,
-      "net_score": 11.5,
+      "net_score": 6.8,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 48.8,
       "risk_score": 31.5,
-      "target_position": 0.9736,
-      "current_position": 0.9736,
+      "target_position": 0.7738,
+      "current_position": 0.7738,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7141,15 +7107,15 @@
     },
     {
       "date": "2026-07-31 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 85.3,
       "sell_score": 76.7,
-      "net_score": 12.9,
+      "net_score": 8.6,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 46.8,
       "risk_score": 28.8,
-      "target_position": 0.9746,
-      "current_position": 0.9746,
+      "target_position": 0.7808,
+      "current_position": 0.7808,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7161,15 +7127,15 @@
     },
     {
       "date": "2026-08-03 00:00:00",
-      "buy_score": 92.0,
+      "buy_score": 87.7,
       "sell_score": 76.7,
-      "net_score": 15.3,
+      "net_score": 11.0,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 48.8,
       "risk_score": 28.8,
-      "target_position": 0.9736,
-      "current_position": 0.9736,
+      "target_position": 0.7742,
+      "current_position": 0.7742,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7181,15 +7147,15 @@
     },
     {
       "date": "2026-08-04 00:00:00",
-      "buy_score": 87.3,
+      "buy_score": 82.5,
       "sell_score": 81.8,
-      "net_score": 5.5,
+      "net_score": 0.7,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 44.9,
       "risk_score": 32.4,
-      "target_position": 0.9748,
-      "current_position": 0.9748,
+      "target_position": 0.7822,
+      "current_position": 0.7822,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7201,15 +7167,15 @@
     },
     {
       "date": "2026-08-05 00:00:00",
-      "buy_score": 79.6,
+      "buy_score": 75.3,
       "sell_score": 76.7,
-      "net_score": 2.9,
+      "net_score": -1.4,
       "regime": "Bear",
       "psychology": "Panic",
       "reward_score": 38.4,
       "risk_score": 28.8,
-      "target_position": 0.9759,
-      "current_position": 0.9759,
+      "target_position": 0.7901,
+      "current_position": 0.7901,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7221,15 +7187,15 @@
     },
     {
       "date": "2026-08-06 00:00:00",
-      "buy_score": 60.5,
+      "buy_score": 57.4,
       "sell_score": 69.2,
-      "net_score": -8.7,
+      "net_score": -11.8,
       "regime": "Bear",
       "psychology": "Hope",
       "reward_score": 27.5,
       "risk_score": 23.4,
-      "target_position": 0.9762,
-      "current_position": 0.9762,
+      "target_position": 0.7921,
+      "current_position": 0.7921,
       "buy_behaviors": [],
       "sell_behaviors": [
         "TrendFailure"
@@ -7241,15 +7207,15 @@
     },
     {
       "date": "2026-08-07 00:00:00",
-      "buy_score": 31.7,
+      "buy_score": 30.1,
       "sell_score": 51.6,
-      "net_score": -19.9,
+      "net_score": -21.5,
       "regime": "Range",
       "psychology": "Hope",
       "reward_score": 19.5,
       "risk_score": 19.5,
-      "target_position": 0.977,
-      "current_position": 0.977,
+      "target_position": 0.7976,
+      "current_position": 0.7976,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -7259,15 +7225,15 @@
     },
     {
       "date": "2026-08-10 00:00:00",
-      "buy_score": 30.1,
+      "buy_score": 28.3,
       "sell_score": 53.3,
-      "net_score": -23.2,
+      "net_score": -25.0,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 17.0,
       "risk_score": 21.0,
-      "target_position": 0.9769,
-      "current_position": 0.9769,
+      "target_position": 0.7969,
+      "current_position": 0.7969,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -7277,15 +7243,15 @@
     },
     {
       "date": "2026-08-11 00:00:00",
-      "buy_score": 31.7,
+      "buy_score": 30.1,
       "sell_score": 51.6,
-      "net_score": -19.9,
+      "net_score": -21.5,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 19.5,
       "risk_score": 19.5,
-      "target_position": 0.9767,
-      "current_position": 0.9767,
+      "target_position": 0.7955,
+      "current_position": 0.7955,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -7295,15 +7261,15 @@
     },
     {
       "date": "2026-08-12 00:00:00",
-      "buy_score": 30.1,
+      "buy_score": 28.6,
       "sell_score": 49.9,
-      "net_score": -19.8,
+      "net_score": -21.3,
       "regime": "Range",
       "psychology": "Optimism",
       "reward_score": 17.0,
       "risk_score": 18.0,
-      "target_position": 0.977,
-      "current_position": 0.977,
+      "target_position": 0.7975,
+      "current_position": 0.7975,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -7313,33 +7279,33 @@
     },
     {
       "date": "2026-08-13 00:00:00",
-      "buy_score": 95.1,
+      "buy_score": 92.2,
       "sell_score": 5.9,
-      "net_score": 89.2,
+      "net_score": 86.3,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 15.5,
       "risk_score": 10.8,
       "target_position": 0.98,
-      "current_position": 0.9768,
+      "current_position": 0.7963,
       "buy_behaviors": [],
       "sell_behaviors": [],
-      "executed": false,
-      "action": "",
-      "executed_price": null,
-      "trade_value": 0
+      "executed": true,
+      "action": "BUY",
+      "executed_price": 1.6226209999999999,
+      "trade_value": 2630.2983561397687
     },
     {
       "date": "2026-08-14 00:00:00",
-      "buy_score": 95.1,
+      "buy_score": 93.6,
       "sell_score": 5.0,
-      "net_score": 90.1,
+      "net_score": 88.6,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 15.5,
       "risk_score": 5.6,
       "target_position": 0.98,
-      "current_position": 0.977,
+      "current_position": 0.9802,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -7349,15 +7315,15 @@
     },
     {
       "date": "2026-08-17 00:00:00",
-      "buy_score": 95.0,
+      "buy_score": 93.8,
       "sell_score": 4.8,
-      "net_score": 90.2,
+      "net_score": 89.0,
       "regime": "Bull",
       "psychology": "Optimism",
       "reward_score": 15.5,
       "risk_score": 4.4,
       "target_position": 0.98,
-      "current_position": 0.9778,
+      "current_position": 0.9809,
       "buy_behaviors": [],
       "sell_behaviors": [],
       "executed": false,
@@ -7367,23 +7333,23 @@
     },
     {
       "date": "2026-08-18 00:00:00",
-      "buy_score": 42.3,
+      "buy_score": 41.5,
       "sell_score": 6.2,
-      "net_score": 36.1,
+      "net_score": 35.3,
       "regime": "Bull",
       "psychology": "Euphoria",
       "reward_score": 10.8,
       "risk_score": 6.2,
       "target_position": 0.7,
-      "current_position": 0.9779,
+      "current_position": 0.981,
       "buy_behaviors": [
         "DoubleBottom"
       ],
       "sell_behaviors": [],
-      "executed": true,
-      "action": "SELL",
-      "executed_price": 1.6992990000000001,
-      "trade_value": 4611.036959974155
+      "executed": false,
+      "action": "",
+      "executed_price": null,
+      "trade_value": 0
     }
   ],
   "daily_equity": [
@@ -8413,411 +8379,411 @@
     },
     {
       "date": "2026-03-23 00:00:00",
-      "equity": 12317.785095965019
+      "equity": 12322.267102065918
     },
     {
       "date": "2026-03-24 00:00:00",
-      "equity": 12601.398106903505
+      "equity": 12524.903568872745
     },
     {
       "date": "2026-03-25 00:00:00",
-      "equity": 12837.742282685576
+      "equity": 12693.767291211767
     },
     {
       "date": "2026-03-26 00:00:00",
-      "equity": 12610.85187393479
+      "equity": 12531.658117766307
     },
     {
       "date": "2026-03-27 00:00:00",
-      "equity": 12799.927214560446
+      "equity": 12666.749095637524
     },
     {
       "date": "2026-03-30 00:00:00",
-      "equity": 12771.565913466597
+      "equity": 12646.48544895684
     },
     {
       "date": "2026-03-31 00:00:00",
-      "equity": 12487.95290252811
+      "equity": 12443.848982150015
     },
     {
       "date": "2026-04-01 00:00:00",
-      "equity": 12875.557350810708
+      "equity": 12720.785486786011
     },
     {
       "date": "2026-04-02 00:00:00",
-      "equity": 12582.49057284094
+      "equity": 12511.394471085623
     },
     {
       "date": "2026-04-03 00:00:00",
-      "equity": 12573.036805809657
+      "equity": 12504.639922192064
     },
     {
       "date": "2026-04-07 00:00:00",
-      "equity": 12648.66694205992
+      "equity": 12558.67631334055
     },
     {
       "date": "2026-04-08 00:00:00",
-      "equity": 13367.153236437416
+      "equity": 13072.022029251175
     },
     {
       "date": "2026-04-09 00:00:00",
-      "equity": 13272.615566124587
+      "equity": 13004.476540315565
     },
     {
       "date": "2026-04-10 00:00:00",
-      "equity": 13414.42207159383
+      "equity": 13105.794773718979
     },
     {
       "date": "2026-04-13 00:00:00",
-      "equity": 13490.052207844094
+      "equity": 13159.831164867466
     },
     {
       "date": "2026-04-14 00:00:00",
-      "equity": 13783.11898581386
+      "equity": 13369.222180567853
     },
     {
       "date": "2026-04-15 00:00:00",
-      "equity": 13839.841588001558
+      "equity": 13409.749473929218
     },
     {
       "date": "2026-04-16 00:00:00",
-      "equity": 14066.731996752347
+      "equity": 13571.370967892033
     },
     {
       "date": "2026-04-17 00:00:00",
-      "equity": 14161.269667065175
+      "equity": 13636.349940727248
     },
     {
       "date": "2026-04-20 00:00:00",
-      "equity": 14255.807337378004
+      "equity": 13701.328913562464
     },
     {
       "date": "2026-04-21 00:00:00",
-      "equity": 14180.17720112774
+      "equity": 13649.345735294291
     },
     {
       "date": "2026-04-22 00:00:00",
-      "equity": 14416.521376909814
+      "equity": 13811.79316738233
     },
     {
       "date": "2026-04-23 00:00:00",
-      "equity": 14170.723434096459
+      "equity": 13642.847838010772
     },
     {
       "date": "2026-04-24 00:00:00",
-      "equity": 14293.622405503136
+      "equity": 13727.32050269655
     },
     {
       "date": "2026-04-27 00:00:00",
-      "equity": 14662.319319723167
+      "equity": 13980.738496753887
     },
     {
       "date": "2026-04-28 00:00:00",
-      "equity": 14407.06760987853
+      "equity": 13805.295270098808
     },
     {
       "date": "2026-04-29 00:00:00",
-      "equity": 14520.512814253925
+      "equity": 13883.270037501065
     },
     {
       "date": "2026-04-30 00:00:00",
-      "equity": 15031.016233943199
+      "equity": 14234.156490811225
     },
     {
       "date": "2026-05-06 00:00:00",
-      "equity": 15532.065886601189
+      "equity": 14578.545046837862
     },
     {
       "date": "2026-05-07 00:00:00",
-      "equity": 15891.309033789938
+      "equity": 14825.465143611678
     },
     {
       "date": "2026-05-08 00:00:00",
-      "equity": 15692.779926132996
+      "equity": 14689.009300657728
     },
     {
       "date": "2026-05-11 00:00:00",
-      "equity": 16203.283345822272
+      "equity": 15039.895753967887
     },
     {
       "date": "2026-05-12 00:00:00",
-      "equity": 16203.283345822272
+      "equity": 15039.895753967887
     },
     {
       "date": "2026-05-13 00:00:00",
-      "equity": 16534.16519191717
+      "equity": 15267.32215889114
     },
     {
       "date": "2026-05-14 00:00:00",
-      "equity": 16112.227672004292
+      "equity": 14981.414678416195
     },
     {
       "date": "2026-05-15 00:00:00",
-      "equity": 15984.601255853939
+      "equity": 14857.954630029286
     },
     {
       "date": "2026-05-18 00:00:00",
-      "equity": 16125.662031599066
+      "equity": 14994.410472983238
     },
     {
       "date": "2026-05-19 00:00:00",
-      "equity": 16427.93512248148
+      "equity": 15286.815850741703
     },
     {
       "date": "2026-05-20 00:00:00",
-      "equity": 16676.470774984802
+      "equity": 15527.238050231997
     },
     {
       "date": "2026-05-21 00:00:00",
-      "equity": 16172.682290180775
+      "equity": 15039.895753967887
     },
     {
       "date": "2026-05-22 00:00:00",
-      "equity": 16414.50076288671
+      "equity": 15273.155633821862
     },
     {
       "date": "2026-05-25 00:00:00",
-      "equity": 16830.965910324703
+      "equity": 15657.640607887075
     },
     {
       "date": "2026-05-26 00:00:00",
-      "equity": 16656.31923559264
+      "equity": 15496.404973601662
     },
     {
       "date": "2026-05-27 00:00:00",
-      "equity": 16367.480504305
+      "equity": 15229.74603997579
     },
     {
       "date": "2026-05-28 00:00:00",
-      "equity": 16535.409999239673
+      "equity": 15384.780303711763
     },
     {
       "date": "2026-05-29 00:00:00",
-      "equity": 15977.884076056553
+      "equity": 14870.066548108332
     },
     {
       "date": "2026-06-01 00:00:00",
-      "equity": 15561.418928618557
+      "equity": 14485.581574043119
     },
     {
       "date": "2026-06-02 00:00:00",
-      "equity": 15756.21714274278
+      "equity": 14665.421319976847
     },
     {
       "date": "2026-06-03 00:00:00",
-      "equity": 15911.563514639105
+      "equity": 14814.254213163382
     },
     {
       "date": "2026-06-04 00:00:00",
-      "equity": 16006.076057946635
+      "equity": 14876.26791865777
     },
     {
       "date": "2026-06-05 00:00:00",
-      "equity": 15665.830902039528
+      "equity": 14653.01857887797
     },
     {
       "date": "2026-06-08 00:00:00",
-      "equity": 15117.658150855856
+      "equity": 14292.957192303264
     },
     {
       "date": "2026-06-09 00:00:00",
-      "equity": 15637.477139047269
+      "equity": 14644.347614713119
     },
     {
       "date": "2026-06-10 00:00:00",
-      "equity": 15552.415850070493
+      "equity": 14586.847363773326
     },
     {
       "date": "2026-06-11 00:00:00",
-      "equity": 15760.343445347056
+      "equity": 14727.403532737266
     },
     {
       "date": "2026-06-12 00:00:00",
-      "equity": 15722.538428024045
+      "equity": 14701.847865652911
     },
     {
       "date": "2026-06-15 00:00:00",
-      "equity": 16506.992537476544
+      "equity": 15232.127957653243
     },
     {
       "date": "2026-06-16 00:00:00",
-      "equity": 16629.858843776332
+      "equity": 15315.18387567739
     },
     {
       "date": "2026-06-17 00:00:00",
-      "equity": 17319.8004099213
+      "equity": 15781.574799966835
     },
     {
       "date": "2026-06-18 00:00:00",
-      "equity": 17735.655600474427
+      "equity": 16062.687137894718
     },
     {
       "date": "2026-06-22 00:00:00",
-      "equity": 17792.36312645895
+      "equity": 16101.020638521248
     },
     {
       "date": "2026-06-23 00:00:00",
-      "equity": 17574.984276851632
+      "equity": 15954.075552786217
     },
     {
       "date": "2026-06-24 00:00:00",
-      "equity": 18056.998247720032
+      "equity": 16279.910308111721
     },
     {
       "date": "2026-06-25 00:00:00",
-      "equity": 18425.597166619395
+      "equity": 16529.078062184162
     },
     {
       "date": "2026-06-26 00:00:00",
-      "equity": 18142.059536696805
+      "equity": 16337.410559051514
     },
     {
       "date": "2026-06-29 00:00:00",
-      "equity": 18642.97601622672
+      "equity": 16676.023147919193
     },
     {
       "date": "2026-06-30 00:00:00",
-      "equity": 19417.97887134846
+      "equity": 17199.914323148434
     },
     {
       "date": "2026-07-01 00:00:00",
-      "equity": 19257.307547725657
+      "equity": 17091.302738039933
     },
     {
       "date": "2026-07-02 00:00:00",
-      "equity": 18236.572080004335
+      "equity": 16396.155828899482
     },
     {
       "date": "2026-07-03 00:00:00",
-      "equity": 18094.803265043047
+      "equity": 16269.025150097077
     },
     {
       "date": "2026-07-06 00:00:00",
-      "equity": 17971.936958743252
+      "equity": 16158.845228468323
     },
     {
       "date": "2026-07-07 00:00:00",
-      "equity": 17971.936958743252
+      "equity": 16158.845228468323
     },
     {
       "date": "2026-07-08 00:00:00",
-      "equity": 17867.973161104972
+      "equity": 16065.616064013222
     },
     {
       "date": "2026-07-09 00:00:00",
-      "equity": 19042.60521569773
+      "equity": 17125.038387366632
     },
     {
       "date": "2026-07-10 00:00:00",
-      "equity": 18435.63451979798
+      "equity": 16379.205071725828
     },
     {
       "date": "2026-07-13 00:00:00",
-      "equity": 17519.81610691854
+      "equity": 15562.198374728512
     },
     {
       "date": "2026-07-14 00:00:00",
-      "equity": 17729.69115987008
+      "equity": 15716.927058078418
     },
     {
       "date": "2026-07-15 00:00:00",
-      "equity": 17090.526225881298
+      "equity": 15245.70788605825
     },
     {
       "date": "2026-07-16 00:00:00",
-      "equity": 16479.98061729501
+      "equity": 14795.588079949433
     },
     {
       "date": "2026-07-17 00:00:00",
-      "equity": 15201.65074931745
+      "equity": 13853.149735909099
     },
     {
       "date": "2026-07-20 00:00:00",
-      "equity": 14915.457495292627
+      "equity": 13642.15607679559
     },
     {
       "date": "2026-07-21 00:00:00",
-      "equity": 16146.088487599376
+      "equity": 14549.428810983674
     },
     {
       "date": "2026-07-22 00:00:00",
-      "equity": 15754.957707098783
+      "equity": 14261.070810195213
     },
     {
       "date": "2026-07-23 00:00:00",
-      "equity": 15401.98602713483
+      "equity": 14000.845297288555
     },
     {
       "date": "2026-07-24 00:00:00",
-      "equity": 15268.42917525658
+      "equity": 13902.38158970225
     },
     {
       "date": "2026-07-27 00:00:00",
-      "equity": 15669.099730891336
+      "equity": 14197.772712461163
     },
     {
       "date": "2026-07-28 00:00:00",
-      "equity": 14743.741542877731
+      "equity": 13515.559881327486
     },
     {
       "date": "2026-07-29 00:00:00",
-      "equity": 14762.821093146053
+      "equity": 13529.626125268385
     },
     {
       "date": "2026-07-30 00:00:00",
-      "equity": 13904.241331071578
+      "equity": 12896.645147927864
     },
     {
       "date": "2026-07-31 00:00:00",
-      "equity": 14457.548288852908
+      "equity": 13304.56622221398
     },
     {
       "date": "2026-08-03 00:00:00",
-      "equity": 13932.860656474058
+      "equity": 12917.744513839214
     },
     {
       "date": "2026-08-04 00:00:00",
-      "equity": 14572.025590462836
+      "equity": 13388.963685859382
     },
     {
       "date": "2026-08-05 00:00:00",
-      "equity": 15258.889400122418
+      "equity": 13895.3484677318
     },
     {
       "date": "2026-08-06 00:00:00",
-      "equity": 15440.145127671476
+      "equity": 14028.977785170357
     },
     {
       "date": "2026-08-07 00:00:00",
-      "equity": 15955.29298491616
+      "equity": 14408.76637157467
     },
     {
       "date": "2026-08-10 00:00:00",
-      "equity": 15888.514558977033
+      "equity": 14359.534517781518
     },
     {
       "date": "2026-08-11 00:00:00",
-      "equity": 15754.957707098783
+      "equity": 14261.070810195213
     },
     {
       "date": "2026-08-12 00:00:00",
-      "equity": 15945.753209782
+      "equity": 14401.733249604218
     },
     {
       "date": "2026-08-13 00:00:00",
-      "equity": 15831.275908172069
+      "equity": 14313.919025766521
     },
     {
       "date": "2026-08-14 00:00:00",
-      "equity": 15955.29298491616
+      "equity": 14426.422849452025
     },
     {
       "date": "2026-08-17 00:00:00",
-      "equity": 16556.298818368294
+      "equity": 14971.633687312555
     },
     {
       "date": "2026-08-18 00:00:00",
-      "equity": 16588.458955204358
+      "equity": 15006.250248446555
     }
   ],
   "score_history": [
@@ -9423,7 +9389,7 @@
     },
     {
       "date": "2025-06-03 00:00:00",
-      "buy_score": 18.9,
+      "buy_score": 16.7,
       "sell_score": 23.4,
       "regime": "Bear",
       "psychology": "Hope",
@@ -9433,7 +9399,7 @@
     },
     {
       "date": "2025-06-04 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 10.4,
       "sell_score": 15.8,
       "regime": "Range",
       "psychology": "Hope",
@@ -9443,7 +9409,7 @@
     },
     {
       "date": "2025-06-05 00:00:00",
-      "buy_score": 8.3,
+      "buy_score": 7.4,
       "sell_score": 11.2,
       "regime": "Range",
       "psychology": "Hope",
@@ -9453,7 +9419,7 @@
     },
     {
       "date": "2025-06-06 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 4.8,
       "regime": "Range",
       "psychology": "Euphoria",
@@ -9473,7 +9439,7 @@
     },
     {
       "date": "2025-06-10 00:00:00",
-      "buy_score": 25.2,
+      "buy_score": 24.8,
       "sell_score": 0.5,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9483,7 +9449,7 @@
     },
     {
       "date": "2025-06-11 00:00:00",
-      "buy_score": 25.1,
+      "buy_score": 24.1,
       "sell_score": 1.5,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9493,7 +9459,7 @@
     },
     {
       "date": "2025-06-12 00:00:00",
-      "buy_score": 59.5,
+      "buy_score": 57.4,
       "sell_score": 1.3,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -9503,7 +9469,7 @@
     },
     {
       "date": "2025-06-13 00:00:00",
-      "buy_score": 20.4,
+      "buy_score": 19.8,
       "sell_score": 8.6,
       "regime": "Range",
       "psychology": "Optimism",
@@ -9513,7 +9479,7 @@
     },
     {
       "date": "2025-06-16 00:00:00",
-      "buy_score": 19.4,
+      "buy_score": 19.2,
       "sell_score": 3.4,
       "regime": "Range",
       "psychology": "Optimism",
@@ -9523,7 +9489,7 @@
     },
     {
       "date": "2025-06-17 00:00:00",
-      "buy_score": 34.9,
+      "buy_score": 33.7,
       "sell_score": 12.8,
       "regime": "Bear",
       "psychology": "Optimism",
@@ -9533,7 +9499,7 @@
     },
     {
       "date": "2025-06-18 00:00:00",
-      "buy_score": 20.3,
+      "buy_score": 20.1,
       "sell_score": 3.4,
       "regime": "Range",
       "psychology": "Hope",
@@ -9543,7 +9509,7 @@
     },
     {
       "date": "2025-06-19 00:00:00",
-      "buy_score": 34.8,
+      "buy_score": 33.6,
       "sell_score": 12.8,
       "regime": "Bear",
       "psychology": "Hope",
@@ -9553,7 +9519,7 @@
     },
     {
       "date": "2025-06-20 00:00:00",
-      "buy_score": 39.6,
+      "buy_score": 37.3,
       "sell_score": 24.2,
       "regime": "Bear",
       "psychology": "Hope",
@@ -9563,7 +9529,7 @@
     },
     {
       "date": "2025-06-23 00:00:00",
-      "buy_score": 20.4,
+      "buy_score": 18.8,
       "sell_score": 25.7,
       "regime": "Bear",
       "psychology": "Hope",
@@ -9573,7 +9539,7 @@
     },
     {
       "date": "2025-06-24 00:00:00",
-      "buy_score": 23.7,
+      "buy_score": 23.3,
       "sell_score": 0.5,
       "regime": "Bull",
       "psychology": "Hope",
@@ -9583,7 +9549,7 @@
     },
     {
       "date": "2025-06-25 00:00:00",
-      "buy_score": 20.8,
+      "buy_score": 20.7,
       "sell_score": 0.2,
       "regime": "Bull",
       "psychology": "Hope",
@@ -9593,7 +9559,7 @@
     },
     {
       "date": "2025-06-26 00:00:00",
-      "buy_score": 20.8,
+      "buy_score": 20.1,
       "sell_score": 0.8,
       "regime": "Bull",
       "psychology": "Hope",
@@ -9603,7 +9569,7 @@
     },
     {
       "date": "2025-06-27 00:00:00",
-      "buy_score": 1.9,
+      "buy_score": 1.8,
       "sell_score": 0.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9623,7 +9589,7 @@
     },
     {
       "date": "2025-07-01 00:00:00",
-      "buy_score": 9.6,
+      "buy_score": 9.5,
       "sell_score": 3.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9633,7 +9599,7 @@
     },
     {
       "date": "2025-07-02 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.8,
       "sell_score": 3.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9643,7 +9609,7 @@
     },
     {
       "date": "2025-07-03 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.8,
       "sell_score": 3.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9653,7 +9619,7 @@
     },
     {
       "date": "2025-07-04 00:00:00",
-      "buy_score": 9.8,
+      "buy_score": 9.7,
       "sell_score": 3.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9663,7 +9629,7 @@
     },
     {
       "date": "2025-07-07 00:00:00",
-      "buy_score": 32.9,
+      "buy_score": 32.3,
       "sell_score": 4.2,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -9673,7 +9639,7 @@
     },
     {
       "date": "2025-07-08 00:00:00",
-      "buy_score": 36.1,
+      "buy_score": 35.8,
       "sell_score": 3.8,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -9683,7 +9649,7 @@
     },
     {
       "date": "2025-07-09 00:00:00",
-      "buy_score": 36.0,
+      "buy_score": 35.4,
       "sell_score": 4.2,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -9693,7 +9659,7 @@
     },
     {
       "date": "2025-07-10 00:00:00",
-      "buy_score": 36.0,
+      "buy_score": 35.2,
       "sell_score": 4.5,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -9703,7 +9669,7 @@
     },
     {
       "date": "2025-07-11 00:00:00",
-      "buy_score": 35.9,
+      "buy_score": 35.4,
       "sell_score": 4.0,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -9713,7 +9679,7 @@
     },
     {
       "date": "2025-07-14 00:00:00",
-      "buy_score": 3.3,
+      "buy_score": 3.2,
       "sell_score": 4.8,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9743,7 +9709,7 @@
     },
     {
       "date": "2025-07-17 00:00:00",
-      "buy_score": 4.8,
+      "buy_score": 4.7,
       "sell_score": 3.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9753,7 +9719,7 @@
     },
     {
       "date": "2025-07-18 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.8,
       "sell_score": 3.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9763,7 +9729,7 @@
     },
     {
       "date": "2025-07-21 00:00:00",
-      "buy_score": 9.9,
+      "buy_score": 9.7,
       "sell_score": 3.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9773,7 +9739,7 @@
     },
     {
       "date": "2025-07-22 00:00:00",
-      "buy_score": 6.6,
+      "buy_score": 6.5,
       "sell_score": 6.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9783,7 +9749,7 @@
     },
     {
       "date": "2025-07-23 00:00:00",
-      "buy_score": 6.6,
+      "buy_score": 6.5,
       "sell_score": 6.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9803,7 +9769,7 @@
     },
     {
       "date": "2025-07-25 00:00:00",
-      "buy_score": 6.5,
+      "buy_score": 6.4,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9813,7 +9779,7 @@
     },
     {
       "date": "2025-07-28 00:00:00",
-      "buy_score": 6.2,
+      "buy_score": 6.1,
       "sell_score": 6.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9823,7 +9789,7 @@
     },
     {
       "date": "2025-07-29 00:00:00",
-      "buy_score": 5.9,
+      "buy_score": 5.8,
       "sell_score": 6.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9833,7 +9799,7 @@
     },
     {
       "date": "2025-07-30 00:00:00",
-      "buy_score": 6.2,
+      "buy_score": 5.9,
       "sell_score": 7.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9843,7 +9809,7 @@
     },
     {
       "date": "2025-07-31 00:00:00",
-      "buy_score": 6.7,
+      "buy_score": 6.5,
       "sell_score": 7.4,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9853,7 +9819,7 @@
     },
     {
       "date": "2025-08-01 00:00:00",
-      "buy_score": 3.1,
+      "buy_score": 3.0,
       "sell_score": 7.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9893,7 +9859,7 @@
     },
     {
       "date": "2025-08-07 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9903,7 +9869,7 @@
     },
     {
       "date": "2025-08-08 00:00:00",
-      "buy_score": 3.1,
+      "buy_score": 3.0,
       "sell_score": 7.0,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9913,7 +9879,7 @@
     },
     {
       "date": "2025-08-11 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9923,7 +9889,7 @@
     },
     {
       "date": "2025-08-12 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.0,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9933,7 +9899,7 @@
     },
     {
       "date": "2025-08-13 00:00:00",
-      "buy_score": 2.9,
+      "buy_score": 2.8,
       "sell_score": 6.3,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -9943,7 +9909,7 @@
     },
     {
       "date": "2025-08-14 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.8,
       "sell_score": 7.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9953,7 +9919,7 @@
     },
     {
       "date": "2025-08-15 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.9,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9963,7 +9929,7 @@
     },
     {
       "date": "2025-08-18 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.9,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9973,7 +9939,7 @@
     },
     {
       "date": "2025-08-19 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.8,
       "sell_score": 8.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9983,7 +9949,7 @@
     },
     {
       "date": "2025-08-20 00:00:00",
-      "buy_score": 6.1,
+      "buy_score": 5.9,
       "sell_score": 6.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -9993,7 +9959,7 @@
     },
     {
       "date": "2025-08-21 00:00:00",
-      "buy_score": 6.6,
+      "buy_score": 6.3,
       "sell_score": 8.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10003,7 +9969,7 @@
     },
     {
       "date": "2025-08-22 00:00:00",
-      "buy_score": 5.8,
+      "buy_score": 5.5,
       "sell_score": 7.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10013,7 +9979,7 @@
     },
     {
       "date": "2025-08-25 00:00:00",
-      "buy_score": 5.8,
+      "buy_score": 5.5,
       "sell_score": 8.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10023,7 +9989,7 @@
     },
     {
       "date": "2025-08-26 00:00:00",
-      "buy_score": 6.4,
+      "buy_score": 6.0,
       "sell_score": 8.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10033,7 +9999,7 @@
     },
     {
       "date": "2025-08-27 00:00:00",
-      "buy_score": 22.4,
+      "buy_score": 20.5,
       "sell_score": 10.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10043,7 +10009,7 @@
     },
     {
       "date": "2025-08-28 00:00:00",
-      "buy_score": 5.8,
+      "buy_score": 5.5,
       "sell_score": 8.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10053,7 +10019,7 @@
     },
     {
       "date": "2025-08-29 00:00:00",
-      "buy_score": 8.8,
+      "buy_score": 8.2,
       "sell_score": 5.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10063,7 +10029,7 @@
     },
     {
       "date": "2025-09-01 00:00:00",
-      "buy_score": 8.8,
+      "buy_score": 8.4,
       "sell_score": 5.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10073,7 +10039,7 @@
     },
     {
       "date": "2025-09-02 00:00:00",
-      "buy_score": 33.6,
+      "buy_score": 31.2,
       "sell_score": 6.2,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10083,7 +10049,7 @@
     },
     {
       "date": "2025-09-03 00:00:00",
-      "buy_score": 15.6,
+      "buy_score": 14.7,
       "sell_score": 5.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10093,8 +10059,8 @@
     },
     {
       "date": "2025-09-04 00:00:00",
-      "buy_score": 29.5,
-      "sell_score": 58.6,
+      "buy_score": 17.9,
+      "sell_score": 87.9,
       "regime": "Bear",
       "psychology": "Euphoria",
       "emotion_score": 47.229450884278236,
@@ -10103,7 +10069,7 @@
     },
     {
       "date": "2025-09-05 00:00:00",
-      "buy_score": 17.5,
+      "buy_score": 16.2,
       "sell_score": 6.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10113,7 +10079,7 @@
     },
     {
       "date": "2025-09-08 00:00:00",
-      "buy_score": 69.6,
+      "buy_score": 65.5,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10123,7 +10089,7 @@
     },
     {
       "date": "2025-09-09 00:00:00",
-      "buy_score": 123.1,
+      "buy_score": 115.7,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10133,7 +10099,7 @@
     },
     {
       "date": "2025-09-10 00:00:00",
-      "buy_score": 123.1,
+      "buy_score": 115.9,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10143,7 +10109,7 @@
     },
     {
       "date": "2025-09-11 00:00:00",
-      "buy_score": 32.2,
+      "buy_score": 30.5,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10153,7 +10119,7 @@
     },
     {
       "date": "2025-09-12 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 3.9,
       "sell_score": 5.2,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10163,7 +10129,7 @@
     },
     {
       "date": "2025-09-15 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 3.9,
       "sell_score": 5.3,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10173,7 +10139,7 @@
     },
     {
       "date": "2025-09-16 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 4.0,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10183,7 +10149,7 @@
     },
     {
       "date": "2025-09-17 00:00:00",
-      "buy_score": 4.2,
+      "buy_score": 4.0,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10193,7 +10159,7 @@
     },
     {
       "date": "2025-09-18 00:00:00",
-      "buy_score": 19.2,
+      "buy_score": 18.1,
       "sell_score": 5.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10203,7 +10169,7 @@
     },
     {
       "date": "2025-09-19 00:00:00",
-      "buy_score": 19.6,
+      "buy_score": 18.7,
       "sell_score": 5.2,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10213,7 +10179,7 @@
     },
     {
       "date": "2025-09-22 00:00:00",
-      "buy_score": 3.6,
+      "buy_score": 3.5,
       "sell_score": 7.3,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10223,7 +10189,7 @@
     },
     {
       "date": "2025-09-23 00:00:00",
-      "buy_score": 19.1,
+      "buy_score": 18.2,
       "sell_score": 5.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10233,7 +10199,7 @@
     },
     {
       "date": "2025-09-24 00:00:00",
-      "buy_score": 5.2,
+      "buy_score": 5.0,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10243,7 +10209,7 @@
     },
     {
       "date": "2025-09-25 00:00:00",
-      "buy_score": 10.8,
+      "buy_score": 10.4,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10253,7 +10219,7 @@
     },
     {
       "date": "2025-09-26 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.2,
       "sell_score": 5.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10263,7 +10229,7 @@
     },
     {
       "date": "2025-09-29 00:00:00",
-      "buy_score": 5.2,
+      "buy_score": 4.9,
       "sell_score": 5.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10273,7 +10239,7 @@
     },
     {
       "date": "2025-09-30 00:00:00",
-      "buy_score": 5.2,
+      "buy_score": 5.0,
       "sell_score": 4.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10283,7 +10249,7 @@
     },
     {
       "date": "2025-10-09 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10293,7 +10259,7 @@
     },
     {
       "date": "2025-10-10 00:00:00",
-      "buy_score": 40.9,
+      "buy_score": 39.1,
       "sell_score": 7.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10303,7 +10269,7 @@
     },
     {
       "date": "2025-10-13 00:00:00",
-      "buy_score": 63.3,
+      "buy_score": 61.1,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10313,7 +10279,7 @@
     },
     {
       "date": "2025-10-14 00:00:00",
-      "buy_score": 31.9,
+      "buy_score": 30.7,
       "sell_score": 44.8,
       "regime": "Range",
       "psychology": "Optimism",
@@ -10323,7 +10289,7 @@
     },
     {
       "date": "2025-10-15 00:00:00",
-      "buy_score": 47.3,
+      "buy_score": 45.0,
       "sell_score": 58.7,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10333,7 +10299,7 @@
     },
     {
       "date": "2025-10-16 00:00:00",
-      "buy_score": 52.1,
+      "buy_score": 49.7,
       "sell_score": 59.5,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10343,7 +10309,7 @@
     },
     {
       "date": "2025-10-17 00:00:00",
-      "buy_score": 60.7,
+      "buy_score": 57.4,
       "sell_score": 69.7,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10353,7 +10319,7 @@
     },
     {
       "date": "2025-10-20 00:00:00",
-      "buy_score": 73.6,
+      "buy_score": 70.2,
       "sell_score": 67.0,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10363,7 +10329,7 @@
     },
     {
       "date": "2025-10-21 00:00:00",
-      "buy_score": 64.4,
+      "buy_score": 61.8,
       "sell_score": 59.3,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10373,7 +10339,7 @@
     },
     {
       "date": "2025-10-22 00:00:00",
-      "buy_score": 64.3,
+      "buy_score": 61.7,
       "sell_score": 59.3,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10383,7 +10349,7 @@
     },
     {
       "date": "2025-10-23 00:00:00",
-      "buy_score": 55.1,
+      "buy_score": 52.7,
       "sell_score": 59.5,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10393,7 +10359,7 @@
     },
     {
       "date": "2025-10-24 00:00:00",
-      "buy_score": 49.4,
+      "buy_score": 47.2,
       "sell_score": 58.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10403,7 +10369,7 @@
     },
     {
       "date": "2025-10-27 00:00:00",
-      "buy_score": 60.6,
+      "buy_score": 58.4,
       "sell_score": 6.4,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10413,7 +10379,7 @@
     },
     {
       "date": "2025-10-28 00:00:00",
-      "buy_score": 62.9,
+      "buy_score": 60.7,
       "sell_score": 6.7,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10423,7 +10389,7 @@
     },
     {
       "date": "2025-10-29 00:00:00",
-      "buy_score": 54.8,
+      "buy_score": 53.3,
       "sell_score": 6.1,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10433,7 +10399,7 @@
     },
     {
       "date": "2025-10-30 00:00:00",
-      "buy_score": 94.1,
+      "buy_score": 91.0,
       "sell_score": 6.0,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -10443,7 +10409,7 @@
     },
     {
       "date": "2025-10-31 00:00:00",
-      "buy_score": 47.0,
+      "buy_score": 44.8,
       "sell_score": 60.6,
       "regime": "Bear",
       "psychology": "Optimism",
@@ -10453,7 +10419,7 @@
     },
     {
       "date": "2025-11-03 00:00:00",
-      "buy_score": 47.0,
+      "buy_score": 44.7,
       "sell_score": 60.6,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10463,7 +10429,7 @@
     },
     {
       "date": "2025-11-04 00:00:00",
-      "buy_score": 51.8,
+      "buy_score": 49.5,
       "sell_score": 61.4,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10473,7 +10439,7 @@
     },
     {
       "date": "2025-11-05 00:00:00",
-      "buy_score": 55.0,
+      "buy_score": 52.7,
       "sell_score": 61.4,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10483,7 +10449,7 @@
     },
     {
       "date": "2025-11-06 00:00:00",
-      "buy_score": 27.6,
+      "buy_score": 26.7,
       "sell_score": 41.2,
       "regime": "Range",
       "psychology": "Fear",
@@ -10493,7 +10459,7 @@
     },
     {
       "date": "2025-11-07 00:00:00",
-      "buy_score": 29.1,
+      "buy_score": 28.5,
       "sell_score": 38.2,
       "regime": "Range",
       "psychology": "Fear",
@@ -10503,7 +10469,7 @@
     },
     {
       "date": "2025-11-10 00:00:00",
-      "buy_score": 28.7,
+      "buy_score": 28.1,
       "sell_score": 38.1,
       "regime": "Range",
       "psychology": "Hope",
@@ -10513,7 +10479,7 @@
     },
     {
       "date": "2025-11-11 00:00:00",
-      "buy_score": 48.6,
+      "buy_score": 47.4,
       "sell_score": 49.2,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10523,7 +10489,7 @@
     },
     {
       "date": "2025-11-12 00:00:00",
-      "buy_score": 51.9,
+      "buy_score": 50.6,
       "sell_score": 50.0,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10533,7 +10499,7 @@
     },
     {
       "date": "2025-11-13 00:00:00",
-      "buy_score": 47.0,
+      "buy_score": 45.8,
       "sell_score": 49.1,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10543,7 +10509,7 @@
     },
     {
       "date": "2025-11-14 00:00:00",
-      "buy_score": 53.5,
+      "buy_score": 50.4,
       "sell_score": 68.2,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10553,7 +10519,7 @@
     },
     {
       "date": "2025-11-17 00:00:00",
-      "buy_score": 60.6,
+      "buy_score": 58.6,
       "sell_score": 57.5,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10563,7 +10529,7 @@
     },
     {
       "date": "2025-11-18 00:00:00",
-      "buy_score": 63.8,
+      "buy_score": 61.8,
       "sell_score": 57.5,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10573,7 +10539,7 @@
     },
     {
       "date": "2025-11-19 00:00:00",
-      "buy_score": 66.3,
+      "buy_score": 63.9,
       "sell_score": 61.2,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10583,7 +10549,7 @@
     },
     {
       "date": "2025-11-20 00:00:00",
-      "buy_score": 80.3,
+      "buy_score": 77.8,
       "sell_score": 59.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10593,7 +10559,7 @@
     },
     {
       "date": "2025-11-21 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 86.2,
       "sell_score": 68.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10603,7 +10569,7 @@
     },
     {
       "date": "2025-11-24 00:00:00",
-      "buy_score": 85.8,
+      "buy_score": 83.0,
       "sell_score": 62.2,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10613,7 +10579,7 @@
     },
     {
       "date": "2025-11-25 00:00:00",
-      "buy_score": 79.5,
+      "buy_score": 76.9,
       "sell_score": 61.0,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10623,7 +10589,7 @@
     },
     {
       "date": "2025-11-26 00:00:00",
-      "buy_score": 76.5,
+      "buy_score": 74.2,
       "sell_score": 58.4,
       "regime": "Bear",
       "psychology": "Panic",
@@ -10633,7 +10599,7 @@
     },
     {
       "date": "2025-11-27 00:00:00",
-      "buy_score": 63.2,
+      "buy_score": 61.1,
       "sell_score": 57.3,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10643,7 +10609,7 @@
     },
     {
       "date": "2025-11-28 00:00:00",
-      "buy_score": 57.5,
+      "buy_score": 56.2,
       "sell_score": 50.1,
       "regime": "Bear",
       "psychology": "Fear",
@@ -10653,7 +10619,7 @@
     },
     {
       "date": "2025-12-01 00:00:00",
-      "buy_score": 54.0,
+      "buy_score": 52.8,
       "sell_score": 48.8,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10663,7 +10629,7 @@
     },
     {
       "date": "2025-12-02 00:00:00",
-      "buy_score": 58.9,
+      "buy_score": 56.9,
       "sell_score": 57.3,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10673,7 +10639,7 @@
     },
     {
       "date": "2025-12-03 00:00:00",
-      "buy_score": 58.9,
+      "buy_score": 56.9,
       "sell_score": 57.3,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10683,7 +10649,7 @@
     },
     {
       "date": "2025-12-04 00:00:00",
-      "buy_score": 56.7,
+      "buy_score": 54.7,
       "sell_score": 57.8,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10693,7 +10659,7 @@
     },
     {
       "date": "2025-12-05 00:00:00",
-      "buy_score": 33.7,
+      "buy_score": 33.1,
       "sell_score": 37.8,
       "regime": "Range",
       "psychology": "Hope",
@@ -10703,7 +10669,7 @@
     },
     {
       "date": "2025-12-08 00:00:00",
-      "buy_score": 30.4,
+      "buy_score": 30.1,
       "sell_score": 33.2,
       "regime": "Range",
       "psychology": "Hope",
@@ -10713,7 +10679,7 @@
     },
     {
       "date": "2025-12-09 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.6,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10723,7 +10689,7 @@
     },
     {
       "date": "2025-12-10 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.6,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10733,7 +10699,7 @@
     },
     {
       "date": "2025-12-11 00:00:00",
-      "buy_score": 112.3,
+      "buy_score": 111.6,
       "sell_score": 4.5,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10743,7 +10709,7 @@
     },
     {
       "date": "2025-12-12 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.7,
       "sell_score": 4.5,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10753,7 +10719,7 @@
     },
     {
       "date": "2025-12-15 00:00:00",
-      "buy_score": 112.3,
+      "buy_score": 111.6,
       "sell_score": 4.5,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10763,7 +10729,7 @@
     },
     {
       "date": "2025-12-16 00:00:00",
-      "buy_score": 62.6,
+      "buy_score": 61.3,
       "sell_score": 49.7,
       "regime": "Bear",
       "psychology": "Hope",
@@ -10773,7 +10739,7 @@
     },
     {
       "date": "2025-12-17 00:00:00",
-      "buy_score": 32.0,
+      "buy_score": 31.5,
       "sell_score": 35.5,
       "regime": "Range",
       "psychology": "Hope",
@@ -10783,7 +10749,7 @@
     },
     {
       "date": "2025-12-18 00:00:00",
-      "buy_score": 115.5,
+      "buy_score": 114.5,
       "sell_score": 4.8,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10793,7 +10759,7 @@
     },
     {
       "date": "2025-12-19 00:00:00",
-      "buy_score": 115.5,
+      "buy_score": 114.9,
       "sell_score": 4.5,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10803,7 +10769,7 @@
     },
     {
       "date": "2025-12-22 00:00:00",
-      "buy_score": 99.3,
+      "buy_score": 98.6,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Hope",
@@ -10813,7 +10779,7 @@
     },
     {
       "date": "2025-12-23 00:00:00",
-      "buy_score": 44.0,
+      "buy_score": 43.9,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10823,7 +10789,7 @@
     },
     {
       "date": "2025-12-24 00:00:00",
-      "buy_score": 66.0,
+      "buy_score": 65.9,
       "sell_score": 3.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10833,7 +10799,7 @@
     },
     {
       "date": "2025-12-25 00:00:00",
-      "buy_score": 64.7,
+      "buy_score": 64.3,
       "sell_score": 3.6,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10843,7 +10809,7 @@
     },
     {
       "date": "2025-12-26 00:00:00",
-      "buy_score": 66.0,
+      "buy_score": 65.9,
       "sell_score": 3.5,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10853,7 +10819,7 @@
     },
     {
       "date": "2025-12-29 00:00:00",
-      "buy_score": 64.7,
+      "buy_score": 64.3,
       "sell_score": 3.6,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10863,7 +10829,7 @@
     },
     {
       "date": "2025-12-30 00:00:00",
-      "buy_score": 64.1,
+      "buy_score": 64.0,
       "sell_score": 3.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10873,7 +10839,7 @@
     },
     {
       "date": "2025-12-31 00:00:00",
-      "buy_score": 43.9,
+      "buy_score": 43.5,
       "sell_score": 5.6,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10883,7 +10849,7 @@
     },
     {
       "date": "2026-01-05 00:00:00",
-      "buy_score": 19.5,
+      "buy_score": 19.3,
       "sell_score": 4.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10893,7 +10859,7 @@
     },
     {
       "date": "2026-01-06 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.3,
       "sell_score": 4.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10903,7 +10869,7 @@
     },
     {
       "date": "2026-01-07 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.4,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10913,7 +10879,7 @@
     },
     {
       "date": "2026-01-08 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.3,
       "sell_score": 4.8,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10923,7 +10889,7 @@
     },
     {
       "date": "2026-01-09 00:00:00",
-      "buy_score": 11.6,
+      "buy_score": 11.3,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10933,7 +10899,7 @@
     },
     {
       "date": "2026-01-12 00:00:00",
-      "buy_score": 11.1,
+      "buy_score": 10.9,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10943,7 +10909,7 @@
     },
     {
       "date": "2026-01-13 00:00:00",
-      "buy_score": 28.8,
+      "buy_score": 27.3,
       "sell_score": 9.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10953,7 +10919,7 @@
     },
     {
       "date": "2026-01-14 00:00:00",
-      "buy_score": 8.2,
+      "buy_score": 8.0,
       "sell_score": 7.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10963,7 +10929,7 @@
     },
     {
       "date": "2026-01-15 00:00:00",
-      "buy_score": 12.4,
+      "buy_score": 11.9,
       "sell_score": 5.5,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -10973,7 +10939,7 @@
     },
     {
       "date": "2026-01-16 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.3,
       "sell_score": 4.8,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10983,7 +10949,7 @@
     },
     {
       "date": "2026-01-19 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 5.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -10993,7 +10959,7 @@
     },
     {
       "date": "2026-01-20 00:00:00",
-      "buy_score": 5.7,
+      "buy_score": 5.5,
       "sell_score": 5.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11003,7 +10969,7 @@
     },
     {
       "date": "2026-01-21 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.3,
       "sell_score": 4.3,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11013,7 +10979,7 @@
     },
     {
       "date": "2026-01-22 00:00:00",
-      "buy_score": 3.6,
+      "buy_score": 3.5,
       "sell_score": 7.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11033,7 +10999,7 @@
     },
     {
       "date": "2026-01-26 00:00:00",
-      "buy_score": 3.8,
+      "buy_score": 3.7,
       "sell_score": 7.1,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11053,7 +11019,7 @@
     },
     {
       "date": "2026-01-28 00:00:00",
-      "buy_score": 3.5,
+      "buy_score": 3.4,
       "sell_score": 7.0,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11063,7 +11029,7 @@
     },
     {
       "date": "2026-01-29 00:00:00",
-      "buy_score": 13.8,
+      "buy_score": 13.4,
       "sell_score": 7.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11073,7 +11039,7 @@
     },
     {
       "date": "2026-01-30 00:00:00",
-      "buy_score": 13.8,
+      "buy_score": 13.4,
       "sell_score": 7.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11123,7 +11089,7 @@
     },
     {
       "date": "2026-02-06 00:00:00",
-      "buy_score": 24.9,
+      "buy_score": 23.5,
       "sell_score": 80.2,
       "regime": "Bear",
       "psychology": "Euphoria",
@@ -11133,7 +11099,7 @@
     },
     {
       "date": "2026-02-09 00:00:00",
-      "buy_score": 8.1,
+      "buy_score": 7.4,
       "sell_score": 98.9,
       "regime": "Bear",
       "psychology": "Euphoria",
@@ -11143,7 +11109,7 @@
     },
     {
       "date": "2026-02-10 00:00:00",
-      "buy_score": 37.0,
+      "buy_score": 34.7,
       "sell_score": 79.0,
       "regime": "Bear",
       "psychology": "Hope",
@@ -11153,7 +11119,7 @@
     },
     {
       "date": "2026-02-11 00:00:00",
-      "buy_score": 54.5,
+      "buy_score": 52.2,
       "sell_score": 60.8,
       "regime": "Bear",
       "psychology": "Hope",
@@ -11163,7 +11129,7 @@
     },
     {
       "date": "2026-02-12 00:00:00",
-      "buy_score": 30.8,
+      "buy_score": 29.5,
       "sell_score": 61.3,
       "regime": "Bear",
       "psychology": "Hope",
@@ -11173,7 +11139,7 @@
     },
     {
       "date": "2026-02-13 00:00:00",
-      "buy_score": 34.8,
+      "buy_score": 33.2,
       "sell_score": 65.9,
       "regime": "Bear",
       "psychology": "Hope",
@@ -11183,7 +11149,7 @@
     },
     {
       "date": "2026-02-24 00:00:00",
-      "buy_score": 37.0,
+      "buy_score": 35.2,
       "sell_score": 70.6,
       "regime": "Bear",
       "psychology": "Hope",
@@ -11193,7 +11159,7 @@
     },
     {
       "date": "2026-02-25 00:00:00",
-      "buy_score": 19.3,
+      "buy_score": 18.6,
       "sell_score": 46.6,
       "regime": "Range",
       "psychology": "Hope",
@@ -11203,7 +11169,7 @@
     },
     {
       "date": "2026-02-26 00:00:00",
-      "buy_score": 17.7,
+      "buy_score": 17.0,
       "sell_score": 47.3,
       "regime": "Range",
       "psychology": "Hope",
@@ -11213,7 +11179,7 @@
     },
     {
       "date": "2026-02-27 00:00:00",
-      "buy_score": 17.7,
+      "buy_score": 17.0,
       "sell_score": 47.3,
       "regime": "Range",
       "psychology": "Optimism",
@@ -11223,7 +11189,7 @@
     },
     {
       "date": "2026-03-02 00:00:00",
-      "buy_score": 63.2,
+      "buy_score": 61.8,
       "sell_score": 5.9,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -11233,7 +11199,7 @@
     },
     {
       "date": "2026-03-03 00:00:00",
-      "buy_score": 58.9,
+      "buy_score": 55.6,
       "sell_score": 70.5,
       "regime": "Bear",
       "psychology": "Optimism",
@@ -11243,7 +11209,7 @@
     },
     {
       "date": "2026-03-04 00:00:00",
-      "buy_score": 74.2,
+      "buy_score": 71.3,
       "sell_score": 63.1,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11253,7 +11219,7 @@
     },
     {
       "date": "2026-03-05 00:00:00",
-      "buy_score": 68.7,
+      "buy_score": 65.7,
       "sell_score": 64.0,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11263,7 +11229,7 @@
     },
     {
       "date": "2026-03-06 00:00:00",
-      "buy_score": 55.0,
+      "buy_score": 53.4,
       "sell_score": 53.1,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11273,7 +11239,7 @@
     },
     {
       "date": "2026-03-09 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.0,
       "sell_score": 65.5,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11283,7 +11249,7 @@
     },
     {
       "date": "2026-03-10 00:00:00",
-      "buy_score": 49.4,
+      "buy_score": 47.9,
       "sell_score": 52.3,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11293,7 +11259,7 @@
     },
     {
       "date": "2026-03-11 00:00:00",
-      "buy_score": 49.4,
+      "buy_score": 47.9,
       "sell_score": 52.2,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11303,7 +11269,7 @@
     },
     {
       "date": "2026-03-12 00:00:00",
-      "buy_score": 56.9,
+      "buy_score": 54.6,
       "sell_score": 60.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11313,7 +11279,7 @@
     },
     {
       "date": "2026-03-13 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.5,
       "sell_score": 60.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11323,7 +11289,7 @@
     },
     {
       "date": "2026-03-16 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.5,
       "sell_score": 60.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11333,7 +11299,7 @@
     },
     {
       "date": "2026-03-17 00:00:00",
-      "buy_score": 66.3,
+      "buy_score": 63.7,
       "sell_score": 63.3,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11343,7 +11309,7 @@
     },
     {
       "date": "2026-03-18 00:00:00",
-      "buy_score": 58.8,
+      "buy_score": 56.5,
       "sell_score": 60.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11353,7 +11319,7 @@
     },
     {
       "date": "2026-03-19 00:00:00",
-      "buy_score": 66.3,
+      "buy_score": 63.6,
       "sell_score": 64.6,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11363,7 +11329,7 @@
     },
     {
       "date": "2026-03-20 00:00:00",
-      "buy_score": 83.4,
+      "buy_score": 80.2,
       "sell_score": 66.9,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11373,7 +11339,7 @@
     },
     {
       "date": "2026-03-23 00:00:00",
-      "buy_score": 92.0,
+      "buy_score": 87.9,
       "sell_score": 74.6,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11383,7 +11349,7 @@
     },
     {
       "date": "2026-03-24 00:00:00",
-      "buy_score": 83.4,
+      "buy_score": 79.3,
       "sell_score": 75.4,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11393,7 +11359,7 @@
     },
     {
       "date": "2026-03-25 00:00:00",
-      "buy_score": 78.0,
+      "buy_score": 74.7,
       "sell_score": 66.5,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11403,7 +11369,7 @@
     },
     {
       "date": "2026-03-26 00:00:00",
-      "buy_score": 80.3,
+      "buy_score": 76.6,
       "sell_score": 71.6,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11413,7 +11379,7 @@
     },
     {
       "date": "2026-03-27 00:00:00",
-      "buy_score": 80.3,
+      "buy_score": 76.6,
       "sell_score": 71.6,
       "regime": "Bear",
       "psychology": "Panic",
@@ -11423,7 +11389,7 @@
     },
     {
       "date": "2026-03-30 00:00:00",
-      "buy_score": 65.6,
+      "buy_score": 63.0,
       "sell_score": 64.1,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11433,7 +11399,7 @@
     },
     {
       "date": "2026-03-31 00:00:00",
-      "buy_score": 71.8,
+      "buy_score": 68.7,
       "sell_score": 68.4,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11443,7 +11409,7 @@
     },
     {
       "date": "2026-04-01 00:00:00",
-      "buy_score": 61.9,
+      "buy_score": 59.5,
       "sell_score": 60.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11453,7 +11419,7 @@
     },
     {
       "date": "2026-04-02 00:00:00",
-      "buy_score": 68.1,
+      "buy_score": 65.5,
       "sell_score": 63.3,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11463,7 +11429,7 @@
     },
     {
       "date": "2026-04-03 00:00:00",
-      "buy_score": 68.1,
+      "buy_score": 65.5,
       "sell_score": 63.3,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11473,7 +11439,7 @@
     },
     {
       "date": "2026-04-07 00:00:00",
-      "buy_score": 65.6,
+      "buy_score": 63.3,
       "sell_score": 60.7,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11483,7 +11449,7 @@
     },
     {
       "date": "2026-04-08 00:00:00",
-      "buy_score": 28.0,
+      "buy_score": 26.8,
       "sell_score": 45.5,
       "regime": "Range",
       "psychology": "Fear",
@@ -11493,7 +11459,7 @@
     },
     {
       "date": "2026-04-09 00:00:00",
-      "buy_score": 12.8,
+      "buy_score": 12.3,
       "sell_score": 51.7,
       "regime": "Range",
       "psychology": "Euphoria",
@@ -11503,7 +11469,7 @@
     },
     {
       "date": "2026-04-10 00:00:00",
-      "buy_score": 12.2,
+      "buy_score": 11.8,
       "sell_score": 47.6,
       "regime": "Range",
       "psychology": "Euphoria",
@@ -11513,7 +11479,7 @@
     },
     {
       "date": "2026-04-13 00:00:00",
-      "buy_score": 39.8,
+      "buy_score": 39.1,
       "sell_score": 5.9,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11523,7 +11489,7 @@
     },
     {
       "date": "2026-04-14 00:00:00",
-      "buy_score": 13.9,
+      "buy_score": 13.6,
       "sell_score": 6.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11533,7 +11499,7 @@
     },
     {
       "date": "2026-04-15 00:00:00",
-      "buy_score": 45.9,
+      "buy_score": 44.7,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11543,7 +11509,7 @@
     },
     {
       "date": "2026-04-16 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.8,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11553,7 +11519,7 @@
     },
     {
       "date": "2026-04-17 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.9,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11563,7 +11529,7 @@
     },
     {
       "date": "2026-04-20 00:00:00",
-      "buy_score": 11.4,
+      "buy_score": 11.1,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11573,7 +11539,7 @@
     },
     {
       "date": "2026-04-21 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.7,
       "sell_score": 5.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11583,7 +11549,7 @@
     },
     {
       "date": "2026-04-22 00:00:00",
-      "buy_score": 10.5,
+      "buy_score": 10.3,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11593,7 +11559,7 @@
     },
     {
       "date": "2026-04-23 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.8,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11603,7 +11569,7 @@
     },
     {
       "date": "2026-04-24 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11613,7 +11579,7 @@
     },
     {
       "date": "2026-04-27 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11623,7 +11589,7 @@
     },
     {
       "date": "2026-04-28 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11633,7 +11599,7 @@
     },
     {
       "date": "2026-04-29 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 4.9,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11643,7 +11609,7 @@
     },
     {
       "date": "2026-04-30 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.5,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11653,7 +11619,7 @@
     },
     {
       "date": "2026-05-06 00:00:00",
-      "buy_score": 11.4,
+      "buy_score": 11.1,
       "sell_score": 4.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11663,7 +11629,7 @@
     },
     {
       "date": "2026-05-07 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.9,
       "sell_score": 6.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11673,7 +11639,7 @@
     },
     {
       "date": "2026-05-08 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.7,
       "sell_score": 8.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11683,7 +11649,7 @@
     },
     {
       "date": "2026-05-11 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.9,
       "sell_score": 6.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11693,7 +11659,7 @@
     },
     {
       "date": "2026-05-12 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.8,
       "sell_score": 7.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11703,7 +11669,7 @@
     },
     {
       "date": "2026-05-13 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.9,
       "sell_score": 6.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11713,7 +11679,7 @@
     },
     {
       "date": "2026-05-14 00:00:00",
-      "buy_score": 26.6,
+      "buy_score": 25.2,
       "sell_score": 8.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11723,7 +11689,7 @@
     },
     {
       "date": "2026-05-15 00:00:00",
-      "buy_score": 26.6,
+      "buy_score": 25.3,
       "sell_score": 8.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11733,7 +11699,7 @@
     },
     {
       "date": "2026-05-18 00:00:00",
-      "buy_score": 12.5,
+      "buy_score": 12.0,
       "sell_score": 7.7,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11743,7 +11709,7 @@
     },
     {
       "date": "2026-05-19 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11753,7 +11719,7 @@
     },
     {
       "date": "2026-05-20 00:00:00",
-      "buy_score": 10.5,
+      "buy_score": 10.3,
       "sell_score": 4.6,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11763,7 +11729,7 @@
     },
     {
       "date": "2026-05-21 00:00:00",
-      "buy_score": 44.1,
+      "buy_score": 42.2,
       "sell_score": 5.7,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11773,7 +11739,7 @@
     },
     {
       "date": "2026-05-22 00:00:00",
-      "buy_score": 39.9,
+      "buy_score": 38.4,
       "sell_score": 5.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11783,7 +11749,7 @@
     },
     {
       "date": "2026-05-25 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 5.0,
       "sell_score": 4.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11793,7 +11759,7 @@
     },
     {
       "date": "2026-05-26 00:00:00",
-      "buy_score": 5.1,
+      "buy_score": 4.9,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11803,7 +11769,7 @@
     },
     {
       "date": "2026-05-27 00:00:00",
-      "buy_score": 18.7,
+      "buy_score": 18.1,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11813,7 +11779,7 @@
     },
     {
       "date": "2026-05-28 00:00:00",
-      "buy_score": 5.4,
+      "buy_score": 5.2,
       "sell_score": 4.4,
       "regime": "Bull",
       "psychology": "Euphoria",
@@ -11823,8 +11789,8 @@
     },
     {
       "date": "2026-05-29 00:00:00",
-      "buy_score": 20.3,
-      "sell_score": 38.6,
+      "buy_score": 12.8,
+      "sell_score": 57.9,
       "regime": "Range",
       "psychology": "Euphoria",
       "emotion_score": 45.83892544002286,
@@ -11833,8 +11799,8 @@
     },
     {
       "date": "2026-06-01 00:00:00",
-      "buy_score": 38.5,
-      "sell_score": 59.6,
+      "buy_score": 23.9,
+      "sell_score": 89.4,
       "regime": "Bear",
       "psychology": "Euphoria",
       "emotion_score": 25.970048792513417,
@@ -11843,8 +11809,8 @@
     },
     {
       "date": "2026-06-02 00:00:00",
-      "buy_score": 36.0,
-      "sell_score": 53.5,
+      "buy_score": 22.5,
+      "sell_score": 80.2,
       "regime": "Bear",
       "psychology": "Euphoria",
       "emotion_score": 31.45576517989715,
@@ -11853,8 +11819,8 @@
     },
     {
       "date": "2026-06-03 00:00:00",
-      "buy_score": 82.5,
-      "sell_score": 42.8,
+      "buy_score": 52.4,
+      "sell_score": 64.2,
       "regime": "Bear",
       "psychology": "Fear",
       "emotion_score": 37.918794749062805,
@@ -11863,8 +11829,8 @@
     },
     {
       "date": "2026-06-04 00:00:00",
-      "buy_score": 82.5,
-      "sell_score": 42.8,
+      "buy_score": 52.4,
+      "sell_score": 64.2,
       "regime": "Bear",
       "psychology": "Fear",
       "emotion_score": 40.54854044370411,
@@ -11873,7 +11839,7 @@
     },
     {
       "date": "2026-06-05 00:00:00",
-      "buy_score": 59.4,
+      "buy_score": 56.4,
       "sell_score": 66.8,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11883,7 +11849,7 @@
     },
     {
       "date": "2026-06-08 00:00:00",
-      "buy_score": 66.8,
+      "buy_score": 63.2,
       "sell_score": 74.4,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11893,7 +11859,7 @@
     },
     {
       "date": "2026-06-09 00:00:00",
-      "buy_score": 59.4,
+      "buy_score": 56.4,
       "sell_score": 66.8,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11903,7 +11869,7 @@
     },
     {
       "date": "2026-06-10 00:00:00",
-      "buy_score": 62.5,
+      "buy_score": 59.1,
       "sell_score": 71.8,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11913,7 +11879,7 @@
     },
     {
       "date": "2026-06-11 00:00:00",
-      "buy_score": 55.0,
+      "buy_score": 52.4,
       "sell_score": 64.1,
       "regime": "Bear",
       "psychology": "Fear",
@@ -11923,7 +11889,7 @@
     },
     {
       "date": "2026-06-12 00:00:00",
-      "buy_score": 51.9,
+      "buy_score": 49.2,
       "sell_score": 64.1,
       "regime": "Bear",
       "psychology": "Hope",
@@ -11933,7 +11899,7 @@
     },
     {
       "date": "2026-06-15 00:00:00",
-      "buy_score": 16.7,
+      "buy_score": 16.0,
       "sell_score": 47.3,
       "regime": "Range",
       "psychology": "Hope",
@@ -11943,7 +11909,7 @@
     },
     {
       "date": "2026-06-16 00:00:00",
-      "buy_score": 16.3,
+      "buy_score": 15.5,
       "sell_score": 49.2,
       "regime": "Range",
       "psychology": "Hope",
@@ -11953,7 +11919,7 @@
     },
     {
       "date": "2026-06-17 00:00:00",
-      "buy_score": 35.3,
+      "buy_score": 33.8,
       "sell_score": 6.6,
       "regime": "Bull",
       "psychology": "Hope",
@@ -11963,7 +11929,7 @@
     },
     {
       "date": "2026-06-18 00:00:00",
-      "buy_score": 7.1,
+      "buy_score": 6.9,
       "sell_score": 7.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11973,7 +11939,7 @@
     },
     {
       "date": "2026-06-22 00:00:00",
-      "buy_score": 10.6,
+      "buy_score": 10.3,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11983,7 +11949,7 @@
     },
     {
       "date": "2026-06-23 00:00:00",
-      "buy_score": 11.4,
+      "buy_score": 11.1,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -11993,7 +11959,7 @@
     },
     {
       "date": "2026-06-24 00:00:00",
-      "buy_score": 10.6,
+      "buy_score": 10.3,
       "sell_score": 4.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -12023,7 +11989,7 @@
     },
     {
       "date": "2026-06-29 00:00:00",
-      "buy_score": 7.1,
+      "buy_score": 6.9,
       "sell_score": 6.9,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -12033,7 +11999,7 @@
     },
     {
       "date": "2026-06-30 00:00:00",
-      "buy_score": 7.0,
+      "buy_score": 6.8,
       "sell_score": 7.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -12043,7 +12009,7 @@
     },
     {
       "date": "2026-07-01 00:00:00",
-      "buy_score": 7.6,
+      "buy_score": 7.3,
       "sell_score": 8.1,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -12053,7 +12019,7 @@
     },
     {
       "date": "2026-07-02 00:00:00",
-      "buy_score": 83.9,
+      "buy_score": 79.7,
       "sell_score": 8.3,
       "regime": "Bull",
       "psychology": "Exhaustion",
@@ -12063,7 +12029,7 @@
     },
     {
       "date": "2026-07-03 00:00:00",
-      "buy_score": 84.2,
+      "buy_score": 80.3,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12073,7 +12039,7 @@
     },
     {
       "date": "2026-07-06 00:00:00",
-      "buy_score": 87.5,
+      "buy_score": 83.6,
       "sell_score": 6.5,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12083,7 +12049,7 @@
     },
     {
       "date": "2026-07-07 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 86.5,
       "sell_score": 6.0,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12093,7 +12059,7 @@
     },
     {
       "date": "2026-07-08 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 86.5,
       "sell_score": 6.0,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12103,7 +12069,7 @@
     },
     {
       "date": "2026-07-09 00:00:00",
-      "buy_score": 53.4,
+      "buy_score": 51.1,
       "sell_score": 6.7,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12113,7 +12079,7 @@
     },
     {
       "date": "2026-07-10 00:00:00",
-      "buy_score": 134.4,
+      "buy_score": 128.8,
       "sell_score": 4.2,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12123,8 +12089,8 @@
     },
     {
       "date": "2026-07-13 00:00:00",
-      "buy_score": 82.6,
-      "sell_score": 48.7,
+      "buy_score": 51.5,
+      "sell_score": 73.1,
       "regime": "Bear",
       "psychology": "Optimism",
       "emotion_score": 31.901711389229938,
@@ -12133,8 +12099,8 @@
     },
     {
       "date": "2026-07-14 00:00:00",
-      "buy_score": 88.2,
-      "sell_score": 47.9,
+      "buy_score": 55.4,
+      "sell_score": 71.8,
       "regime": "Bear",
       "psychology": "Fear",
       "emotion_score": 38.82766584758469,
@@ -12143,8 +12109,8 @@
     },
     {
       "date": "2026-07-15 00:00:00",
-      "buy_score": 94.7,
-      "sell_score": 49.6,
+      "buy_score": 59.5,
+      "sell_score": 74.4,
       "regime": "Bear",
       "psychology": "Fear",
       "emotion_score": 22.440683600113843,
@@ -12153,8 +12119,8 @@
     },
     {
       "date": "2026-07-16 00:00:00",
-      "buy_score": 120.5,
-      "sell_score": 51.2,
+      "buy_score": 76.1,
+      "sell_score": 76.8,
       "regime": "Bear",
       "psychology": "Panic",
       "emotion_score": 13.86652891131591,
@@ -12163,7 +12129,7 @@
     },
     {
       "date": "2026-07-17 00:00:00",
-      "buy_score": 87.3,
+      "buy_score": 82.9,
       "sell_score": 78.0,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12173,7 +12139,7 @@
     },
     {
       "date": "2026-07-20 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 84.0,
       "sell_score": 89.5,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12183,7 +12149,7 @@
     },
     {
       "date": "2026-07-21 00:00:00",
-      "buy_score": 82.6,
+      "buy_score": 77.8,
       "sell_score": 81.8,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12193,7 +12159,7 @@
     },
     {
       "date": "2026-07-22 00:00:00",
-      "buy_score": 82.6,
+      "buy_score": 77.8,
       "sell_score": 81.8,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12203,7 +12169,7 @@
     },
     {
       "date": "2026-07-23 00:00:00",
-      "buy_score": 85.0,
+      "buy_score": 80.7,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12213,7 +12179,7 @@
     },
     {
       "date": "2026-07-24 00:00:00",
-      "buy_score": 87.3,
+      "buy_score": 83.1,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12223,7 +12189,7 @@
     },
     {
       "date": "2026-07-27 00:00:00",
-      "buy_score": 82.6,
+      "buy_score": 78.3,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12233,7 +12199,7 @@
     },
     {
       "date": "2026-07-28 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 85.3,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12243,7 +12209,7 @@
     },
     {
       "date": "2026-07-29 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 85.3,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12253,7 +12219,7 @@
     },
     {
       "date": "2026-07-30 00:00:00",
-      "buy_score": 92.0,
+      "buy_score": 87.3,
       "sell_score": 80.5,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12263,7 +12229,7 @@
     },
     {
       "date": "2026-07-31 00:00:00",
-      "buy_score": 89.6,
+      "buy_score": 85.3,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12273,7 +12239,7 @@
     },
     {
       "date": "2026-08-03 00:00:00",
-      "buy_score": 92.0,
+      "buy_score": 87.7,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12283,7 +12249,7 @@
     },
     {
       "date": "2026-08-04 00:00:00",
-      "buy_score": 87.3,
+      "buy_score": 82.5,
       "sell_score": 81.8,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12293,7 +12259,7 @@
     },
     {
       "date": "2026-08-05 00:00:00",
-      "buy_score": 79.6,
+      "buy_score": 75.3,
       "sell_score": 76.7,
       "regime": "Bear",
       "psychology": "Panic",
@@ -12303,7 +12269,7 @@
     },
     {
       "date": "2026-08-06 00:00:00",
-      "buy_score": 60.5,
+      "buy_score": 57.4,
       "sell_score": 69.2,
       "regime": "Bear",
       "psychology": "Hope",
@@ -12313,7 +12279,7 @@
     },
     {
       "date": "2026-08-07 00:00:00",
-      "buy_score": 31.7,
+      "buy_score": 30.1,
       "sell_score": 51.6,
       "regime": "Range",
       "psychology": "Hope",
@@ -12323,7 +12289,7 @@
     },
     {
       "date": "2026-08-10 00:00:00",
-      "buy_score": 30.1,
+      "buy_score": 28.3,
       "sell_score": 53.3,
       "regime": "Range",
       "psychology": "Optimism",
@@ -12333,7 +12299,7 @@
     },
     {
       "date": "2026-08-11 00:00:00",
-      "buy_score": 31.7,
+      "buy_score": 30.1,
       "sell_score": 51.6,
       "regime": "Range",
       "psychology": "Optimism",
@@ -12343,7 +12309,7 @@
     },
     {
       "date": "2026-08-12 00:00:00",
-      "buy_score": 30.1,
+      "buy_score": 28.6,
       "sell_score": 49.9,
       "regime": "Range",
       "psychology": "Optimism",
@@ -12353,7 +12319,7 @@
     },
     {
       "date": "2026-08-13 00:00:00",
-      "buy_score": 95.1,
+      "buy_score": 92.2,
       "sell_score": 5.9,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12363,7 +12329,7 @@
     },
     {
       "date": "2026-08-14 00:00:00",
-      "buy_score": 95.1,
+      "buy_score": 93.6,
       "sell_score": 5.0,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12373,7 +12339,7 @@
     },
     {
       "date": "2026-08-17 00:00:00",
-      "buy_score": 95.0,
+      "buy_score": 93.8,
       "sell_score": 4.8,
       "regime": "Bull",
       "psychology": "Optimism",
@@ -12383,7 +12349,7 @@
     },
     {
       "date": "2026-08-18 00:00:00",
-      "buy_score": 42.3,
+      "buy_score": 41.5,
       "sell_score": 6.2,
       "regime": "Bull",
       "psychology": "Euphoria",

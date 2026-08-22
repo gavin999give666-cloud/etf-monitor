@@ -125,8 +125,10 @@ class RiskGuard:
                     'desc': f'阶梯止盈T1（浮盈 {pnl_pct*100:.1f}% ≥ {_cfg.TAKE_PROFIT_T1*100:.0f}%，减1/3）',
                 })
 
-            # 距 60 日高点回撤 → 清仓锁利
-            if high_60d and high_60d > 0:
+            # V7.0 P6.7 修复: 距 60 日高点回撤 → 清仓锁利
+            # 仅在正浮盈时触发（pnl_pct > 0），防止"刚建仓就被 trail_exit 清仓"
+            # 的 whipsaw 循环（无盈利可锁时 trail_exit 退化为强制止损）
+            if high_60d and high_60d > 0 and pnl_pct > 0:
                 dist_from_high = (high_60d - current_price) / high_60d
                 if dist_from_high >= _cfg.TRAIL_EXIT_DRAWDOWN:
                     cap = 0.0

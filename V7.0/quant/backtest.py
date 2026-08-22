@@ -449,6 +449,16 @@ class V6Backtest:
         drawdown = (equity_df['equity'] - cummax) / cummax
         results['max_drawdown'] = drawdown.min()
 
+        # V7.0 P6.6: 基准（buy & hold）最大回撤 —— 用收盘价序列的峰谷回撤
+        # 供 benchmark_beating_objective 计算 dd_improvement 与 DD_TARGET（基准回撤的50%）
+        _bclose = self.df['close'].values
+        if len(_bclose) > 0:
+            _bcummax = np.maximum.accumulate(_bclose)
+            _bdd = (_bclose - _bcummax) / np.where(_bcummax > 0, _bcummax, 1)
+            results['benchmark_max_drawdown'] = float(_bdd.min())
+        else:
+            results['benchmark_max_drawdown'] = 0.0
+
         trading_days = len(equity_df)
         years = trading_days / 252.0
         results['annualized_return'] = ((end_equity / start_equity) ** (1.0 / years) - 1) if years > 0 else 0

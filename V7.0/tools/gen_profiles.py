@@ -75,6 +75,29 @@ STRATEGY_KEYS = [
     'CALIBRATION_METHOD', 'CALIBRATION_MIN_SAMPLES', 'CALIBRATION_AUTO_DISABLE',
 ]
 
+# V7.0 P6.8: 新增策略参数（L1 战略层 + L3 风控层 + 架构开关）。
+# 这些参数不在 V6.2.3 旧 config 中，需从 V7.0/quant/config.py 默认值导出。
+V7_KEYS = [
+    # L1 战略层：仓位中枢 + 相位通道
+    'CENTER_BULL', 'CENTER_RANGE', 'CENTER_BEAR', 'CENTER_UNKNOWN',
+    'TARGET_VOL', 'OVERHEAT_CENTER_MULT', 'BOTTOMFISHING_BOOST',
+    'OVERHEAT_OFFSET_PENALTY', 'BUY_OFFSET_THRESHOLDS', 'SELL_OFFSET_THRESHOLDS',
+    'POSITION_FLOOR', 'STRATEGY_MODE',
+    # L3 风控层
+    'STOP_LOSS_PCT', 'STOP_LOSS_HARD', 'STOP_LOSS_COOLDOWN_DAYS',
+    'TAKE_PROFIT_T1', 'TAKE_PROFIT_T2', 'TRAIL_EXIT_DRAWDOWN',
+    'DRAWDOWN_CIRCUIT', 'CIRCUIT_BREAKER_CAP', 'CIRCUIT_RELEASE_DAYS',
+]
+
+# STRATEGY_KEYS 全量 = V6 旧参数 + V7 新参数（_default.json 冷启动默认需含 V7）
+STRATEGY_KEYS = STRATEGY_KEYS + V7_KEYS
+
+# 优化器扁平参数 → REGIME_WEIGHTS 嵌套键映射（与 param_optimizer._REGIME_MAPPING 一致）
+_REGIME_MAPPING = {
+    'BULL_BUY_MULT': ('Bull', 'buy_mult'),
+    'BEAR_BUY_MULT': ('Bear', 'buy_mult'),
+}
+
 # 标的信息（代码 → (名称, 市场前缀, 是否已优化)）
 INSTRUMENTS = {
     '589800': ('科创综指 ETF', 'sh', True),
@@ -91,10 +114,10 @@ def load_module(name, path):
     return mod
 
 
-def collect_params(mod):
-    """收集 STRATEGY_KEYS 中在模块里存在的参数值（JSON 可序列化）"""
+def collect_params(mod, keys=None):
+    """收集指定键集合（默认 STRATEGY_KEYS）中在模块里存在的参数值（JSON 可序列化）"""
     out = {}
-    for k in STRATEGY_KEYS:
+    for k in (keys if keys is not None else STRATEGY_KEYS):
         if hasattr(mod, k):
             out[k] = getattr(mod, k)
     return out
@@ -126,14 +149,95 @@ def build_identity(code, name, market, optimized):
     }
 
 
+def build_base_profile(code, kc_config, a5_config, v7_config):
+    """构建基础 profile：身份 + 旧 config V6 参数 + V7 config 新参数"""
+    if code == '589800':
+        n, m, o = INSTRUMENTS['589800']
+        old = kc_config
+    else:
+        n, m, o = INSTRUMENTS['563360']
+        old = a5_config
+    return {**build_identity(code, n, m, o),
+            **collect_params(old),
+            **collect_params(v7_config, V7_KEYS)}
+
+
+def apply_optimized(code, results_json, kc_config, a5_config, v7_config):
+    """--apply-optimized：读验收通过参数组，合并写回 profiles/{code}.json
+
+    results_json 支持两种格式：
+      - acceptance_report.json（含 accepted + params）
+      - heavy/light_excess_results.json（含 top20，取 top1）
+    """
+    if not os.path.exists(results_json):
+        print(f"[{code}] 未找到 {results_json}")
+        return False
+    with open(results_json, encoding='utf-8') as f:
+        data = json.load(f)
+
+    if 'accepted' in data:
+        if not data.get('accepted', False):
+            print(f"[{code}] 验收未通过（accepted=False），拒绝写回")
+            return False
+        params = data.get('params', {})
+    elif 'top20' in data and data['top20']:
+        params = data['top20'][0]['params']
+        print(f"[{code}] 无验收标记，取 top20[0] 参数组写回")
+    elif 'params' in data:
+        params = data['params']
+    else:
+        print(f"[{code}] {results_json} 无法解析出参数组")
+        return False
+
+    base = build_base_profile(code, kc_config, a5_config, v7_config)
+    applied = []
+    for k, v in params.items():
+        if k in _REGIME_MAPPING:
+            regime, weight = _REGIME_MAPPING[k]
+            rw = base.setdefault('REGIME_WEIGHTS', {})
+            rw.setdefault(regime, {})[weight] = v
+            applied.append(k)
+        elif k in STRATEGY_KEYS or hasattr(v7_config, k):
+            base[k] = v
+            applied.append(k)
+        else:
+            print(f"[{code}] 跳过未知参数键 {k}")
+
+    path = os.path.join(PROFILES_DIR, f'{code}.json')
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(base, f, ensure_ascii=False, indent=2)
+    print(f"[{code}] 已写回 {path}  ({len(base)} 键，覆盖 {len(applied)} 个优化参数)")
+    return True
+
+
+def apply_optimized_auto(code, results_json):
+    """GUI 薄封装：自动加载三个 config 模块后调用 apply_optimized。
+
+    供 app/bridge.py 一键应用参数使用（GUI 不感知 config 加载细节）。
+    """
+    kc_config = load_module('kc_config', os.path.join(OLD_DIR, '科创', 'config.py'))
+    a5_config = load_module('a5_config', os.path.join(OLD_DIR, 'A500', 'config.py'))
+    v7_config = load_module('v7_config', os.path.join(ROOT, 'quant', 'config.py'))
+    return apply_optimized(code, results_json, kc_config, a5_config, v7_config)
+
+
 def main():
     kc_config = load_module('kc_config', os.path.join(OLD_DIR, '科创', 'config.py'))
     a5_config = load_module('a5_config', os.path.join(OLD_DIR, 'A500', 'config.py'))
+    v7_config = load_module('v7_config', os.path.join(ROOT, 'quant', 'config.py'))
 
-    n589, m589, o589 = INSTRUMENTS['589800']
-    n563, m563, o563 = INSTRUMENTS['563360']
-    p589 = {**build_identity('589800', n589, m589, o589), **collect_params(kc_config)}
-    p563 = {**build_identity('563360', n563, m563, o563), **collect_params(a5_config)}
+    if '--apply-optimized' in sys.argv:
+        idx = sys.argv.index('--apply-optimized')
+        if len(sys.argv) < idx + 3:
+            print("用法: python tools/gen_profiles.py --apply-optimized {code} {results_json}")
+            sys.exit(1)
+        code = sys.argv[idx + 1]
+        results_json = sys.argv[idx + 2]
+        ok = apply_optimized(code, results_json, kc_config, a5_config, v7_config)
+        sys.exit(0 if ok else 1)
+
+    p589 = build_base_profile('589800', kc_config, a5_config, v7_config)
+    p563 = build_base_profile('563360', kc_config, a5_config, v7_config)
 
     if '--dump' in sys.argv:
         dump(p589, p563)

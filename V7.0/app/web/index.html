@@ -483,16 +483,241 @@
           </template>
         </div>
 
-        <!-- 优化页（占位 - P5实现） -->
+        <!-- 优化页（P5实现） -->
         <div v-if="currentPage === 'optimize'">
           <div class="page-header">
             <div class="page-title">参数优化</div>
-            <div class="page-desc">高算力参数寻优</div>
+            <div class="page-desc">高算力参数寻优 · 优化前诊断 / 参数版本对比 / 一键应用</div>
           </div>
+
+          <!-- 1. 优化前诊断卡 -->
           <div class="card">
-            <div class="empty-state">
-              <div class="empty-state-icon">⚙️</div>
-              <div class="empty-state-text">优化功能开发中（P5 阶段）</div>
+            <div class="card-header">
+              <div>
+                <div class="card-title">优化前诊断</div>
+                <div class="card-subtitle" v-if="optDiagnostics.available">
+                  数据区间 {{ optDiagnostics.meta.data_start }} ~ {{ optDiagnostics.meta.data_end }}
+                  · {{ optDiagnostics.meta.trading_days }} 个交易日
+                </div>
+              </div>
+              <button class="btn btn-sm" @click="loadDiagnostics" :disabled="optDiagLoading">刷新</button>
+            </div>
+
+            <div v-if="optDiagLoading" class="loading">
+              <div class="loading-spinner"></div>
+              正在计算诊断数据...
+            </div>
+
+            <div v-else-if="!optDiagnostics.available" class="empty-state">
+              <div class="empty-state-text">{{ optDiagnostics.reason || '暂无诊断数据' }}</div>
+            </div>
+
+            <template v-else>
+              <div class="diag-grid">
+                <!-- 仓位分布直方图 -->
+                <div class="diag-panel">
+                  <div class="diag-panel-title">仓位分布（10 等分桶）</div>
+                  <div id="diagChartPos" class="diag-chart"></div>
+                  <div class="diag-stats">
+                    <span class="diag-stat">均值 <b class="text-mono">{{ optDiagnostics.position_stats.mean }}</b></span>
+                    <span class="diag-stat">≥90% <b class="text-mono">{{ optDiagnostics.position_stats.pct_ge_90 }}%</b></span>
+                    <span class="diag-stat">&lt;30% <b class="text-mono">{{ optDiagnostics.position_stats.pct_lt_30 }}%</b></span>
+                    <span class="diag-stat">&lt;70% <b class="text-mono">{{ optDiagnostics.position_stats.pct_lt_70 }}%</b></span>
+                  </div>
+                </div>
+
+                <!-- 相关性 + 超额分解 -->
+                <div class="diag-panel">
+                  <div class="diag-panel-title">策略-基准相关性</div>
+                  <div class="diag-corr">
+                    <div class="diag-corr-value" :class="optDiagnostics.correlation.pearson_r >= 0 ? 'buy' : 'sell'">
+                      {{ optDiagnostics.correlation.pearson_r }}
+                    </div>
+                    <div class="diag-corr-sub">
+                      策略波动 {{ optDiagnostics.correlation.strategy_vol_pct }}% · 基准波动 {{ optDiagnostics.correlation.benchmark_vol_pct }}%
+                    </div>
+                  </div>
+                  <div class="diag-panel-title mt-lg">超额来源分解（pp）</div>
+                  <div id="diagChartExcess" class="diag-chart diag-chart-excess"></div>
+                  <div class="diag-legend">
+                    <span class="diag-legend-item"><span class="diag-legend-dot" style="background:#3b82f6;"></span>仓位 {{ optDiagnostics.excess_decomp.position_pp }}</span>
+                    <span class="diag-legend-item"><span class="diag-legend-dot" style="background:#8b5cf6;"></span>择时 {{ optDiagnostics.excess_decomp.timing_pp }}</span>
+                    <span class="diag-legend-item"><span class="diag-legend-dot" style="background:#64748b;"></span>残差 {{ optDiagnostics.excess_decomp.residual_pp }}</span>
+                    <span class="diag-legend-item"><span class="diag-legend-dot" style="background:#10b981;"></span>超额 {{ optDiagnostics.excess_decomp.excess_pp }}</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- 2. 参数版本对比卡 -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">参数版本对比</div>
+                <div class="card-subtitle" v-if="optParamVersions.available">
+                  V6.2.3 vs V7 当前 · 共 {{ optParamVersions.summary.total }} 项
+                  · 变更 {{ optParamVersions.summary.changed }} · 新增 {{ optParamVersions.summary.new }}
+                </div>
+              </div>
+              <button class="btn btn-sm" @click="loadParamVersions" :disabled="optParamLoading">刷新</button>
+            </div>
+
+            <div v-if="optParamLoading" class="loading">
+              <div class="loading-spinner"></div>
+              正在加载参数对比...
+            </div>
+
+            <div v-else-if="!optParamVersions.available" class="empty-state">
+              <div class="empty-state-text">{{ optParamVersions.reason || '暂无参数对比数据' }}</div>
+            </div>
+
+            <div v-else class="opt-diff-wrap">
+              <table class="bt-table opt-diff-table">
+                <thead>
+                  <tr>
+                    <th>参数</th>
+                    <th>V6.2.3</th>
+                    <th>V7 当前</th>
+                    <th>状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in optParamVersions.rows"
+                    :key="row.key"
+                    :class="{ 'opt-diff-row-changed': row.changed, 'opt-diff-row-new': row.is_new }"
+                  >
+                    <td class="text-mono">{{ row.key }}</td>
+                    <td class="text-mono text-secondary">{{ row.is_new ? '—' : row.v6 }}</td>
+                    <td class="text-mono">{{ row.v7 }}</td>
+                    <td>
+                      <span v-if="row.is_new" class="badge info">新增</span>
+                      <span v-else-if="row.changed" class="badge warning">变更</span>
+                      <span v-else class="badge">一致</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 3. 优化操作卡 -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">优化控制</div>
+                <div class="card-subtitle">模式 / 试验次数 / CPU 上限（自适应进程池）</div>
+              </div>
+            </div>
+
+            <div class="opt-form">
+              <div class="opt-form-row">
+                <div class="opt-form-field">
+                  <label class="opt-form-label">优化模式</label>
+                  <select class="profile-select" v-model="optModeKey" :disabled="optRunning || optModes.length === 0">
+                    <option v-for="m in optModes" :key="m.key" :value="m.key">{{ m.label }}</option>
+                  </select>
+                  <div class="opt-form-desc" v-if="optModeDesc">{{ optModeDesc }}</div>
+                </div>
+                <div class="opt-form-field">
+                  <label class="opt-form-label">试验次数</label>
+                  <input class="profile-select" type="number" v-model.number="optTrials" min="1" :disabled="optRunning" />
+                </div>
+                <div class="opt-form-field">
+                  <label class="opt-form-label">CPU 上限：{{ optCpuLimit }}%</label>
+                  <input class="opt-slider" type="range" min="10" max="100" step="5" v-model.number="optCpuLimit"
+                         :disabled="optRunning" @change="onCpuLimitChange" />
+                  <div class="opt-form-desc">运行中可动态调整</div>
+                </div>
+              </div>
+              <div class="opt-form-actions">
+                <button class="btn btn-primary" @click="doStartOptimization" :disabled="optRunning || optModes.length === 0">
+                  {{ optRunning ? '优化中...' : '开始优化' }}
+                </button>
+                <button class="btn" @click="doPause" :disabled="!optRunning">暂停</button>
+                <button class="btn" @click="doResume" :disabled="!optRunning">继续</button>
+                <button class="btn btn-danger" @click="doStop" :disabled="!optRunning">停止</button>
+                <button class="btn btn-sm" @click="loadOptimizationResults" :disabled="optRunning">刷新结果</button>
+              </div>
+              <div v-if="optError" class="error-box mt-md">错误：{{ optError }}</div>
+            </div>
+          </div>
+
+          <!-- 4. 进度卡 -->
+          <div class="card" v-if="optRunning || optProgress.phase || optLogLines.length">
+            <div class="card-header">
+              <div>
+                <div class="card-title">优化进度</div>
+                <div class="card-subtitle" v-if="optProgress.phase">
+                  {{ optProgress.phase }} · {{ optProgress.current }}/{{ optProgress.total }}
+                  · 工作进程 {{ optProgress.workers }} · CPU {{ optProgress.cpu }}%
+                </div>
+              </div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" :style="{ width: (optProgress.pct || 0) + '%' }"></div>
+            </div>
+            <div class="opt-log" ref="optLogRef">
+              <div v-for="(line, i) in optLogLines" :key="i" class="opt-log-line">{{ line }}</div>
+            </div>
+          </div>
+
+          <!-- 5. 结果卡 -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">优化结果</div>
+                <div class="card-subtitle" v-if="optResultFile">
+                  来源 {{ optResultFile }} · 生成于 {{ optResultMeta.generated_at || '—' }}
+                </div>
+              </div>
+              <div class="flex gap-sm items-center">
+                <span v-if="optAcceptance" class="badge" :class="optAcceptance.accepted ? 'success' : 'danger'">
+                  {{ optAcceptance.accepted ? '验收通过' : '验收未通过' }}
+                </span>
+                <button class="btn btn-success btn-sm" @click="doApplyParams" :disabled="!optTop20.length || optRunning">
+                  应用 Top1 参数
+                </button>
+              </div>
+            </div>
+
+            <div v-if="optApplyMsg" class="mt-md" :class="optApplyOk ? 'opt-apply-ok' : 'error-box'">
+              {{ optApplyMsg }}
+            </div>
+
+            <div v-if="!optTop20.length" class="empty-state">
+              <div class="empty-state-icon">📊</div>
+              <div class="empty-state-text">暂无优化结果，点击"开始优化"或"刷新结果"</div>
+            </div>
+
+            <div v-else class="opt-table-wrap">
+              <table class="bt-table opt-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>目标值</th>
+                    <th>总收益</th>
+                    <th>年化</th>
+                    <th>夏普</th>
+                    <th>最大回撤</th>
+                    <th>交易数</th>
+                    <th>超额</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(r, idx) in optTop20" :key="idx" :class="{ 'opt-table-top': idx === 0 }">
+                    <td class="text-muted">{{ idx + 1 }}</td>
+                    <td class="text-mono" :class="r.objective >= 0 ? 'buy' : 'sell'">{{ fmtNum(r.objective) }}</td>
+                    <td class="text-mono" :class="r.total_return >= 0 ? 'buy' : 'sell'">{{ fmtPct(r.total_return) }}</td>
+                    <td class="text-mono">{{ fmtPct(r.annual_return) }}</td>
+                    <td class="text-mono">{{ fmtNum(r.sharpe) }}</td>
+                    <td class="text-mono sell">{{ fmtPct(r.max_drawdown) }}</td>
+                    <td class="text-mono">{{ r.total_trades }}</td>
+                    <td class="text-mono" :class="r.excess_return >= 0 ? 'buy' : 'sell'">{{ fmtPct(r.excess_return) }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

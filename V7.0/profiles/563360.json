@@ -138,5 +138,60 @@
   "ML_RETRAIN_FREQUENCY": 10,
   "CALIBRATION_METHOD": "platt",
   "CALIBRATION_MIN_SAMPLES": 30,
-  "CALIBRATION_AUTO_DISABLE": true
+  "CALIBRATION_AUTO_DISABLE": true,
+  "CENTER_BULL": 0.75,
+  "CENTER_RANGE": 0.45,
+  "CENTER_BEAR": 0.15,
+  "CENTER_UNKNOWN": 0.45,
+  "TARGET_VOL": 0.2,
+  "OVERHEAT_CENTER_MULT": 0.5,
+  "BOTTOMFISHING_BOOST": 0.15,
+  "OVERHEAT_OFFSET_PENALTY": -0.3,
+  "BUY_OFFSET_THRESHOLDS": [
+    [
+      68,
+      0.2
+    ],
+    [
+      62,
+      0.15
+    ],
+    [
+      56,
+      0.1
+    ],
+    [
+      50,
+      0.05
+    ]
+  ],
+  "SELL_OFFSET_THRESHOLDS": [
+    [
+      68,
+      -0.25
+    ],
+    [
+      62,
+      -0.18
+    ],
+    [
+      56,
+      -0.12
+    ],
+    [
+      50,
+      -0.06
+    ]
+  ],
+  "POSITION_FLOOR": 0.0,
+  "STRATEGY_MODE": "V7",
+  "STOP_LOSS_PCT": -0.08,
+  "STOP_LOSS_HARD": -0.12,
+  "STOP_LOSS_COOLDOWN_DAYS": 180,
+  "TAKE_PROFIT_T1": 0.15,
+  "TAKE_PROFIT_T2": 0.25,
+  "TRAIL_EXIT_DRAWDOWN": 0.04,
+  "DRAWDOWN_CIRCUIT": 0.12,
+  "CIRCUIT_BREAKER_CAP": 0.2,
+  "CIRCUIT_RELEASE_DAYS": 5
 }
