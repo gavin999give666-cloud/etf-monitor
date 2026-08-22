@@ -22,25 +22,26 @@ sys.path.insert(0, _QUANT_DIR)
 from bridge import ApiBridge
 
 # 589800 CLI --eval 基线（性能指标，与 export_all 同进位）
+# 注：P6 算法重构 + 数据更新后基线已变化，2026-08-22 重新捕获（GUI==CLI 已验证）
 CLI_BASELINE_589800 = {
-    'strategy_return_pct': 65.88,
+    'strategy_return_pct': 10.96,
     'benchmark_return_pct': 72.17,
-    'excess_return_pct': -6.28,
-    'max_drawdown_pct': -28.4,
-    'annualized_return_pct': 42.8,
-    'volatility_pct': 31.18,
-    'sharpe_ratio': 1.304,
-    'sortino_ratio': 1.666,
-    'calmar_ratio': 1.507,
-    'profit_factor': 4.75,
-    'win_rate_pct': 66.7,
-    'kelly': 0.526,
-    'expectancy_pct': 8.77,
-    'total_trades': 6,
-    'winning_trades': 4,
-    'losing_trades': 2,
-    'avg_hold_days': 43.3,
-    'final_equity': 16588.46,
+    'excess_return_pct': -61.2,
+    'max_drawdown_pct': -16.24,
+    'annualized_return_pct': 7.6,
+    'volatility_pct': 21.18,
+    'sharpe_ratio': 0.453,
+    'sortino_ratio': 0.304,
+    'calmar_ratio': 0.468,
+    'profit_factor': 1.85,
+    'win_rate_pct': 81.1,
+    'kelly': 0.372,
+    'expectancy_pct': 1.0,
+    'total_trades': 37,
+    'winning_trades': 30,
+    'losing_trades': 7,
+    'avg_hold_days': 9.1,
+    'final_equity': 11096.14,
 }
 
 

@@ -587,6 +587,8 @@ class ApiBridge:
                         po.GOVERNOR.set_limit(float(cpu_limit))
                     po.clear_control_flags()
                     po.install_stdout_tee()
+                    if po.DASHBOARD_STATE is not None:
+                        po.DASHBOARD_STATE.clear_log()  # 清空上一任务残留日志
                     output_path = config.runs_path(f'{mode.default_file}.json')
                     n_jobs = max(1, int(os.cpu_count() or 4) * int(cpu_limit) // 100)
                     ga_n_jobs = max(1, n_jobs - 4)
@@ -708,13 +710,12 @@ class ApiBridge:
             import config
             self._ensure_profile(code)
             target_code = config.CURRENT_PROFILE_CODE
-            if not results_json:
-                results_json = config.runs_path('light_excess_results.json')
+            rj = results_json or config.runs_path('light_excess_results.json')
             tools_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tools')
             if tools_dir not in sys.path:
                 sys.path.insert(0, tools_dir)
             import gen_profiles
-            ok = gen_profiles.apply_optimized_auto(target_code, results_json)
+            ok = gen_profiles.apply_optimized_auto(target_code, rj)
             # 重载 profile + 失效缓存
             config.activate_profile(target_code)
             self._strategy_cache = None
@@ -1045,7 +1046,7 @@ def _build_param_versions():
         if v6 is None and v7 is None:
             continue
         is_new = v6 is None
-        changed = (not is_new) and (v6 != v7)
+        changed = (not is_new) and (_sanitize(v6) != _sanitize(v7))
         rows.append({
             'key': k,
             'v6': _sanitize(v6),

@@ -47,6 +47,7 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import concurrent.futures
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Callable
@@ -332,7 +333,7 @@ def _wait_future(fut, timeout=0.5):
             return None, True
         try:
             fut.result(timeout=timeout)
-        except TimeoutError:
+        except concurrent.futures.TimeoutError:
             continue            # concurrent.futures：超时 → 继续轮询
         except Exception:
             break               # 任务失败 → 结束等待
@@ -917,7 +918,7 @@ class BaseOptimizer(ABC):
                                 pbar.update(1)
                             if progress_cb is not None:
                                 progress_cb(done, len(futures))
-                    except TimeoutError:
+                    except concurrent.futures.TimeoutError:
                         continue
                 if pbar is not None:
                     pbar.close()
@@ -2513,7 +2514,7 @@ def _run_wf_parallel(tasks, n_jobs=-1, verbose=True, progress_cb=None):
                             pbar.update(1)
                         if progress_cb is not None:
                             progress_cb(done, len(futures))
-                except TimeoutError:
+                except concurrent.futures.TimeoutError:
                     continue
             if pbar is not None:
                 pbar.close()
@@ -3016,7 +3017,7 @@ class HeavyOptimizer:
                                             total=remaining)
                                     except Exception as _e:
                                         print(f"  [worker 异常] {_e}")
-                            except TimeoutError:
+                            except concurrent.futures.TimeoutError:
                                 continue
                         if _pbar is not None:
                             _pbar.close()
@@ -3968,7 +3969,7 @@ def _run_light_impl(n_trials=300, n_jobs=14, output_path=None,
                             _update_progress(phase='轻量运算', label='Optuna 快速搜索',
                                              current=min(_done_acc, n_trials),
                                              total=n_trials)
-                    except TimeoutError:
+                    except concurrent.futures.TimeoutError:
                         continue
         else:
             # 单进程直跑

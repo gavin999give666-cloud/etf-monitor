@@ -681,11 +681,10 @@ createApp({
           optProgress.pct = p.pct || 0;
           optProgress.workers = d.dashboard.workers || 0;
           optProgress.cpu = d.dashboard.cpu || 0;
-          // 日志增量追加
+          // 日志增量追加（后端 log_lines 为完整历史，按已消费长度切片）
           const logs = d.dashboard.log_lines || [];
           const seq = d.dashboard.log_seq || 0;
           if (seq > optLogSeq.value) {
-            const start = Math.max(0, optLogLines.value.length - (optLogSeq.value ? 0 : 0));
             const newLines = logs.slice(optLogLines.value.length);
             optLogLines.value.push(...newLines);
             optLogSeq.value = seq;
@@ -751,7 +750,16 @@ createApp({
         const data = res.data[pick];
         optResultFile.value = pick;
         Object.keys(data.meta || {}).forEach(k => { optResultMeta[k] = data.meta[k]; });
-        optTop20.value = data.top20 || [];
+        // top20 字段映射为前端语义化名称（源字段 return_pct/excess_pct/annualized_pct/max_dd_pct）
+        optTop20.value = (data.top20 || []).map(r => ({
+          objective: r.objective,
+          total_return: r.return_pct,
+          annual_return: r.annualized_pct,
+          sharpe: r.sharpe,
+          max_drawdown: r.max_dd_pct,
+          total_trades: r.total_trades,
+          excess_return: r.excess_pct,
+        }));
       } else {
         optResultFile.value = '';
         optTop20.value = [];
